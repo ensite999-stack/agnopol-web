@@ -406,7 +406,7 @@ export default function Page() {
           display: flex;
           justify-content: space-between;
           align-items: flex-start;
-          gap: 10px;
+          gap: 12px;
           margin-bottom: 20px;
         }
 
@@ -416,8 +416,10 @@ export default function Page() {
         }
 
         .agnopol-lang {
-          width: 86px;
-          flex: 0 0 86px;
+          width: 102px;
+          flex: 0 0 102px;
+          display: flex;
+          justify-content: flex-end;
         }
 
         .agnopol-tabs {
@@ -440,8 +442,8 @@ export default function Page() {
 
         @media (max-width: 640px) {
           .agnopol-lang {
-            width: 82px;
-            flex: 0 0 82px;
+            width: 96px;
+            flex: 0 0 96px;
           }
         }
       `}</style>
@@ -451,11 +453,11 @@ export default function Page() {
           <div className="agnopol-brand">
             <h1
               style={{
-                fontSize: 'clamp(54px, 10vw, 90px)',
+                fontSize: 'clamp(52px, 10vw, 88px)',
                 fontWeight: 900,
                 margin: 0,
                 color: '#111827',
-                lineHeight: 0.94,
+                lineHeight: 0.95,
                 letterSpacing: '-0.05em',
                 wordBreak: 'break-word',
               }}
@@ -484,9 +486,9 @@ export default function Page() {
               title="Language"
               style={{
                 width: '100%',
-                height: 34,
+                height: 36,
                 padding: '0 8px',
-                borderRadius: 10,
+                borderRadius: 12,
                 border: '1px solid #d7dbe3',
                 background: '#ffffff',
                 fontSize: 11,
