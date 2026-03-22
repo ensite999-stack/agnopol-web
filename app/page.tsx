@@ -334,7 +334,6 @@ export default function Page() {
 
   function handleCreateOrder() {
     const params = new URLSearchParams()
-
     params.set('lang', lang)
     params.set('email', email)
 
@@ -357,7 +356,7 @@ export default function Page() {
       minWidth: 0,
       padding: '14px 16px',
       borderRadius: 16,
-      border: active ? '1px solid #0b1733' : '1px solid #d1d5db',
+      border: active ? '1px solid #07163f' : '1px solid #d1d5db',
       background: active ? '#07163f' : '#ffffff',
       color: active ? '#ffffff' : '#111827',
       fontWeight: 800,
@@ -404,7 +403,7 @@ export default function Page() {
           display: flex;
           justify-content: space-between;
           align-items: flex-start;
-          gap: 16px;
+          gap: 12px;
           margin-bottom: 26px;
         }
 
@@ -414,8 +413,8 @@ export default function Page() {
         }
 
         .agnopol-lang {
-          width: 170px;
-          flex: 0 0 170px;
+          width: 110px;
+          flex: 0 0 110px;
         }
 
         .agnopol-tabs {
@@ -438,8 +437,8 @@ export default function Page() {
 
         @media (max-width: 640px) {
           .agnopol-lang {
-            width: 132px;
-            flex: 0 0 132px;
+            width: 104px;
+            flex: 0 0 104px;
           }
         }
       `}</style>
@@ -449,12 +448,12 @@ export default function Page() {
           <div className="agnopol-brand">
             <h1
               style={{
-                fontSize: 'clamp(42px, 8vw, 76px)',
+                fontSize: 'clamp(48px, 9vw, 84px)',
                 fontWeight: 900,
                 margin: 0,
                 color: '#111827',
-                lineHeight: 0.98,
-                letterSpacing: '-0.03em',
+                lineHeight: 1,
+                letterSpacing: '-0.04em',
                 wordBreak: 'break-word',
               }}
             >
@@ -463,10 +462,10 @@ export default function Page() {
 
             <p
               style={{
-                marginTop: 12,
+                marginTop: 8,
                 marginBottom: 0,
                 color: '#6b7280',
-                fontSize: 'clamp(15px, 2vw, 20px)',
+                fontSize: 'clamp(14px, 2vw, 18px)',
                 fontWeight: 500,
               }}
             >
@@ -480,12 +479,13 @@ export default function Page() {
               onChange={(e) => setLang(e.target.value as LangType)}
               style={{
                 width: '100%',
-                height: 52,
-                padding: '10px 12px',
-                borderRadius: 14,
+                height: 38,
+                padding: '4px 8px',
+                borderRadius: 10,
                 border: '1px solid #d1d5db',
                 background: '#ffffff',
-                fontSize: 14,
+                fontSize: 12,
+                color: '#374151',
                 boxSizing: 'border-box',
               }}
             >
