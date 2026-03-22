@@ -2,11 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Agnopol | Digital Rights</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Agnopol | One World One Breath</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        // Tailwind configuration for Space Blue theme
         tailwind.config = {
             theme: { extend: { colors: { space: '#020617', panel: '#0f172a', brand: '#38bdf8' } } }
         }
@@ -17,48 +16,74 @@
         const SUPABASE_KEY = "Sb_publishable_qlqsvQJlcgXa6HMcXKJZ3Q_ejSvpjvy";
         // ==========================================================
         
-        // Multi-language configuration dictionary (7 Languages)
+        // Multi-language configuration dictionary (7 Languages, Full coverage)
         const i18n = {
-            en: { title: "Premium Services", tg3: "TG Premium 3 Months", tg6: "TG Premium 6 Months", tg12: "TG Premium 12 Months", stars: "TG Stars", upload: "Upload Proof / Hash", payBtn: "I Have Paid", success: "Order Submitted! Please wait for processing.", queryBtn: "Query", orderLog: "Order Inquiry", noData: "No records in 48h.", total: "Total Amount" },
-            'zh-CN': { title: "尊享服务", tg3: "TG 会员 3个月", tg6: "TG 会员 6个月", tg12: "TG 会员 12个月", stars: "TG 星星 (Stars)", upload: "上传支付凭证 / Hash截图", payBtn: "我已付款", success: "订单已提交！请等待后台人工处理。", queryBtn: "查询", orderLog: "订单查询", noData: "48小时内无记录", total: "总金额" },
-            'zh-TW': { title: "尊享服務", tg3: "TG 會員 3個月", tg6: "TG 會員 6個月", tg12: "TG 會員 12個月", stars: "TG 星星 (Stars)", upload: "上傳支付憑證 / Hash截圖", payBtn: "我已付款", success: "訂單已提交！請等待後台人工處理。", queryBtn: "查詢", orderLog: "訂單查詢", noData: "48小時內無記錄", total: "總金額" },
-            ja: { title: "プレミアムサービス", tg3: "TG プレミアム 3ヶ月", tg6: "TG プレミアム 6ヶ月", tg12: "TG プレミアム 12ヶ月", stars: "TG スター", upload: "支払い証明 / ハッシュをアップロード", payBtn: "支払い完了", success: "注文が送信されました！処理をお待ちください。", queryBtn: "検索", orderLog: "注文照会", noData: "48時間以内の記録なし", total: "合計金額" },
-            fr: { title: "Services Premium", tg3: "TG Premium 3 Mois", tg6: "TG Premium 6 Mois", tg12: "TG Premium 12 Mois", stars: "TG Stars", upload: "Télécharger la Preuve / Hash", payBtn: "J'ai Payé", success: "Commande Soumise ! Veuillez patienter.", queryBtn: "Rechercher", orderLog: "Suivi de Commande", noData: "Aucune trace (48h)", total: "Montant Total" },
-            de: { title: "Premium-Dienste", tg3: "TG Premium 3 Monate", tg6: "TG Premium 6 Monate", tg12: "TG Premium 12 Monate", stars: "TG Stars", upload: "Nachweis hochladen / Hash", payBtn: "Ich habe bezahlt", success: "Bestellung aufgegeben! Bitte warten.", queryBtn: "Suchen", orderLog: "Bestellabfrage", noData: "Keine Daten (48h)", total: "Gesamtbetrag" },
-            es: { title: "Servicios Premium", tg3: "TG Premium 3 Meses", tg6: "TG Premium 6 Meses", tg12: "TG Premium 12 Meses", stars: "TG Stars", upload: "Subir Comprobante / Hash", payBtn: "Ya Pagué", success: "¡Pedido Enviado! Por favor, espere.", queryBtn: "Buscar", orderLog: "Consulta de Pedido", noData: "Sin datos (48h)", total: "Monto Total" }
+            en: { title: "Premium Services", tg3: "TG Premium 3M", tg6: "TG Premium 6M", tg12: "TG Premium 12M", stars: "TG Stars", starsInput: "Enter Amount (Min 50)", buyBtn: "Buy Now", upload: "Upload Proof / Hash", payBtn: "I Have Paid", success: "Order Submitted! Wait for processing.", queryBtn: "Query", orderLog: "Order Inquiry", noData: "No records in 48h.", total: "Total", copy: "Copy", copied: "Copied!", invalidStars: "Min 50 stars.", uploading: "✅ Proof Received.", emailReq: "Email is required.", placeholderEmail: "Enter Tracking Email", placeholderTg: "TG Username (Optional)", processing: "Processing...", netErr: "Network Error." },
+            'zh-CN': { title: "尊享服务", tg3: "TG 会员 3个月", tg6: "TG 会员 6个月", tg12: "TG 会员 12个月", stars: "TG 星星 (Stars)", starsInput: "输入星星数量 (最少 50)", buyBtn: "立即购买", upload: "上传支付凭证 / Hash截图", payBtn: "我已付款", success: "订单已提交！等待处理。", queryBtn: "查询", orderLog: "订单查询", noData: "48小时内无记录", total: "总计", copy: "复制", copied: "已复制!", invalidStars: "最少输入 50 颗。", uploading: "✅ 凭证已收到。", emailReq: "须填写 Email。", placeholderEmail: "输入查询 Email", placeholderTg: "TG 用户名 (选填)", processing: "处理中...", netErr: "网络错误。" },
+            'zh-TW': { title: "尊享服務", tg3: "TG 會員 3個月", tg6: "TG 會員 6個月", tg12: "TG 會員 12個月", stars: "TG 星星 (Stars)", starsInput: "輸入星星數量 (最少 50)", buyBtn: "立即購買", upload: "上傳支付憑證 / Hash截圖", payBtn: "我已付款", success: "訂單已提交！等待處理。", queryBtn: "查詢", orderLog: "訂單查詢", noData: "48小時內無記錄", total: "總計", copy: "複製", copied: "已複製!", invalidStars: "最少輸入 50 顆。", uploading: "✅ 憑證已收到。", emailReq: "須填寫 Email。", placeholderEmail: "輸入查詢 Email", placeholderTg: "TG 用戶名 (選填)", processing: "處理中...", netErr: "網絡錯誤。" },
+            ja: { title: "プレミアムサービス", tg3: "TG プレミアム 3ヶ月", tg6: "TG プレミアム 6ヶ月", tg12: "TG プレミアム 12ヶ月", stars: "TG スター", starsInput: "数量を入力 (最少 50)", buyBtn: "購入する", upload: "支払い証明 / ハッシュをアップロード", payBtn: "支払い完了", success: "注文が送信されました！待ち下さい。", queryBtn: "検索", orderLog: "注文照会", noData: "48時間以内記録なし", total: "合計", copy: "コピー", copied: "完了!", invalidStars: "最少50スター。", uploading: "✅ 証明受信。", emailReq: "Emailは必須。", placeholderEmail: "追跡用 Email 入力", placeholderTg: "TG ユーザー名 (任意)", processing: "処理中...", netErr: "接続エラー。" },
+            fr: { title: "Services Premium", tg3: "TG Premium 3 Mois", tg6: "TG Premium 6 Mois", tg12: "TG Premium 12 Mois", stars: "TG Stars", starsInput: "Entrez la quantité (Min 50)", buyBtn: "Acheter", upload: "Télécharger la Preuve / Hash", payBtn: "J'ai Payé", success: "Commande Soumise ! Veuillez patienter.", queryBtn: "Chercher", orderLog: "Suivi Commande", noData: "Aucun (48h)", total: "Total", copy: "Copier", copied: "Copié!", invalidStars: "Min 50 stars.", uploading: "✅ Preuve reçue.", emailReq: "Email requis.", placeholderEmail: "Entrez l'e-mail de suivi", placeholderTg: "Nom d'utilisateur TG (Optionnel)", processing: "Traitement...", netErr: "Erreur réseau." },
+            de: { title: "Premium-Dienste", tg3: "TG Premium 3 Monate", tg6: "TG Premium 6 Monate", tg12: "TG Premium 12 Monate", stars: "TG Stars", starsInput: "Menge eingeben (Min 50)", buyBtn: "Kaufen", upload: "Nachweis hochladen / Hash", payBtn: "Ich habe bezahlt", success: "Aufgegeben! Bitte warten.", queryBtn: "Suchen", orderLog: "Bestellabfrage", noData: "Keine Daten (48h)", total: "Gesamt", copy: "Kopieren", copied: "Kopiert!", invalidStars: "Min 50 Stars.", uploading: "✅ Nachweis erhalten.", emailReq: "E-Mail erforderlich.", placeholderEmail: "Tracking-E-Mail eingeben", placeholderTg: "TG-Benutzername (Optional)", processing: "Bearbeitung...", netErr: "Netzwerkfehler." },
+            es: { title: "Servicios Premium", tg3: "TG Premium 3 Meses", tg6: "TG Premium 6 Meses", tg12: "TG Premium 12 Meses", stars: "TG Stars", starsInput: "Cantidad (Mín 50)", buyBtn: "Comprar", upload: "Subir Comprobante / Hash", payBtn: "Ya Pagué", success: "¡Pedido Enviado! Espere.", queryBtn: "Buscar", orderLog: "Consulta Pedido", noData: "Sin datos (48h)", total: "Total", copy: "Copiar", copied: "¡Copiado!", invalidStars: "Mín 50 stars.", uploading: "✅ Comprobante recibido.", emailReq: "Email requerido.", placeholderEmail: "Email de seguimiento", placeholderTg: "Usuario TG (Opcional)", processing: "Procesando...", netErr: "Error de red." }
         };
-        let lang = 'en'; // Default language set to English
+        let lang = 'zh-CN'; // Default language
 
-        // Language toggle function
         function changeLang(l) {
             lang = l;
+            document.documentElement.lang = lang;
             document.querySelectorAll('[data-i18n]').forEach(el => {
-                el.innerText = i18n[lang][el.getAttribute('data-i18n')];
+                const key = el.getAttribute('data-i18n');
+                if (key.includes('placeholder')) {
+                    el.placeholder = i18n[lang][key] || i18n['en'][key];
+                } else {
+                    el.innerText = i18n[lang][key] || i18n['en'][key];
+                }
             });
-            // Update dynamic text elements
-            document.getElementById('queryBtn').innerText = i18n[lang].queryBtn;
-            document.getElementById('orderLogText').innerText = i18n[lang].orderLog;
-            document.getElementById('totalText').innerText = i18n[lang].total;
+            // Specific UI adjustments
+            updateStarsPrice(); // Update input placeholder/price
+            if(proofBase64) document.getElementById('upload-text').innerText = i18n[lang].uploading;
+        }
+
+        async function copyToClipboard(elementId, btnEl) {
+            const text = document.getElementById(elementId).innerText;
+            const originalBtnText = btnEl.innerText;
+            try {
+                await navigator.clipboard.writeText(text);
+                btnEl.innerText = i18n[lang].copied;
+                btnEl.classList.remove('text-brand', 'border-slate-700');
+                btnEl.classList.add('text-white', 'bg-slate-700');
+            } catch (err) {
+                console.error('Failed to copy', err);
+            } finally {
+                setTimeout(() => {
+                    btnEl.innerText = originalBtnText;
+                    btnEl.classList.add('text-brand', 'border-slate-700');
+                    btnEl.classList.remove('text-white', 'bg-slate-700');
+                }, 1500);
+            }
         }
     </script>
     <style>
-        /* Global styles for the dark space theme */
-        body { background-color: #020617; color: #e2e8f0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background-color: #020617; color: #e2e8f0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-font-smoothing: antialiased; }
         .glass-panel { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(10px); border: 1px solid #1e293b; }
         .hidden { display: none !important; }
+        input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
+        .animate-fade-in { animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
-<body class="min-h-screen p-4 flex flex-col items-center">
+<body class="min-h-screen p-4 flex flex-col items-center select-none">
 
-    <header class="w-full max-w-2xl flex justify-between items-center py-6">
+    <header class="w-full max-w-2xl flex justify-between items-center py-6 px-1">
         <div>
             <h1 class="text-3xl font-bold text-brand tracking-wider">Agnopol</h1>
             <p class="text-xs text-slate-400 mt-1 uppercase tracking-widest">One world One breath</p>
         </div>
-        <select onchange="changeLang(this.value)" class="bg-space border border-slate-700 text-sm rounded px-2 py-1 outline-none text-slate-300 focus:border-brand">
-            <option value="en">English</option>
+        <select onchange="changeLang(this.value)" class="bg-space border border-slate-700 text-sm rounded-lg px-3 py-1.5 outline-none text-slate-300 focus:border-brand cursor-pointer shadow-sm">
             <option value="zh-CN">简体中文</option>
             <option value="zh-TW">繁體中文</option>
+            <option value="en">English</option>
             <option value="ja">日本語</option>
             <option value="fr">Français</option>
             <option value="de">Deutsch</option>
@@ -68,73 +93,80 @@
 
     <main class="w-full max-w-2xl flex-1 mt-4 space-y-6">
         
-        <div class="glass-panel p-4 rounded-xl flex justify-between items-center shadow-sm">
-            <span class="text-sm text-slate-400" id="orderLogText">Order Inquiry</span>
+        <div class="glass-panel p-4 rounded-xl flex justify-between items-center shadow-md">
+            <span class="text-sm text-slate-400" data-i18n="orderLog">订单查询</span>
             <div class="flex space-x-2">
-                <input type="email" id="queryEmail" placeholder="Email" class="bg-space border border-slate-700 px-3 py-1 rounded text-sm w-40 outline-none focus:border-brand">
-                <button id="queryBtn" onclick="queryOrders()" class="bg-slate-700 text-white px-3 py-1 rounded text-sm hover:bg-slate-600 transition">Query</button>
+                <input type="email" id="queryEmail" data-i18n="placeholderEmail" placeholder="Tracking Email" class="bg-space border border-slate-700 px-3 py-1.5 rounded-lg text-sm w-44 outline-none focus:border-brand transition">
+                <button onclick="queryOrders()" class="bg-slate-700 text-white px-4 py-1.5 rounded-lg text-sm font-medium hover:bg-slate-600 transition" data-i18n="queryBtn">查询</button>
             </div>
         </div>
-        <div id="queryResult" class="text-xs text-brand space-y-2 px-2"></div>
+        <div id="queryResult" class="animate-fade-in text-xs text-brand space-y-2 px-2"></div>
 
-        <h2 data-i18n="title" class="text-xl font-semibold text-white border-b border-slate-800 pb-2 mt-8">Premium Services</h2>
+        <h2 data-i18n="title" class="text-xl font-semibold text-white border-b border-slate-800 pb-2 mt-8">尊享服务</h2>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-            <div class="glass-panel p-5 rounded-xl cursor-pointer hover:border-brand transition shadow-md" onclick="selectProduct('premium_3m', 13.1)">
-                <h3 data-i18n="tg3" class="text-lg font-medium text-white">TG Premium 3 Months</h3>
-                <p class="text-2xl font-bold text-brand mt-2">13.1 USDT</p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+            <div class="glass-panel p-6 rounded-2xl cursor-pointer hover:border-brand transition shadow-md group" onclick="selectProduct('premium_3m', 13.1)">
+                <h3 data-i18n="tg3" class="text-lg font-medium text-white group-hover:text-brand">TG 会员 3个月</h3>
+                <p class="text-3xl font-bold text-brand mt-2">13.1 USDT</p>
             </div>
-            <div class="glass-panel p-5 rounded-xl cursor-pointer hover:border-brand transition shadow-md" onclick="selectProduct('premium_6m', 17.1)">
-                <h3 data-i18n="tg6" class="text-lg font-medium text-white">TG Premium 6 Months</h3>
-                <p class="text-2xl font-bold text-brand mt-2">17.1 USDT</p>
+            <div class="glass-panel p-6 rounded-2xl cursor-pointer hover:border-brand transition shadow-md group" onclick="selectProduct('premium_6m', 17.1)">
+                <h3 data-i18n="tg6" class="text-lg font-medium text-white group-hover:text-brand">TG 会员 6个月</h3>
+                <p class="text-3xl font-bold text-brand mt-2">17.1 USDT</p>
             </div>
-            <div class="glass-panel p-5 rounded-xl cursor-pointer hover:border-brand transition shadow-md" onclick="selectProduct('premium_12m', 31.1)">
-                <h3 data-i18n="tg12" class="text-lg font-medium text-white">TG Premium 12 Months</h3>
-                <p class="text-2xl font-bold text-brand mt-2">31.1 USDT</p>
+            <div class="glass-panel p-6 rounded-2xl cursor-pointer hover:border-brand transition shadow-md group" onclick="selectProduct('premium_12m', 31.1)">
+                <h3 data-i18n="tg12" class="text-lg font-medium text-white group-hover:text-brand">TG 会员 12个月</h3>
+                <p class="text-3xl font-bold text-brand mt-2">31.1 USDT</p>
             </div>
             
-            <div class="glass-panel p-5 rounded-xl border border-slate-700 hover:border-brand transition shadow-md">
-                <h3 data-i18n="stars" class="text-lg font-medium text-white">TG Stars</h3>
-                <input type="range" min="50" max="10000" step="50" value="50" class="w-full mt-4 accent-brand" oninput="updateStars(this.value)">
-                <div class="flex justify-between mt-2 text-sm">
-                    <span id="star-count" class="text-slate-300">50</span>
-                    <span id="star-price" class="font-bold text-brand">1.0 USDT</span>
+            <div class="glass-panel p-6 rounded-2xl border border-slate-700 hover:border-brand transition shadow-md">
+                <h3 data-i18n="stars" class="text-lg font-medium text-white mb-3">TG Stars</h3>
+                <input type="number" id="starInput" min="50" step="1" value="50" oninput="updateStarsPrice()" class="w-full bg-space border border-slate-700 px-4 py-2.5 rounded-lg text-sm outline-none focus:border-brand transition" data-i18n="placeholderStarsInput">
+                <div class="flex justify-between items-end mt-3 text-sm">
+                    <span id="star-count" class="text-slate-400">Min 50</span>
+                    <span id="star-price" class="font-bold text-brand text-2xl">1.0 USDT</span>
                 </div>
-                <button onclick="selectProduct('tg_stars', document.getElementById('star-price').innerText.replace(' USDT',''))" class="mt-4 w-full bg-slate-800 py-2 rounded text-sm text-white hover:bg-slate-700 transition">Buy / 购买</button>
+                <button onclick="buyStarsProduct()" class="mt-4 w-full bg-slate-800 py-2.5 rounded-lg text-sm text-white font-medium hover:bg-slate-700 transition" data-i18n="buyBtn">购买</button>
             </div>
         </div>
 
-        <div id="checkout-panel" class="hidden glass-panel p-6 rounded-xl mt-8 border-brand shadow-[0_0_15px_rgba(56,189,248,0.15)] transition-all">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-medium text-white">Checkout</h3>
-                <button onclick="closeCheckout()" class="text-slate-500 hover:text-white">&times; Close</button>
+        <div id="checkout-panel" class="hidden glass-panel p-6 rounded-2xl mt-12 border-brand shadow-[0_0_20px_rgba(56,189,248,0.1)] animate-fade-in relative z-10">
+            <div class="flex justify-between items-center mb-5">
+                <h3 class="text-xl font-medium text-white">Checkout</h3>
+                <button onclick="closeCheckout()" class="text-slate-500 hover:text-white text-2xl">&times;</button>
             </div>
-            <p class="text-sm text-slate-400 mb-2"><span id="totalText">Total Amount</span>: <span id="pay-amount" class="text-brand font-bold text-2xl ml-2">0</span> USDT</p>
+            <p class="text-sm text-slate-400 mb-3"><span data-i18n="total">总计</span>: <span id="pay-amount" class="text-brand font-bold text-3xl ml-3">0</span> USDT</p>
             
-            <div class="space-y-3 mt-4 text-[11px] md:text-xs font-mono bg-space p-4 rounded-lg border border-slate-800">
-                <div class="flex flex-col space-y-1">
-                    <span class="text-slate-500">TRC20 (USDT):</span>
-                    <span class="text-brand select-all">TD6sQK9NmqxKzP6WHvmUdkHQRZvwX6Cy1e</span>
+            <div class="space-y-4 mt-5 p-5 bg-space rounded-xl border border-slate-800 shadow-inner">
+                <div class="flex justify-between items-center gap-2">
+                    <div class="flex flex-col flex-1 truncate">
+                        <span class="text-slate-500 text-xs font-mono uppercase tracking-widest">TRC20 (USDT)</span>
+                        <span id="addrTrc" class="text-brand select-all font-mono text-[11px] md:text-xs tracking-tight truncate">TD6sQK9NmqxKzP6WHvmUdkHQRZvwX6Cy1e</span>
+                    </div>
+                    <button onclick="copyToClipboard('addrTrc', this)" class="shrink-0 border border-slate-700 text-slate-400 text-xs px-3 py-1 rounded-md hover:border-brand hover:text-white transition active:scale-95" data-i18n="copy">复制</button>
                 </div>
-                <div class="flex flex-col space-y-1 mt-2">
-                    <span class="text-slate-500">Base (USDC):</span>
-                    <span class="text-brand select-all">0x21E43Ddaa992A0B5cfcCeFE98838239b9E91B40E</span>
+                <div class="border-t border-slate-800/60"></div>
+                <div class="flex justify-between items-center gap-2">
+                    <div class="flex flex-col flex-1 truncate">
+                        <span class="text-slate-500 text-xs font-mono uppercase tracking-widest">Base (USDC)</span>
+                        <span id="addrBase" class="text-brand select-all font-mono text-[11px] md:text-xs tracking-tight truncate">0x21E43Ddaa992A0B5cfcCeFE98838239b9E91B40E</span>
+                    </div>
+                    <button onclick="copyToClipboard('addrBase', this)" class="shrink-0 border border-slate-700 text-slate-400 text-xs px-3 py-1 rounded-md hover:border-brand hover:text-white transition active:scale-95" data-i18n="copy">复制</button>
                 </div>
             </div>
 
-            <div class="mt-6 space-y-4">
-                <input type="email" id="orderEmail" placeholder="Email (Required for tracking)" class="w-full bg-space border border-slate-700 px-4 py-3 rounded text-sm outline-none focus:border-brand transition">
-                <input type="text" id="orderUsername" placeholder="Telegram Username (Optional)" class="w-full bg-space border border-slate-700 px-4 py-3 rounded text-sm outline-none focus:border-brand transition">
+            <div class="mt-8 space-y-4">
+                <input type="email" id="orderEmail" data-i18n="placeholderEmail" placeholder="Tracking Email" class="w-full bg-space border border-slate-700 px-4 py-3 rounded-lg text-sm outline-none focus:border-brand transition">
+                <input type="text" id="orderUsername" data-i18n="placeholderTg" placeholder="TG Username" class="w-full bg-space border border-slate-700 px-4 py-3 rounded-lg text-sm outline-none focus:border-brand transition">
                 
-                <div class="border-2 border-dashed border-slate-600 p-6 text-center rounded-lg relative hover:border-brand hover:bg-slate-800/50 transition cursor-pointer group">
-                    <input type="file" id="fileInput" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" onchange="handleFile(this)">
-                    <div class="flex flex-col items-center justify-center space-y-2">
-                        <svg class="w-8 h-8 text-slate-500 group-hover:text-brand transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
-                        <span id="upload-text" class="text-sm text-slate-400 font-medium" data-i18n="upload">Upload Proof / Hash</span>
+                <div class="border-2 border-dashed border-slate-600 p-8 text-center rounded-xl relative hover:border-brand hover:bg-slate-800/30 transition cursor-pointer group animate-fade-in z-20">
+                    <input type="file" id="fileInput" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-30" onchange="handleFile(this)">
+                    <div class="flex flex-col items-center justify-center space-y-2.5">
+                        <svg class="w-9 h-9 text-slate-500 group-hover:text-brand transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                        <span id="upload-text" class="text-sm text-slate-400 font-medium" data-i18n="upload">上传支付凭证 / Hash截图</span>
                     </div>
                 </div>
 
-                <button id="submitBtn" disabled onclick="submitOrder()" class="w-full bg-slate-800 text-slate-500 font-bold py-3.5 rounded-lg transition duration-300 cursor-not-allowed mt-2" data-i18n="payBtn">
+                <button id="submitBtn" disabled onclick="submitOrder()" class="w-full bg-slate-800 text-slate-500 font-bold py-4 rounded-xl transition cursor-not-allowed mt-3 shadow-lg active:scale-[0.98]" data-i18n="payBtn">
                     I Have Paid
                 </button>
             </div>
@@ -142,176 +174,140 @@
 
     </main>
 
-    <footer class="w-full max-w-2xl mt-16 py-8 border-t border-slate-800/60 text-center text-xs text-slate-500 flex flex-col items-center space-y-3">
-        <p class="font-medium tracking-wide">Agnopol © 2026. All rights reserved.</p>
-        <div class="flex space-x-4">
-            <a href="#" class="hover:text-brand transition">Terms of Service</a>
-            <span class="text-slate-700">|</span>
-            <a href="#" class="hover:text-brand transition">Risk Disclosure</a>
-            <span class="text-slate-700">|</span>
-            <a href="#" class="hover:text-brand transition">Privacy Policy</a>
-        </div>
-        <p class="text-[10px] mt-4 opacity-70 max-w-md leading-relaxed px-4">
-            ⚠️ Privacy Notice: To strictly protect user privacy and digital rights, all order information and uploaded proofs will be permanently destroyed from our servers within 48 hours.
+    <footer class="w-full max-w-2xl mt-20 py-10 border-t border-slate-800/60 text-center text-xs text-slate-500 flex flex-col items-center space-y-3 px-4">
+        <p class="font-medium tracking-wide">Agnopol © 2026. One world One breath.</p>
+        <p class="text-[10px] tracking-tight max-w-lg leading-relaxed px-4 text-slate-600">
+            All order information and uploaded proofs will be permanently destroyed from our servers within 48 hours for extreme privacy protection.
         </p>
     </footer>
 
     <script>
-        // Core state variables
         let currentProduct = '';
         let currentPrice = 0;
         let proofBase64 = '';
 
-        // Handle dynamic stars pricing
-        function updateStars(val) {
-            document.getElementById('star-count').innerText = val;
-            document.getElementById('star-price').innerText = (val * 0.02).toFixed(1) + ' USDT';
+        function updateStarsPrice() {
+            const el = document.getElementById('starInput');
+            let val = parseInt(el.value) || 0;
+            const priceEl = document.getElementById('star-price');
+            const countEl = document.getElementById('star-count');
+            countEl.innerText = val > 0 ? `${val}` : i18n[lang].invalidStars || "Min 50";
+            if(val >= 50) {
+                priceEl.innerText = (val * 0.02).toFixed(1) + ' USDT';
+                priceEl.classList.remove('text-slate-600');
+                priceEl.classList.add('text-brand');
+            } else {
+                priceEl.innerText = "0.0 USDT";
+                priceEl.classList.add('text-slate-600');
+                priceEl.classList.remove('text-brand');
+            }
         }
 
-        // Handle product selection & scroll to checkout
+        function buyStarsProduct() {
+            const el = document.getElementById('starInput');
+            let val = parseInt(el.value);
+            if (!val || val < 50) {
+                alert(i18n[lang].invalidStars || "Min 50");
+                return;
+            }
+            selectProduct(`stars_${val}`, val * 0.02);
+        }
+
         function selectProduct(type, price) {
             currentProduct = type;
-            currentPrice = price;
-            document.getElementById('pay-amount').innerText = price;
+            currentPrice = price.toFixed(1);
+            document.getElementById('pay-amount').innerText = currentPrice;
             const panel = document.getElementById('checkout-panel');
             panel.classList.remove('hidden');
-            setTimeout(() => {
-                panel.scrollIntoView({ behavior: "smooth", block: "center" });
-            }, 100);
+            setTimeout(() => { panel.scrollIntoView({ behavior: "smooth", block: "start" }); }, 100);
         }
 
-        // Close checkout panel
         function closeCheckout() {
             document.getElementById('checkout-panel').classList.add('hidden');
         }
 
-        // Handle image upload and convert to Base64
         function handleFile(input) {
             const file = input.files[0];
             if (!file) return;
-            
-            // UI feedback
-            document.getElementById('upload-text').innerHTML = `<span class="text-brand font-bold">✅ ${file.name}</span>`;
-            
-            // Read file for Supabase insertion
+            document.getElementById('upload-text').innerText = i18n[lang].uploading || "Proof reçue.";
             const reader = new FileReader();
             reader.onload = function(e) {
                 proofBase64 = e.target.result;
-                
-                // Unlock the payment button
                 const btn = document.getElementById('submitBtn');
                 btn.disabled = false;
                 btn.classList.remove('bg-slate-800', 'text-slate-500', 'cursor-not-allowed');
-                btn.classList.add('bg-brand', 'text-white', 'hover:bg-sky-400', 'shadow-lg', 'shadow-brand/20');
+                btn.classList.add('bg-brand', 'text-white', 'hover:bg-sky-400', 'shadow-brand/20', 'cursor-pointer');
             };
             reader.readAsDataURL(file);
         }
 
-        // Submit order to Supabase REST API
         async function submitOrder() {
             const email = document.getElementById('orderEmail').value.trim();
-            if(!email) {
-                alert("Email is required for order tracking.");
-                return;
-            }
+            if(!email) { alert(i18n[lang].emailReq || "Required."); return; }
             
-            // Loading state
             const btn = document.getElementById('submitBtn');
             const originalText = btn.innerText;
-            btn.innerText = "Processing...";
+            btn.innerText = i18n[lang].processing || "Wait...";
             btn.disabled = true;
 
-            // Generate unique Order No
             const orderNo = "AG" + Date.now().toString().slice(-6) + Math.floor(Math.random()*100);
             
-            // Prepare payload for Supabase insertion
             const payload = {
                 order_no: orderNo,
                 email: email,
                 username: document.getElementById('orderUsername').value.trim() || '',
                 product_type: currentProduct,
                 amount: currentPrice.toString(),
-                proof_file_key: proofBase64, // Stored as Base64 text
-                status: 'paid' // Set initial status as paid/pending review
+                proof_file_key: proofBase64,
+                status: 'paid'
             };
 
             try {
                 const res = await fetch(`${SUPABASE_URL}/rest/v1/orders`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'apikey': SUPABASE_KEY,
-                        'Authorization': `Bearer ${SUPABASE_KEY}`,
-                        'Prefer': 'return=minimal' // No need to return full row data
-                    },
+                    headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Prefer': 'return=minimal' },
                     body: JSON.stringify(payload)
                 });
 
                 if(res.ok) {
-                    alert(`${i18n[lang].success}\nOrder No: ${orderNo}`);
+                    alert(`${i18n[lang].success || "Success!"}\nNo: ${orderNo}`);
                     window.location.reload();
                 } else {
-                    const err = await res.json();
-                    console.error("Supabase Error:", err);
-                    alert("Submission failed. Please try again.");
-                    btn.innerText = originalText;
-                    btn.disabled = false;
+                    btn.innerText = originalText; btn.disabled = false;
                 }
             } catch(error) {
-                console.error("Network Error:", error);
-                alert("Network error. Check console.");
-                btn.innerText = originalText;
-                btn.disabled = false;
+                alert(i18n[lang].netErr || "Net Error."); btn.innerText = originalText; btn.disabled = false;
             }
         }
 
-        // Query recent orders (last 48 hours)
         async function queryOrders() {
             const email = document.getElementById('queryEmail').value.trim();
             if(!email) return;
-            
             const btn = document.getElementById('queryBtn');
             btn.innerText = "...";
-
             try {
-                // Fetch from Supabase with email filter, ordered by date, limit 3
-                const res = await fetch(`${SUPABASE_URL}/rest/v1/orders?email=eq.${encodeURIComponent(email)}&select=order_no,product_type,amount,status,admin_note,created_at&order=created_at.desc&limit=3`, {
-                    headers: { 
-                        'apikey': SUPABASE_KEY, 
-                        'Authorization': `Bearer ${SUPABASE_KEY}` 
-                    }
+                const res = await fetch(`${SUPABASE_URL}/rest/v1/orders?email=eq.${encodeURIComponent(email)}&select=order_no,product_type,amount,status,admin_note&order=created_at.desc&limit=3`, {
+                    headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
                 });
-                
                 const data = await res.json();
-                const resultDiv = document.getElementById('queryResult');
-                
+                const div = document.getElementById('queryResult');
                 if (data.length === 0) {
-                    resultDiv.innerHTML = `<span class="text-slate-400">${i18n[lang].noData}</span>`;
+                    div.innerHTML = `<span class="text-slate-500">${i18n[lang].noData}</span>`;
                 } else {
-                    resultDiv.innerHTML = data.map(o => `
-                        <div class="bg-slate-800/50 p-3 rounded border border-slate-700 mt-2">
-                            <div class="flex justify-between">
-                                <span class="font-bold text-white">${o.product_type}</span>
-                                <span class="${o.status === 'completed' ? 'text-green-400' : 'text-yellow-400'} uppercase">${o.status}</span>
-                            </div>
-                            <div class="text-slate-400 mt-1 flex justify-between">
-                                <span>No: ${o.order_no}</span>
-                                <span class="text-brand">${o.amount} U</span>
-                            </div>
-                            ${o.admin_note ? `<div class="mt-2 text-brand bg-brand/10 p-2 rounded">Note: ${o.admin_note}</div>` : ''}
+                    div.innerHTML = data.map(o => `
+                        <div class="bg-slate-800/40 p-3 rounded-lg border border-slate-700 mt-2 shadow-inner">
+                            <div class="flex justify-between items-center"><span class="font-bold text-white tracking-wide">${o.product_type}</span> <span class="${o.status === 'completed' ? 'text-green-400' : 'text-yellow-400'} uppercase font-mono text-[10px] bg-slate-800 px-1.5 py-0.5 rounded">${o.status}</span></div>
+                            <div class="text-slate-400 mt-1 flex justify-between font-mono text-[10px]"><span>No: ${o.order_no}</span><span class="text-brand font-bold text-xs">${o.amount} U</span></div>
+                            ${o.admin_note ? `<div class="mt-2 text-brand bg-brand/5 p-2 rounded text-[10px] font-mono leading-tight">Note: ${o.admin_note}</div>` : ''}
                         </div>
                     `).join('');
                 }
-            } catch(e) {
-                console.error("Query Error:", e);
-                alert("Query failed.");
-            } finally {
-                btn.innerText = i18n[lang].queryBtn;
-            }
+            } catch(e) { div.innerHTML = "Query Err."; } finally { btn.innerText = i18n[lang].queryBtn; }
         }
 
-        // Initialize language on load
+        // Initialize default language and states
         changeLang(lang);
+        updateStarsPrice();
     </script>
 </body>
 </html>
