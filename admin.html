@@ -1,0 +1,131 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agnopol Admin | God Mode</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { theme: { extend: { colors: { space: '#020617', panel: '#0f172a', brand: '#38bdf8' } } } }
+    </script>
+    <style>
+        body { background-color: #020617; color: #e2e8f0; font-family: sans-serif; }
+        .glass { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(12px); border: 1px solid #1e293b; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body class="p-4 md:p-8 flex flex-col items-center">
+
+    <div id="login-screen" class="mt-32 w-full max-w-sm">
+        <div class="glass p-8 rounded-3xl text-center shadow-2xl border-brand/20">
+            <h1 class="text-3xl font-bold text-brand mb-8">Agnopol</h1>
+            <input type="password" id="pw" placeholder="Enter Access Key" class="w-full bg-space border border-slate-700 p-4 rounded-xl mb-4 text-center outline-none focus:border-brand">
+            <button onclick="login()" class="w-full bg-brand text-white py-4 rounded-xl font-bold shadow-lg shadow-brand/20 active:scale-95 transition">Authorize Session (24h)</button>
+        </div>
+    </div>
+
+    <div id="admin-panel" class="hidden w-full max-w-4xl">
+        <header class="flex justify-between items-center py-6">
+            <h2 class="text-2xl font-bold text-white tracking-tight">System Control</h2>
+            <button onclick="cleanup()" class="bg-red-500/10 text-red-500 border border-red-500/20 px-3 py-1.5 rounded-lg text-[10px] font-bold hover:bg-red-500 hover:text-white transition">PURGE 48H DATA</button>
+        </header>
+
+        <div class="glass p-6 rounded-2xl mb-8">
+            <h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Price Management</h3>
+            <div id="price-fields" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
+            <button onclick="savePrices()" class="w-full mt-4 bg-slate-800 hover:bg-brand text-white py-2 rounded-lg text-[10px] font-bold transition">Update Cloud Prices</button>
+        </div>
+
+        <div id="order-list" class="space-y-4"></div>
+    </div>
+
+    <div id="modal" class="hidden fixed inset-0 bg-space/95 z-50 p-4 flex flex-col items-center justify-center" onclick="this.classList.add('hidden')">
+        <img id="modal-img" class="max-w-full max-h-[85vh] rounded-2xl border border-slate-800">
+    </div>
+
+    <script>
+        let sessionPw = "";
+        let settings = [];
+
+        window.onload = () => {
+            const saved = localStorage.getItem('agn_pw');
+            const time = localStorage.getItem('agn_time');
+            if (saved && time && (Date.now() - time < 24 * 60 * 60 * 1000)) {
+                sessionPw = saved;
+                startApp();
+            }
+        };
+
+        async function login() {
+            const input = document.getElementById('pw').value;
+            const res = await api('fetch_all', {}, input);
+            if(res.error) return alert("Access Denied");
+            sessionPw = input;
+            localStorage.setItem('agn_pw', input);
+            localStorage.setItem('agn_time', Date.now());
+            startApp();
+        }
+
+        async function api(action, data = {}, pw = sessionPw) {
+            const res = await fetch('/api/admin', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ password: pw, action, data })
+            });
+            return await res.json();
+        }
+
+        async function startApp() {
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('admin-panel').classList.remove('hidden');
+            const data = await api('fetch_all');
+            settings = data.settings;
+            renderAll(data);
+            setInterval(async () => { const d = await api('fetch_all'); renderAll(d); }, 30000);
+        }
+
+        function renderAll(data) {
+            const priceBox = document.getElementById('price-fields');
+            priceBox.innerHTML = data.settings.map(s => `
+                <div class="flex flex-col gap-1">
+                    <label class="text-[9px] text-slate-500 uppercase">${s.key}</label>
+                    <input id="in-${s.key}" value="${s.value}" class="bg-space border border-slate-800 rounded-lg p-2 text-brand font-bold text-sm">
+                </div>
+            `).join('');
+
+            const list = document.getElementById('order-list');
+            list.innerHTML = data.orders.map(o => `
+                <div class="glass p-4 rounded-xl flex flex-col md:flex-row justify-between gap-4">
+                    <div>
+                        <div class="flex gap-2 items-center"><span class="text-brand font-bold text-xs">${o.order_no}</span><span class="text-[10px] text-slate-500">${new Date(o.created_at).toLocaleString()}</span></div>
+                        <p class="text-white text-sm font-medium mt-1">${o.product_type} - $${o.amount}</p>
+                        <p class="text-[10px] text-slate-400">${o.email} | ${o.username || 'NO TG'}</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="showP('${o.proof_file_key}')" class="bg-slate-800 text-[10px] px-2 py-1 rounded">PROOF</button>
+                        <select onchange="upS('${o.id}', this.value)" class="bg-space border border-slate-700 text-[10px] p-1 rounded">
+                            <option value="paid" ${o.status==='paid'?'selected':''}>PAID</option>
+                            <option value="completed" ${o.status==='completed'?'selected':''}>DONE</option>
+                            <option value="cancelled" ${o.status==='cancelled'?'selected':''}>CANCEL</option>
+                        </select>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function savePrices() {
+            const up = settings.map(s => ({ key: s.key, value: document.getElementById(`in-${s.key}`).value }));
+            await api('update_prices', { settings: up });
+            alert("Cloud Synced!");
+        }
+
+        async function upS(id, status) { await api('update_order', { id, update: { status } }); }
+        function showP(src) { document.getElementById('modal-img').src = src; document.getElementById('modal').classList.remove('hidden'); }
+        async function cleanup() {
+            if(!confirm("Purge 48h?")) return;
+            const th = new Date(Date.now() - 48*60*60*1000).toISOString();
+            await api('cleanup', { threshold: th });
+        }
+    </script>
+</body>
+</html>
