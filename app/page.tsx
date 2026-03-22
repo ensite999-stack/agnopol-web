@@ -45,11 +45,11 @@ const messages: Record<
     starsPriceHint: string
     selectedPremium: string
     selectedStars: string
-    rights: string
-    disclaimer: string
-    affiliation: string
-    paymentWarning: string
     loading: string
+    rights: string
+    footerTerms: string
+    footerPrivacy: string
+    footerRisk: string
   }
 > = {
   de: {
@@ -71,14 +71,11 @@ const messages: Record<
     starsPriceHint: 'Preis wird automatisch berechnet',
     selectedPremium: 'TG Premium',
     selectedStars: 'TG Stars',
-    rights: '© {year} Agnopol. Alle Rechte vorbehalten.',
-    disclaimer:
-      'Hinweis: Dieser Dienst ist eine unabhängige Plattform und nicht mit Telegram verbunden. Alle digitalen Produkte werden virtuell geliefert und sind nach Bearbeitung nicht erstattungsfähig.',
-    affiliation:
-      'Agnopol ist ein unabhängiger digitaler Dienstleister und steht in keiner Verbindung zu Telegram. Alle Marken und Produktnamen gehören ihren jeweiligen Inhabern.',
-    paymentWarning:
-      'Zahlungen müssen über das richtige Netzwerk und in exakt passender Höhe erfolgen. Falsche Zahlungen können zu einer fehlgeschlagenen Lieferung führen.',
     loading: 'Laden...',
+    rights: '© {year} Agnopol. Alle Rechte vorbehalten.',
+    footerTerms: 'Terms of Service',
+    footerPrivacy: 'Privacy Policy',
+    footerRisk: 'Risk Disclosure',
   },
   en: {
     brand: 'Agnopol',
@@ -99,14 +96,11 @@ const messages: Record<
     starsPriceHint: 'Price is calculated automatically',
     selectedPremium: 'TG Premium',
     selectedStars: 'TG Stars',
-    rights: '© {year} Agnopol. All rights reserved.',
-    disclaimer:
-      'Disclaimer: This service is an independent platform and is not affiliated with Telegram. All digital products are delivered virtually and are non-refundable once processed.',
-    affiliation:
-      'Agnopol is an independent digital service provider and is not affiliated with Telegram. All trademarks and product names belong to their respective owners.',
-    paymentWarning:
-      'Payments must be made using the correct network and exact amount. Incorrect payments may result in failed delivery.',
     loading: 'Loading...',
+    rights: '© {year} Agnopol. All rights reserved.',
+    footerTerms: 'Terms of Service',
+    footerPrivacy: 'Privacy Policy',
+    footerRisk: 'Risk Disclosure',
   },
   es: {
     brand: 'Agnopol',
@@ -127,14 +121,11 @@ const messages: Record<
     starsPriceHint: 'El precio se calcula automáticamente',
     selectedPremium: 'TG Premium',
     selectedStars: 'TG Stars',
-    rights: '© {year} Agnopol. Todos los derechos reservados.',
-    disclaimer:
-      'Aviso: Este servicio es una plataforma independiente y no está afiliada con Telegram. Todos los productos digitales se entregan virtualmente y no son reembolsables una vez procesados.',
-    affiliation:
-      'Agnopol es un proveedor independiente de servicios digitales y no está afiliado con Telegram. Todas las marcas y nombres de productos pertenecen a sus respectivos propietarios.',
-    paymentWarning:
-      'Los pagos deben realizarse usando la red correcta y el importe exacto. Los pagos incorrectos pueden causar fallos en la entrega.',
     loading: 'Cargando...',
+    rights: '© {year} Agnopol. Todos los derechos reservados.',
+    footerTerms: 'Terms of Service',
+    footerPrivacy: 'Privacy Policy',
+    footerRisk: 'Risk Disclosure',
   },
   fr: {
     brand: 'Agnopol',
@@ -155,14 +146,11 @@ const messages: Record<
     starsPriceHint: 'Le prix est calculé automatiquement',
     selectedPremium: 'TG Premium',
     selectedStars: 'TG Stars',
-    rights: '© {year} Agnopol. Tous droits réservés.',
-    disclaimer:
-      'Avertissement : Ce service est une plateforme indépendante et n’est pas affiliée à Telegram. Tous les produits numériques sont livrés virtuellement et ne sont pas remboursables une fois traités.',
-    affiliation:
-      'Agnopol est un prestataire indépendant de services numériques et n’est pas affilié à Telegram. Toutes les marques et tous les noms de produits appartiennent à leurs propriétaires respectifs.',
-    paymentWarning:
-      'Les paiements doivent être effectués sur le bon réseau et pour le montant exact. Des paiements incorrects peuvent entraîner un échec de livraison.',
     loading: 'Chargement...',
+    rights: '© {year} Agnopol. Tous droits réservés.',
+    footerTerms: 'Terms of Service',
+    footerPrivacy: 'Privacy Policy',
+    footerRisk: 'Risk Disclosure',
   },
   ja: {
     brand: 'Agnopol',
@@ -183,14 +171,11 @@ const messages: Record<
     starsPriceHint: '価格は自動計算されます',
     selectedPremium: 'TG Premium',
     selectedStars: 'TG Stars',
-    rights: '© {year} Agnopol. All rights reserved.',
-    disclaimer:
-      '免責事項：このサービスは独立したプラットフォームであり、Telegram とは提携していません。すべてのデジタル商品はバーチャルで提供され、処理後の返金はできません。',
-    affiliation:
-      'Agnopol は独立したデジタルサービス事業者であり、Telegram とは提携していません。すべての商標および製品名は各権利者に帰属します。',
-    paymentWarning:
-      '支払いは正しいネットワークと正確な金額で行う必要があります。誤った支払いは配達失敗の原因となる場合があります。',
     loading: '読み込み中...',
+    rights: '© {year} Agnopol. All rights reserved.',
+    footerTerms: 'Terms of Service',
+    footerPrivacy: 'Privacy Policy',
+    footerRisk: 'Risk Disclosure',
   },
   ko: {
     brand: 'Agnopol',
@@ -211,14 +196,11 @@ const messages: Record<
     starsPriceHint: '가격은 자동으로 계산됩니다',
     selectedPremium: 'TG Premium',
     selectedStars: 'TG Stars',
-    rights: '© {year} Agnopol. All rights reserved.',
-    disclaimer:
-      '고지: 이 서비스는 독립 플랫폼이며 Telegram과 제휴되어 있지 않습니다. 모든 디지털 상품은 가상으로 제공되며 처리 후 환불되지 않습니다.',
-    affiliation:
-      'Agnopol은 독립 디지털 서비스 제공업체이며 Telegram과 제휴되어 있지 않습니다. 모든 상표와 제품명은 각 소유자에게 귀속됩니다.',
-    paymentWarning:
-      '결제는 올바른 네트워크와 정확한 금액으로 이루어져야 합니다. 잘못된 결제는 배송 실패를 초래할 수 있습니다.',
     loading: '로딩 중...',
+    rights: '© {year} Agnopol. All rights reserved.',
+    footerTerms: 'Terms of Service',
+    footerPrivacy: 'Privacy Policy',
+    footerRisk: 'Risk Disclosure',
   },
   'zh-cn': {
     brand: 'Agnopol',
@@ -239,14 +221,11 @@ const messages: Record<
     starsPriceHint: '价格将自动计算',
     selectedPremium: 'TG Premium',
     selectedStars: 'TG Stars',
-    rights: '© {year} Agnopol。保留所有权利。',
-    disclaimer:
-      '免责声明：本服务为独立平台，与 Telegram 无关联。所有数字商品均为虚拟交付，一经处理不支持退款。',
-    affiliation:
-      'Agnopol 是独立数字服务提供商，与 Telegram 无关联。所有商标及产品名称归其各自权利人所有。',
-    paymentWarning:
-      '支付必须使用正确网络并保证金额完全一致。错误支付可能导致交付失败。',
     loading: '加载中...',
+    rights: '© {year} Agnopol。保留所有权利。',
+    footerTerms: '服务条款',
+    footerPrivacy: '隐私政策',
+    footerRisk: '风险披露',
   },
   'zh-tw': {
     brand: 'Agnopol',
@@ -267,14 +246,11 @@ const messages: Record<
     starsPriceHint: '價格將自動計算',
     selectedPremium: 'TG Premium',
     selectedStars: 'TG Stars',
-    rights: '© {year} Agnopol。保留所有權利。',
-    disclaimer:
-      '免責聲明：本服務為獨立平台，與 Telegram 無關聯。所有數位商品均為虛擬交付，一經處理不支援退款。',
-    affiliation:
-      'Agnopol 是獨立數位服務提供商，與 Telegram 無關聯。所有商標及產品名稱均屬其各自權利人所有。',
-    paymentWarning:
-      '支付必須使用正確網路並保證金額完全一致。錯誤支付可能導致交付失敗。',
     loading: '載入中...',
+    rights: '© {year} Agnopol。保留所有權利。',
+    footerTerms: '服務條款',
+    footerPrivacy: '隱私政策',
+    footerRisk: '風險披露',
   },
 }
 
@@ -433,6 +409,23 @@ export default function Page() {
           gap: 12px;
         }
 
+        .agnopol-footer-links {
+          display: flex;
+          gap: 14px;
+          flex-wrap: wrap;
+          justify-content: center;
+          margin-top: 8px;
+        }
+
+        .agnopol-footer-links a {
+          color: #475569;
+          text-decoration: none;
+        }
+
+        .agnopol-footer-links a:hover {
+          text-decoration: underline;
+        }
+
         @media (min-width: 900px) {
           .agnopol-plan-grid {
             grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -537,30 +530,21 @@ export default function Page() {
             </p>
 
             <div className="agnopol-plan-grid">
-              <div
-                onClick={() => setDuration('3m')}
-                style={planCardStyle(duration === '3m')}
-              >
+              <div onClick={() => setDuration('3m')} style={planCardStyle(duration === '3m')}>
                 <div style={{ fontSize: 18, fontWeight: 800 }}>{t.plan3m}</div>
                 <div style={{ marginTop: 10, fontSize: 22, fontWeight: 900 }}>
                   ${prices ? prices.tg_premium_3m : t.loading}
                 </div>
               </div>
 
-              <div
-                onClick={() => setDuration('6m')}
-                style={planCardStyle(duration === '6m')}
-              >
+              <div onClick={() => setDuration('6m')} style={planCardStyle(duration === '6m')}>
                 <div style={{ fontSize: 18, fontWeight: 800 }}>{t.plan6m}</div>
                 <div style={{ marginTop: 10, fontSize: 22, fontWeight: 900 }}>
                   ${prices ? prices.tg_premium_6m : t.loading}
                 </div>
               </div>
 
-              <div
-                onClick={() => setDuration('12m')}
-                style={planCardStyle(duration === '12m')}
-              >
+              <div onClick={() => setDuration('12m')} style={planCardStyle(duration === '12m')}>
                 <div style={{ fontSize: 18, fontWeight: 800 }}>{t.plan12m}</div>
                 <div style={{ marginTop: 10, fontSize: 22, fontWeight: 900 }}>
                   ${prices ? prices.tg_premium_12m : t.loading}
@@ -720,15 +704,19 @@ export default function Page() {
             fontSize: 12,
             color: '#6b7280',
             lineHeight: 1.75,
-            maxWidth: 760,
+            maxWidth: 900,
             marginLeft: 'auto',
             marginRight: 'auto',
+            textAlign: 'center',
           }}
         >
           <p>{t.rights.replace('{year}', String(currentYear))}</p>
-          <p>{t.disclaimer}</p>
-          <p>{t.affiliation}</p>
-          <p>{t.paymentWarning}</p>
+
+          <div className="agnopol-footer-links">
+            <a href={`/legal?lang=${lang}#terms`}>{t.footerTerms}</a>
+            <a href={`/legal?lang=${lang}#privacy`}>{t.footerPrivacy}</a>
+            <a href={`/legal?lang=${lang}#risk`}>{t.footerRisk}</a>
+          </div>
         </footer>
       </div>
     </main>
