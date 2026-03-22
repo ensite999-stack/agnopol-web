@@ -3,111 +3,185 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Agnopol | One World One Breath</title>
+    <title>Agnopol | Digital Rights Service Provider</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        // Tailwind configuration for responsive design and custom colors
+        // Tailwind Configuration
         tailwind.config = {
             theme: { 
                 extend: { 
-                    colors: { space: '#020617', panel: '#0f172a', brand: '#38bdf8' },
-                    screens: { 'xs': '375px' }
+                    colors: { space: '#020617', panel: '#0f172a', brand: '#38bdf8' }
                 } 
             }
         }
     </script>
     <script>
-        // ================= SUPABASE CONFIGURATION =================
+        // ================= PUBLIC CONFIGURATION =================
         const SUPABASE_URL = "https://tlsfyduighotjrsvjlqy.supabase.co";
         const SUPABASE_KEY = "Sb_publishable_qlqsvQJlcgXa6HMcXKJZ3Q_ejSvpjvy";
-        // ==========================================================
-        
-        // Multi-language dictionary
+        // ========================================================
+
+        // Dictionary for 7 languages (Alphabetically Ordered)
         const i18n = {
-            en: { title: "Premium Services", tg3: "TG Premium 3M", tg6: "TG Premium 6M", tg12: "TG Premium 12M", stars: "TG Stars", starsInput: "Enter Amount (Min 50)", buyBtn: "Buy Now", upload: "Upload Proof / Hash", payBtn: "I Have Paid", success: "Order Submitted! Wait for processing.", queryBtn: "Query", orderLog: "Order Inquiry", noData: "No records in 48h.", total: "Total", copy: "Copy", copied: "Copied!", invalidStars: "Min 50 stars.", uploading: "✅ Proof Received.", emailReq: "Email is required.", placeholderEmail: "Tracking Email", placeholderTg: "TG Username (Optional)", processing: "Processing...", netErr: "Network Error.", terms: "Terms of Service", privacy: "Privacy Policy", risk: "Risk Disclosure" },
-            'zh-CN': { title: "尊享服务", tg3: "TG 会员 3个月", tg6: "TG 会员 6个月", tg12: "TG 会员 12个月", stars: "TG 星星 (Stars)", starsInput: "输入星星数量 (最少 50)", buyBtn: "立即购买", upload: "上传支付凭证 / Hash截图", payBtn: "我已付款", success: "订单已提交！等待处理。", queryBtn: "查询", orderLog: "订单查询", noData: "48小时内无记录", total: "总计", copy: "复制", copied: "已复制!", invalidStars: "最少输入 50 颗。", uploading: "✅ 凭证已收到。", emailReq: "须填写 Email。", placeholderEmail: "输入查询 Email", placeholderTg: "TG 用户名 (选填)", processing: "处理中...", netErr: "网络错误。", terms: "服务条款", privacy: "隐私政策", risk: "风险披露" },
-            'zh-TW': { title: "尊享服務", tg3: "TG 會員 3個月", tg6: "TG 會員 6個月", tg12: "TG 會員 12個月", stars: "TG 星星 (Stars)", starsInput: "輸入星星數量 (最少 50)", buyBtn: "立即購買", upload: "上傳支付憑證 / Hash截圖", payBtn: "我已付款", success: "訂單已提交！等待處理。", queryBtn: "查詢", orderLog: "訂單查詢", noData: "48小時內無記錄", total: "總計", copy: "複製", copied: "已複製!", invalidStars: "最少輸入 50 顆。", uploading: "✅ 憑證已收到。", emailReq: "須填寫 Email。", placeholderEmail: "輸入查詢 Email", placeholderTg: "TG 用戶名 (選填)", processing: "處理中...", netErr: "網絡錯誤。", terms: "服務條款", privacy: "隱私政策", risk: "風險披露" },
-            ja: { title: "プレミアムサービス", tg3: "TG プレミアム 3ヶ月", tg6: "TG プレミアム 6ヶ月", tg12: "TG プレミアム 12ヶ月", stars: "TG スター", starsInput: "数量を入力 (最少 50)", buyBtn: "購入する", upload: "支払い証明 / ハッシュをアップロード", payBtn: "支払い完了", success: "注文送信完了！お待ちください。", queryBtn: "検索", orderLog: "注文照会", noData: "48時間以内記録なし", total: "合計", copy: "コピー", copied: "完了!", invalidStars: "最少50スター。", uploading: "✅ 証明受信。", emailReq: "Emailは必須。", placeholderEmail: "追跡用 Email", placeholderTg: "TG ユーザー名 (任意)", processing: "処理中...", netErr: "接続エラー。", terms: "利用規約", privacy: "プライバシーポリシー", risk: "リスク開示" },
-            fr: { title: "Services Premium", tg3: "TG Premium 3 Mois", tg6: "TG Premium 6 Mois", tg12: "TG Premium 12 Mois", stars: "TG Stars", starsInput: "Quantité (Min 50)", buyBtn: "Acheter", upload: "Télécharger Preuve / Hash", payBtn: "J'ai Payé", success: "Commande Soumise ! Patientez.", queryBtn: "Chercher", orderLog: "Suivi Commande", noData: "Aucun (48h)", total: "Total", copy: "Copier", copied: "Copié!", invalidStars: "Min 50 stars.", uploading: "✅ Preuve reçue.", emailReq: "Email requis.", placeholderEmail: "Email de suivi", placeholderTg: "Utilisateur TG (Optionnel)", processing: "Traitement...", netErr: "Erreur réseau.", terms: "Conditions", privacy: "Confidentialité", risk: "Risques" },
-            de: { title: "Premium-Dienste", tg3: "TG Premium 3 Monate", tg6: "TG Premium 6 Monate", tg12: "TG Premium 12 Monate", stars: "TG Stars", starsInput: "Menge (Min 50)", buyBtn: "Kaufen", upload: "Nachweis / Hash hochladen", payBtn: "Ich habe bezahlt", success: "Aufgegeben! Bitte warten.", queryBtn: "Suchen", orderLog: "Bestellabfrage", noData: "Keine Daten (48h)", total: "Gesamt", copy: "Kopieren", copied: "Kopiert!", invalidStars: "Min 50 Stars.", uploading: "✅ Nachweis erhalten.", emailReq: "E-Mail erforderlich.", placeholderEmail: "Tracking-E-Mail", placeholderTg: "TG-Benutzername (Optional)", processing: "Bearbeitung...", netErr: "Netzwerkfehler.", terms: "Nutzungsbedingungen", privacy: "Datenschutz", risk: "Risikooffenlegung" },
-            es: { title: "Servicios Premium", tg3: "TG Premium 3 Meses", tg6: "TG Premium 6 Meses", tg12: "TG Premium 12 Meses", stars: "TG Stars", starsInput: "Cantidad (Mín 50)", buyBtn: "Comprar", upload: "Subir Comprobante / Hash", payBtn: "Ya Pagué", success: "¡Pedido Enviado! Espere.", queryBtn: "Buscar", orderLog: "Consulta Pedido", noData: "Sin datos (48h)", total: "Total", copy: "Copiar", copied: "¡Copiado!", invalidStars: "Mín 50 stars.", uploading: "✅ Comprobante recibido.", emailReq: "Email requerido.", placeholderEmail: "Email de seguimiento", placeholderTg: "Usuario TG (Opcional)", processing: "Procesando...", netErr: "Error de red.", terms: "Términos", privacy: "Privacidad", risk: "Riesgos" }
+            de: { title: "Premium-Dienste", tg3: "TG Premium 3M", tg6: "TG Premium 6M", tg12: "TG Premium 12M", stars: "TG Stars", starsInput: "Menge (Min 50)", buyBtn: "Kaufen", upload: "Beleg hochladen", payBtn: "Ich habe bezahlt", success: "Bestellung aufgegeben!", queryBtn: "Suchen", orderLog: "Abfrage", noData: "Keine Daten (48h)", total: "Gesamt", copy: "Kopieren", copied: "Kopiert!", terms: "Bedingungen", privacy: "Datenschutz", risk: "Risiken" },
+            en: { title: "Premium Services", tg3: "TG Premium 3M", tg6: "TG Premium 6M", tg12: "TG Premium 12M", stars: "TG Stars", starsInput: "Amount (Min 50)", buyBtn: "Buy Now", upload: "Upload Proof / Hash", payBtn: "I Have Paid", success: "Order Submitted!", queryBtn: "Query", orderLog: "Order Tracking", noData: "No records (48h)", total: "Total", copy: "Copy", copied: "Copied!", terms: "Terms", privacy: "Privacy", risk: "Risk Disclosure" },
+            es: { title: "Servicios Premium", tg3: "TG Premium 3M", tg6: "TG Premium 6M", tg12: "TG Premium 12M", stars: "TG Stars", starsInput: "Cantidad (Mín 50)", buyBtn: "Comprar", upload: "Subir Comprobante", payBtn: "Ya Pagué", success: "¡Pedido enviado!", queryBtn: "Buscar", orderLog: "Seguimiento", noData: "Sin datos (48h)", total: "Total", copy: "Copiar", copied: "¡Copiado!", terms: "Términos", privacy: "Privacidad", risk: "Riesgos" },
+            fr: { title: "Services Premium", tg3: "TG Premium 3M", tg6: "TG Premium 6M", tg12: "TG Premium 12M", stars: "TG Stars", starsInput: "Quantité (Min 50)", buyBtn: "Acheter", upload: "Preuve d'achat", payBtn: "J'ai payé", success: "Commande envoyée !", queryBtn: "Chercher", orderLog: "Suivi", noData: "Aucun (48h)", total: "Total", copy: "Copier", copied: "Copié!", terms: "Conditions", privacy: "Confidentialité", risk: "Risques" },
+            ja: { title: "プレミアムサービス", tg3: "TG プレミアム 3ヶ月", tg6: "TG プレミアム 6ヶ月", tg12: "TG プレミアム 12ヶ月", stars: "TG スター", starsInput: "数量を入力 (最少 50)", buyBtn: "購入する", upload: "支払い証明をアップロード", payBtn: "支払い完了", success: "注文が送信されました！", queryBtn: "検索", orderLog: "注文照会", noData: "記録なし (48h)", total: "合計", copy: "コピー", copied: "完了!", terms: "規約", privacy: "プライバシー", risk: "リスク" },
+            'zh-CN': { title: "尊享服务", tg3: "TG 会员 3个月", tg6: "TG 会员 6个月", tg12: "TG 会员 12个月", stars: "TG 星星 (Stars)", starsInput: "输入数量 (最少 50)", buyBtn: "立即购买", upload: "上传支付凭证 / Hash截图", payBtn: "我已付款", success: "订单提交成功！", queryBtn: "查询", orderLog: "订单追踪", noData: "48小时内无记录", total: "总计", copy: "复制", copied: "已复制!", terms: "服务条款", privacy: "隐私政策", risk: "风险披露" },
+            'zh-TW': { title: "尊享服務", tg3: "TG 會員 3個月", tg6: "TG 會員 6個月", tg12: "TG 會員 12個月", stars: "TG 星星 (Stars)", starsInput: "輸入數量 (最少 50)", buyBtn: "立即購買", upload: "上傳支付憑證 / Hash截圖", payBtn: "我已付款", success: "訂單提交成功！", queryBtn: "查詢", orderLog: "訂單追蹤", noData: "48小時內無記錄", total: "總計", copy: "複製", copied: "已複製!", terms: "服務條款", privacy: "隱私政策", risk: "風險披露" }
         };
 
-        // Legal texts standard templates
-        const legalDocs = {
-            terms: { title: "Terms of Service", content: "1. Acceptance of Terms\nBy accessing and using Agnopol services, you accept and agree to be bound by the terms and provision of this agreement.\n\n2. Service Description\nAgnopol provides digital rights facilitation. We reserve the right to modify or discontinue, temporarily or permanently, the service with or without notice.\n\n3. Payment and Delivery\nAll digital assets and services are delivered upon successful verification of blockchain transactions. Due to the nature of digital goods, all sales are final.\n\n4. User Conduct\nYou agree to not use the service for any unlawful purpose or in any way that interrupts, damages, or impairs the service." },
-            privacy: { title: "Privacy Policy", content: "1. Extreme Privacy Commitment\nAgnopol is built on a foundation of absolute privacy. We do not track, profile, or sell user data.\n\n2. Data Collection & Destruction\nWe collect only the minimum data required to process your transaction (Email for tracking, optional Username, and payment proof). ALL order data, including uploaded files and database records, are permanently destroyed from our servers within 48 hours of processing.\n\n3. Security\nWe implement industry-standard security measures, but users acknowledge that blockchain transactions are public by nature." },
-            risk: { title: "Risk Disclosure", content: "1. Cryptocurrency Risks\nTrading and transacting in cryptocurrencies involves significant risk. Prices are highly volatile and you are responsible for entering the correct wallet addresses and networks.\n\n2. Non-Refundable Nature\nDue to the cryptographic nature of digital assets and our strict 48-hour data destruction policy, refunds are generally not technically feasible once a service is delivered.\n\n3. Third-Party Platforms\nServices related to third-party platforms (e.g., Telegram) are subject to the respective platform's rules and policies. Agnopol is not responsible for actions taken by these third-party platforms." }
+        const legalContent = {
+            terms: "Agnopol provides digital service facilitation. All sales are final. Transactions are subject to blockchain verification.",
+            privacy: "We value extreme privacy. No user profiling. All order data is permanently destroyed within 48 hours.",
+            risk: "Cryptocurrency is volatile. Ensure correct network (TRC20/Base) before sending. Agnopol is not liable for network errors."
         };
 
         let lang = 'en';
+        let starsUnitPrice = 0.02; // Default fallback
 
-        // Language toggle
+        // Core Functions
         function changeLang(l) {
             lang = l;
-            document.documentElement.lang = lang;
             document.querySelectorAll('[data-i18n]').forEach(el => {
                 const key = el.getAttribute('data-i18n');
-                if (key.includes('placeholder')) {
-                    el.placeholder = i18n[lang][key] || i18n['en'][key];
-                } else {
-                    el.innerText = i18n[lang][key] || i18n['en'][key];
-                }
+                el.innerText = i18n[lang][key] || i18n['en'][key];
             });
-            updateStarsPrice(); 
-            if(proofBase64) document.getElementById('upload-text').innerText = i18n[lang].uploading;
+            updateStarsPrice();
         }
 
-        // Copy functionality
-        async function copyToClipboard(elementId, btnEl) {
-            const text = document.getElementById(elementId).innerText;
-            const originalBtnText = btnEl.innerText;
+        async function syncPrices() {
             try {
-                await navigator.clipboard.writeText(text);
-                btnEl.innerText = i18n[lang].copied;
-                btnEl.classList.remove('text-brand', 'border-slate-700');
-                btnEl.classList.add('text-white', 'bg-slate-700');
-            } catch (err) {
-                console.error('Copy failed', err);
-            } finally {
-                setTimeout(() => {
-                    btnEl.innerText = originalBtnText;
-                    btnEl.classList.add('text-brand', 'border-slate-700');
-                    btnEl.classList.remove('text-white', 'bg-slate-700');
-                }, 1500);
+                const res = await fetch(`${SUPABASE_URL}/rest/v1/settings?select=*`, {
+                    headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+                });
+                const data = await res.json();
+                data.forEach(s => {
+                    if(s.key === 'premium_3m_price') document.getElementById('price-3m').innerText = '$' + s.value;
+                    if(s.key === 'premium_6m_price') document.getElementById('price-6m').innerText = '$' + s.value;
+                    if(s.key === 'premium_12m_price') document.getElementById('price-12m').innerText = '$' + s.value;
+                    if(s.key === 'stars_unit_price') starsUnitPrice = parseFloat(s.value);
+                });
+                updateStarsPrice();
+            } catch (e) { console.error("Cloud Sync Failed"); }
+        }
+
+        function updateStarsPrice() {
+            const val = parseInt(document.getElementById('starInput').value) || 0;
+            const price = (val * starsUnitPrice).toFixed(1);
+            document.getElementById('star-display-price').innerText = '$' + price;
+        }
+
+        async function copyAddr(id, btn) {
+            const txt = document.getElementById(id).innerText;
+            await navigator.clipboard.writeText(txt);
+            const old = btn.innerText;
+            btn.innerText = i18n[lang].copied;
+            setTimeout(() => btn.innerText = old, 1500);
+        }
+
+        function openLegal(type) {
+            document.getElementById('modal-title').innerText = i18n[lang][type];
+            document.getElementById('modal-text').innerText = legalContent[type];
+            document.getElementById('modal').classList.remove('hidden');
+        }
+
+        // App Logic
+        let currentProduct = '';
+        let currentPrice = 0;
+        let proofBase64 = '';
+
+        function selectProduct(type, priceId) {
+            currentProduct = type;
+            // Get price from UI (synced from cloud)
+            const priceStr = document.getElementById(priceId).innerText.replace('$', '');
+            currentPrice = parseFloat(priceStr);
+            document.getElementById('pay-amount').innerText = '$' + currentPrice;
+            const checkout = document.getElementById('checkout');
+            checkout.classList.remove('hidden');
+            checkout.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function handleFile(input) {
+            const file = input.files[0];
+            if (!file) return;
+            document.getElementById('up-status').innerText = "✅ " + file.name;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                proofBase64 = e.target.result;
+                const btn = document.getElementById('submit-btn');
+                btn.disabled = false;
+                btn.classList.replace('bg-slate-800', 'bg-brand');
+                btn.classList.replace('text-slate-500', 'text-white');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        async function submitOrder() {
+            const email = document.getElementById('orderEmail').value;
+            if(!email) return alert("Email Required");
+            
+            const btn = document.getElementById('submit-btn');
+            btn.innerText = "...";
+            btn.disabled = true;
+
+            const orderNo = "AG" + Date.now().toString().slice(-6);
+            const payload = {
+                order_no: orderNo,
+                email: email,
+                username: document.getElementById('orderTg').value,
+                product_type: currentProduct,
+                amount: currentPrice.toString(),
+                proof_file_key: proofBase64,
+                status: 'paid'
+            };
+
+            const res = await fetch(`${SUPABASE_URL}/rest/v1/orders`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` },
+                body: JSON.stringify(payload)
+            });
+
+            if(res.ok) {
+                alert(i18n[lang].success + " Order No: " + orderNo);
+                location.reload();
             }
         }
 
-        // Modal Handlers
-        function openModal(docType) {
-            document.getElementById('modalTitle').innerText = legalDocs[docType].title;
-            document.getElementById('modalContent').innerText = legalDocs[docType].content;
-            document.getElementById('legalModal').classList.remove('hidden');
+        async function queryOrders() {
+            const email = document.getElementById('queryEmail').value;
+            if(!email) return;
+            const res = await fetch(`${SUPABASE_URL}/rest/v1/orders?email=eq.${email}&order=created_at.desc&limit=2`, {
+                headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+            });
+            const data = await res.json();
+            const box = document.getElementById('query-results');
+            box.innerHTML = data.length ? data.map(o => `
+                <div class="bg-slate-800/50 p-3 rounded-lg border border-slate-700 mt-2 text-[10px]">
+                    <div class="flex justify-between"><b>${o.product_type}</b> <span class="text-brand">${o.status}</span></div>
+                    <div class="mt-1 opacity-50">No: ${o.order_no} | $${o.amount}</div>
+                </div>
+            `).join('') : `<p class="text-[10px] opacity-50 mt-2">${i18n[lang].noData}</p>`;
         }
-        function closeModal() {
-            document.getElementById('legalModal').classList.add('hidden');
-        }
+
+        window.onload = () => { syncPrices(); changeLang('en'); };
     </script>
     <style>
-        body { background-color: #020617; color: #e2e8f0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-font-smoothing: antialiased; }
-        .glass-panel { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(12px); border: 1px solid #1e293b; }
+        body { background-color: #020617; color: #e2e8f0; font-family: -apple-system, sans-serif; -webkit-font-smoothing: antialiased; }
+        .glass { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(12px); border: 1px solid #1e293b; }
         .hidden { display: none !important; }
-        input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-        input[type=number] { -moz-appearance: textfield; }
-        .animate-fade-in { animation: fadeIn 0.3s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-        /* Ensure modal overlay covers everything and prevents scrolling */
-        .modal-overlay { background: rgba(2, 6, 23, 0.85); backdrop-filter: blur(5px); }
+        input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
     </style>
 </head>
-<body class="min-h-screen p-4 md:p-6 flex flex-col items-center select-none overflow-x-hidden">
+<body class="p-4 md:p-10 flex flex-col items-center min-h-screen select-none">
 
-    <header class="w-full max-w-3xl flex justify-between items-center py-4 md:py-6 px-1">
+    <header class="w-full max-w-3xl flex justify-between items-center py-6">
         <div>
-            <h1 class="text-2xl md:text-3xl font-bold text-brand tracking-wider">Agnopol</h1>
-            <p class="text-[10px] md:text-xs text-slate-400 mt-1 uppercase tracking-widest">One world One breath</p>
+            <h1 class="text-3xl font-bold text-brand tracking-tighter">Agnopol</h1>
+            <p class="text-[9px] uppercase tracking-[0.3em] text-slate-500">One World One Breath</p>
         </div>
-        <select onchange="changeLang(this.value)" class="bg-space border border-slate-700 text-xs md:text-sm rounded-lg px-2 py-1.5 md:px-3 outline-none text-slate-300 focus:border-brand cursor-pointer shadow-sm">
+        <select onchange="changeLang(this.value)" class="bg-panel border border-slate-800 text-xs rounded-lg px-2 py-1.5 outline-none text-slate-400">
             <option value="de">Deutsch</option>
             <option value="en" selected>English</option>
             <option value="es">Español</option>
@@ -118,241 +192,99 @@
         </select>
     </header>
 
-    <main class="w-full max-w-3xl flex-1 mt-2 space-y-6">
+    <main class="w-full max-w-3xl space-y-6">
         
-        <div class="glass-panel p-3 md:p-4 rounded-xl flex flex-col sm:flex-row justify-between items-start sm:items-center shadow-md gap-3 sm:gap-0">
-            <span class="text-sm text-slate-400 w-full sm:w-auto" data-i18n="orderLog">Order Inquiry</span>
-            <div class="flex w-full sm:w-auto space-x-2">
-                <input type="email" id="queryEmail" data-i18n="placeholderEmail" placeholder="Tracking Email" class="flex-1 sm:w-48 bg-space border border-slate-700 px-3 py-1.5 rounded-lg text-sm outline-none focus:border-brand transition">
-                <button onclick="queryOrders()" class="bg-slate-700 text-white px-4 py-1.5 rounded-lg text-sm font-medium hover:bg-slate-600 transition whitespace-nowrap" data-i18n="queryBtn">Query</button>
+        <div class="glass p-4 rounded-2xl flex flex-col sm:flex-row justify-between items-center gap-3">
+            <span class="text-xs text-slate-500 font-medium" data-i18n="orderLog">Order Tracking</span>
+            <div class="flex w-full sm:w-auto gap-2">
+                <input id="queryEmail" type="email" placeholder="Email" class="flex-1 sm:w-48 bg-space border border-slate-800 px-3 py-1.5 rounded-lg text-xs outline-none focus:border-brand">
+                <button onclick="queryOrders()" class="bg-slate-800 px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-slate-700 transition" data-i18n="queryBtn">Query</button>
             </div>
         </div>
-        <div id="queryResult" class="animate-fade-in text-xs text-brand space-y-2 px-2"></div>
+        <div id="query-results" class="animate-pulse"></div>
 
-        <h2 data-i18n="title" class="text-lg md:text-xl font-semibold text-white border-b border-slate-800 pb-2 mt-6 md:mt-8">Premium Services</h2>
+        <h2 data-i18n="title" class="text-lg font-bold text-white border-b border-slate-800 pb-2 pt-4">Premium Services</h2>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5 mt-4">
-            <div class="glass-panel p-5 md:p-6 rounded-2xl cursor-pointer hover:border-brand transition shadow-md group flex flex-col justify-between" onclick="selectProduct('premium_3m', 13.1)">
-                <h3 data-i18n="tg3" class="text-base md:text-lg font-medium text-white group-hover:text-brand transition">TG Premium 3M</h3>
-                <p class="text-2xl md:text-3xl font-bold text-brand mt-3">$13.1</p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="glass p-6 rounded-3xl cursor-pointer hover:border-brand transition group" onclick="selectProduct('premium_3m', 'price-3m')">
+                <h3 class="text-slate-400 text-sm font-medium group-hover:text-brand" data-i18n="tg3">TG Premium 3M</h3>
+                <p id="price-3m" class="text-3xl font-bold mt-2 text-white">$0.0</p>
             </div>
-            <div class="glass-panel p-5 md:p-6 rounded-2xl cursor-pointer hover:border-brand transition shadow-md group flex flex-col justify-between" onclick="selectProduct('premium_6m', 17.1)">
-                <h3 data-i18n="tg6" class="text-base md:text-lg font-medium text-white group-hover:text-brand transition">TG Premium 6M</h3>
-                <p class="text-2xl md:text-3xl font-bold text-brand mt-3">$17.1</p>
+            <div class="glass p-6 rounded-3xl cursor-pointer hover:border-brand transition group" onclick="selectProduct('premium_6m', 'price-6m')">
+                <h3 class="text-slate-400 text-sm font-medium group-hover:text-brand" data-i18n="tg6">TG Premium 6M</h3>
+                <p id="price-6m" class="text-3xl font-bold mt-2 text-white">$0.0</p>
             </div>
-            <div class="glass-panel p-5 md:p-6 rounded-2xl cursor-pointer hover:border-brand transition shadow-md group flex flex-col justify-between" onclick="selectProduct('premium_12m', 31.1)">
-                <h3 data-i18n="tg12" class="text-base md:text-lg font-medium text-white group-hover:text-brand transition">TG Premium 12M</h3>
-                <p class="text-2xl md:text-3xl font-bold text-brand mt-3">$31.1</p>
+            <div class="glass p-6 rounded-3xl cursor-pointer hover:border-brand transition group" onclick="selectProduct('premium_12m', 'price-12m')">
+                <h3 class="text-slate-400 text-sm font-medium group-hover:text-brand" data-i18n="tg12">TG Premium 12M</h3>
+                <p id="price-12m" class="text-3xl font-bold mt-2 text-white">$0.0</p>
             </div>
             
-            <div class="glass-panel p-5 md:p-6 rounded-2xl border border-slate-700 hover:border-brand transition shadow-md flex flex-col justify-between">
-                <h3 data-i18n="stars" class="text-base md:text-lg font-medium text-white mb-3">TG Stars</h3>
-                <input type="number" id="starInput" min="50" step="1" value="50" oninput="updateStarsPrice()" class="w-full bg-space border border-slate-700 px-4 py-2.5 rounded-lg text-sm outline-none focus:border-brand transition" data-i18n="placeholderStarsInput">
-                <div class="flex justify-between items-end mt-3 text-sm">
-                    <span id="star-count" class="text-slate-400">Min 50</span>
-                    <span id="star-price" class="font-bold text-brand text-xl md:text-2xl">$1.0</span>
+            <div class="glass p-6 rounded-3xl border border-slate-800 flex flex-col justify-between">
+                <div>
+                    <h3 class="text-slate-400 text-sm font-medium" data-i18n="stars">TG Stars</h3>
+                    <input id="starInput" type="number" value="50" min="50" oninput="updateStarsPrice()" class="w-full bg-space border border-slate-800 rounded-xl px-4 py-2 mt-3 text-brand font-bold outline-none focus:border-brand">
                 </div>
-                <button onclick="buyStarsProduct()" class="mt-4 w-full bg-slate-800 py-2.5 rounded-lg text-sm text-white font-medium hover:bg-slate-700 transition" data-i18n="buyBtn">Buy Now</button>
+                <div class="flex justify-between items-end mt-4">
+                    <span id="star-display-price" class="text-2xl font-bold text-white">$0.0</span>
+                    <button onclick="selectProduct('stars_custom', 'star-display-price')" class="bg-slate-800 px-4 py-1.5 rounded-lg text-[10px] font-bold hover:bg-brand hover:text-white transition" data-i18n="buyBtn">Buy</button>
+                </div>
             </div>
         </div>
 
-        <div id="checkout-panel" class="hidden glass-panel p-5 md:p-6 rounded-2xl mt-8 md:mt-12 border-brand shadow-[0_0_20px_rgba(56,189,248,0.1)] animate-fade-in relative z-10">
-            <div class="flex justify-between items-center mb-5">
-                <h3 class="text-lg md:text-xl font-medium text-white">Checkout</h3>
-                <button onclick="closeCheckout()" class="text-slate-500 hover:text-white text-2xl">&times;</button>
+        <div id="checkout" class="hidden glass p-6 md:p-8 rounded-3xl border-brand shadow-2xl shadow-brand/10 space-y-6">
+            <div class="flex justify-between items-center">
+                <h3 class="text-xl font-bold text-white tracking-tight">Payment</h3>
+                <span id="pay-amount" class="text-3xl font-black text-brand">$0.0</span>
             </div>
-            <p class="text-sm md:text-base text-slate-400 mb-3 flex items-center">
-                <span data-i18n="total">Total</span>: <span class="text-brand font-bold text-2xl md:text-3xl ml-2 md:ml-3" id="pay-amount">$0</span>
-            </p>
-            
-            <div class="space-y-4 mt-5 p-4 md:p-5 bg-space rounded-xl border border-slate-800 shadow-inner">
-                <div class="flex justify-between items-center gap-2">
-                    <div class="flex flex-col flex-1 min-w-0">
-                        <span class="text-slate-500 text-[10px] md:text-xs font-mono uppercase tracking-widest">Crypto Pay (TRC20)</span>
-                        <span id="addrTrc" class="text-brand select-all font-mono text-[11px] md:text-sm tracking-tight truncate">TD6sQK9NmqxKzP6WHvmUdkHQRZvwX6Cy1e</span>
-                    </div>
-                    <button onclick="copyToClipboard('addrTrc', this)" class="shrink-0 border border-slate-700 text-slate-400 text-xs px-3 py-1.5 rounded-md hover:border-brand hover:text-white transition active:scale-95" data-i18n="copy">Copy</button>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div class="bg-space p-4 rounded-2xl border border-slate-800 relative">
+                    <span class="text-[9px] uppercase text-slate-500 tracking-widest">USDT (TRC20)</span>
+                    <p id="trc-addr" class="text-[10px] font-mono mt-1 text-brand break-all">TD6sQK9NmqxKzP6WHvmUdkHQRZvwX6Cy1e</p>
+                    <button onclick="copyAddr('trc-addr', this)" class="absolute top-4 right-4 text-[9px] font-bold text-slate-500 border border-slate-800 px-2 py-1 rounded hover:text-brand" data-i18n="copy">Copy</button>
                 </div>
-                <div class="border-t border-slate-800/60"></div>
-                <div class="flex justify-between items-center gap-2">
-                    <div class="flex flex-col flex-1 min-w-0">
-                        <span class="text-slate-500 text-[10px] md:text-xs font-mono uppercase tracking-widest">Crypto Pay (Base)</span>
-                        <span id="addrBase" class="text-brand select-all font-mono text-[11px] md:text-sm tracking-tight truncate">0x21E43Ddaa992A0B5cfcCeFE98838239b9E91B40E</span>
-                    </div>
-                    <button onclick="copyToClipboard('addrBase', this)" class="shrink-0 border border-slate-700 text-slate-400 text-xs px-3 py-1.5 rounded-md hover:border-brand hover:text-white transition active:scale-95" data-i18n="copy">Copy</button>
+                <div class="bg-space p-4 rounded-2xl border border-slate-800 relative">
+                    <span class="text-[9px] uppercase text-slate-500 tracking-widest">USDC (Base)</span>
+                    <p id="base-addr" class="text-[10px] font-mono mt-1 text-brand break-all">0x21E43Ddaa992A0B5cfcCeFE98838239b9E91B40E</p>
+                    <button onclick="copyAddr('base-addr', this)" class="absolute top-4 right-4 text-[9px] font-bold text-slate-500 border border-slate-800 px-2 py-1 rounded hover:text-brand" data-i18n="copy">Copy</button>
                 </div>
             </div>
 
-            <div class="mt-6 md:mt-8 space-y-4">
-                <input type="email" id="orderEmail" data-i18n="placeholderEmail" placeholder="Tracking Email" class="w-full bg-space border border-slate-700 px-4 py-3 rounded-lg text-sm outline-none focus:border-brand transition">
-                <input type="text" id="orderUsername" data-i18n="placeholderTg" placeholder="TG Username (Optional)" class="w-full bg-space border border-slate-700 px-4 py-3 rounded-lg text-sm outline-none focus:border-brand transition">
+            <div class="space-y-4 pt-4">
+                <input id="orderEmail" type="email" placeholder="Your tracking Email" class="w-full bg-space border border-slate-800 p-4 rounded-2xl text-sm outline-none focus:border-brand">
+                <input id="orderTg" type="text" placeholder="TG @Username (Optional)" class="w-full bg-space border border-slate-800 p-4 rounded-2xl text-sm outline-none focus:border-brand">
                 
-                <div class="border-2 border-dashed border-slate-600 p-6 md:p-8 text-center rounded-xl relative hover:border-brand hover:bg-slate-800/30 transition cursor-pointer group animate-fade-in z-20">
-                    <input type="file" id="fileInput" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-30" onchange="handleFile(this)">
-                    <div class="flex flex-col items-center justify-center space-y-2">
-                        <svg class="w-8 h-8 md:w-10 md:h-10 text-slate-500 group-hover:text-brand transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
-                        <span id="upload-text" class="text-xs md:text-sm text-slate-400 font-medium" data-i18n="upload">Upload Proof / Hash</span>
-                    </div>
+                <div class="border-2 border-dashed border-slate-800 rounded-3xl p-8 text-center relative hover:border-brand transition cursor-pointer">
+                    <input type="file" accept="image/*" onchange="handleFile(this)" class="absolute inset-0 opacity-0 cursor-pointer">
+                    <span id="up-status" class="text-xs text-slate-500" data-i18n="upload">Upload Proof / Hash Screenshot</span>
                 </div>
 
-                <button id="submitBtn" disabled onclick="submitOrder()" class="w-full bg-slate-800 text-slate-500 font-bold py-3.5 md:py-4 rounded-xl transition cursor-not-allowed mt-3 shadow-lg active:scale-[0.98]" data-i18n="payBtn">
-                    I Have Paid
-                </button>
+                <button id="submit-btn" disabled onclick="submitOrder()" class="w-full bg-slate-800 text-slate-500 py-5 rounded-3xl font-black text-lg shadow-xl shadow-brand/10 active:scale-95 transition" data-i18n="payBtn">I HAVE PAID</button>
             </div>
         </div>
 
     </main>
 
-    <footer class="w-full max-w-3xl mt-16 md:mt-20 py-8 md:py-10 border-t border-slate-800/60 text-center flex flex-col items-center space-y-4 px-4">
-        <div class="flex flex-wrap justify-center gap-x-4 gap-y-2 text-xs text-slate-400">
-            <button onclick="openModal('terms')" class="hover:text-brand transition" data-i18n="terms">Terms of Service</button>
-            <span class="text-slate-700 hidden sm:inline">|</span>
-            <button onclick="openModal('privacy')" class="hover:text-brand transition" data-i18n="privacy">Privacy Policy</button>
-            <span class="text-slate-700 hidden sm:inline">|</span>
-            <button onclick="openModal('risk')" class="hover:text-brand transition" data-i18n="risk">Risk Disclosure</button>
+    <footer class="w-full max-w-3xl mt-20 border-t border-slate-900 py-10 flex flex-col items-center gap-6">
+        <div class="flex gap-4 text-[10px] text-slate-500 uppercase tracking-widest">
+            <button onclick="openLegal('terms')" data-i18n="terms">Terms</button>
+            <span>|</span>
+            <button onclick="openLegal('privacy')" data-i18n="privacy">Privacy</button>
+            <span>|</span>
+            <button onclick="openLegal('risk')" data-i18n="risk">Risk</button>
         </div>
-        
-        <p class="font-medium tracking-wide text-xs md:text-sm text-slate-500 mt-2">Agnopol © 2026. One world One breath.</p>
-        <p class="text-[9px] md:text-[10px] tracking-tight max-w-lg leading-relaxed px-2 text-slate-600">
-            All order information and uploaded proofs will be permanently destroyed from our servers within 48 hours for extreme privacy protection.
+        <p class="text-[10px] text-slate-700 text-center max-w-sm leading-relaxed">
+            Agnopol © 2026. Data destruction policy: All order records and proof files are permanently deleted within 48 hours for your digital privacy.
         </p>
     </footer>
 
-    <div id="legalModal" class="hidden fixed inset-0 z-50 flex items-center justify-center modal-overlay p-4 animate-fade-in">
-        <div class="glass-panel w-full max-w-xl max-h-[85vh] overflow-y-auto p-6 md:p-8 rounded-2xl relative shadow-2xl border border-slate-700">
-            <button onclick="closeModal()" class="absolute top-4 right-4 text-slate-500 hover:text-white text-3xl font-light">&times;</button>
-            <h3 id="modalTitle" class="text-xl md:text-2xl font-bold text-white mb-4 md:mb-6 border-b border-slate-800 pb-3"></h3>
-            <div id="modalContent" class="text-sm md:text-base text-slate-300 space-y-4 whitespace-pre-line leading-relaxed"></div>
+    <div id="modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-6" onclick="this.classList.add('hidden')">
+        <div class="absolute inset-0 bg-space/90 backdrop-blur-sm"></div>
+        <div class="glass w-full max-w-md p-8 rounded-3xl relative z-10" onclick="event.stopPropagation()">
+            <h3 id="modal-title" class="text-xl font-bold mb-4 text-brand"></h3>
+            <p id="modal-text" class="text-sm leading-relaxed text-slate-300"></p>
         </div>
     </div>
 
-    <script>
-        // Core Logic
-        let currentProduct = '';
-        let currentPrice = 0;
-        let proofBase64 = '';
-
-        function updateStarsPrice() {
-            const el = document.getElementById('starInput');
-            let val = parseInt(el.value) || 0;
-            const priceEl = document.getElementById('star-price');
-            const countEl = document.getElementById('star-count');
-            countEl.innerText = val > 0 ? `${val}` : i18n[lang].invalidStars || "Min 50";
-            if(val >= 50) {
-                priceEl.innerText = '$' + (val * 0.02).toFixed(1);
-                priceEl.classList.remove('text-slate-600');
-                priceEl.classList.add('text-brand');
-            } else {
-                priceEl.innerText = "$0.0";
-                priceEl.classList.add('text-slate-600');
-                priceEl.classList.remove('text-brand');
-            }
-        }
-
-        function buyStarsProduct() {
-            const el = document.getElementById('starInput');
-            let val = parseInt(el.value);
-            if (!val || val < 50) {
-                alert(i18n[lang].invalidStars || "Min 50");
-                return;
-            }
-            selectProduct(`stars_${val}`, val * 0.02);
-        }
-
-        function selectProduct(type, price) {
-            currentProduct = type;
-            currentPrice = price.toFixed(1);
-            document.getElementById('pay-amount').innerText = '$' + currentPrice;
-            const panel = document.getElementById('checkout-panel');
-            panel.classList.remove('hidden');
-            setTimeout(() => { panel.scrollIntoView({ behavior: "smooth", block: "start" }); }, 100);
-        }
-
-        function closeCheckout() {
-            document.getElementById('checkout-panel').classList.add('hidden');
-        }
-
-        function handleFile(input) {
-            const file = input.files[0];
-            if (!file) return;
-            document.getElementById('upload-text').innerText = i18n[lang].uploading || "Proof Received.";
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                proofBase64 = e.target.result;
-                const btn = document.getElementById('submitBtn');
-                btn.disabled = false;
-                btn.classList.remove('bg-slate-800', 'text-slate-500', 'cursor-not-allowed');
-                btn.classList.add('bg-brand', 'text-white', 'hover:bg-sky-400', 'shadow-brand/20', 'cursor-pointer');
-            };
-            reader.readAsDataURL(file);
-        }
-
-        async function submitOrder() {
-            const email = document.getElementById('orderEmail').value.trim();
-            if(!email) { alert(i18n[lang].emailReq || "Required."); return; }
-            
-            const btn = document.getElementById('submitBtn');
-            const originalText = btn.innerText;
-            btn.innerText = i18n[lang].processing || "Wait...";
-            btn.disabled = true;
-
-            const orderNo = "AG" + Date.now().toString().slice(-6) + Math.floor(Math.random()*100);
-            
-            const payload = {
-                order_no: orderNo,
-                email: email,
-                username: document.getElementById('orderUsername').value.trim() || '',
-                product_type: currentProduct,
-                amount: currentPrice.toString(),
-                proof_file_key: proofBase64,
-                status: 'paid'
-            };
-
-            try {
-                const res = await fetch(`${SUPABASE_URL}/rest/v1/orders`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Prefer': 'return=minimal' },
-                    body: JSON.stringify(payload)
-                });
-
-                if(res.ok) {
-                    alert(`${i18n[lang].success || "Success!"}\nNo: ${orderNo}`);
-                    window.location.reload();
-                } else {
-                    btn.innerText = originalText; btn.disabled = false;
-                }
-            } catch(error) {
-                alert(i18n[lang].netErr || "Net Error."); btn.innerText = originalText; btn.disabled = false;
-            }
-        }
-
-        async function queryOrders() {
-            const email = document.getElementById('queryEmail').value.trim();
-            if(!email) return;
-            const btn = document.getElementById('queryBtn');
-            btn.innerText = "...";
-            try {
-                const res = await fetch(`${SUPABASE_URL}/rest/v1/orders?email=eq.${encodeURIComponent(email)}&select=order_no,product_type,amount,status,admin_note&order=created_at.desc&limit=3`, {
-                    headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
-                });
-                const data = await res.json();
-                const div = document.getElementById('queryResult');
-                if (data.length === 0) {
-                    div.innerHTML = `<span class="text-slate-500">${i18n[lang].noData}</span>`;
-                } else {
-                    div.innerHTML = data.map(o => `
-                        <div class="bg-slate-800/40 p-3 rounded-lg border border-slate-700 mt-2 shadow-inner">
-                            <div class="flex justify-between items-center"><span class="font-bold text-white tracking-wide">${o.product_type}</span> <span class="${o.status === 'completed' ? 'text-green-400' : 'text-yellow-400'} uppercase font-mono text-[10px] bg-slate-800 px-1.5 py-0.5 rounded">${o.status}</span></div>
-                            <div class="text-slate-400 mt-1 flex justify-between font-mono text-[10px]"><span>No: ${o.order_no}</span><span class="text-brand font-bold text-xs">$${o.amount}</span></div>
-                            ${o.admin_note ? `<div class="mt-2 text-brand bg-brand/5 p-2 rounded text-[10px] font-mono leading-tight">Note: ${o.admin_note}</div>` : ''}
-                        </div>
-                    `).join('');
-                }
-            } catch(e) { div.innerHTML = "Query Err."; } finally { btn.innerText = i18n[lang].queryBtn; }
-        }
-
-        // Initialize state
-        changeLang(lang);
-    </script>
 </body>
 </html>
