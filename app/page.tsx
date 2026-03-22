@@ -45,8 +45,8 @@ const messages: Record<
     starsPriceHint: string
     selectedPremium: string
     selectedStars: string
-    disclaimer: string
     rights: string
+    disclaimer: string
     affiliation: string
     paymentWarning: string
     loading: string
@@ -71,9 +71,9 @@ const messages: Record<
     starsPriceHint: 'Preis wird automatisch berechnet',
     selectedPremium: 'TG Premium',
     selectedStars: 'TG Stars',
+    rights: '© {year} Agnopol. Alle Rechte vorbehalten.',
     disclaimer:
       'Hinweis: Dieser Dienst ist eine unabhängige Plattform und nicht mit Telegram verbunden. Alle digitalen Produkte werden virtuell geliefert und sind nach Bearbeitung nicht erstattungsfähig.',
-    rights: '© {year} Agnopol. Alle Rechte vorbehalten.',
     affiliation:
       'Agnopol ist ein unabhängiger digitaler Dienstleister und steht in keiner Verbindung zu Telegram. Alle Marken und Produktnamen gehören ihren jeweiligen Inhabern.',
     paymentWarning:
@@ -99,9 +99,9 @@ const messages: Record<
     starsPriceHint: 'Price is calculated automatically',
     selectedPremium: 'TG Premium',
     selectedStars: 'TG Stars',
+    rights: '© {year} Agnopol. All rights reserved.',
     disclaimer:
       'Disclaimer: This service is an independent platform and is not affiliated with Telegram. All digital products are delivered virtually and are non-refundable once processed.',
-    rights: '© {year} Agnopol. All rights reserved.',
     affiliation:
       'Agnopol is an independent digital service provider and is not affiliated with Telegram. All trademarks and product names belong to their respective owners.',
     paymentWarning:
@@ -127,9 +127,9 @@ const messages: Record<
     starsPriceHint: 'El precio se calcula automáticamente',
     selectedPremium: 'TG Premium',
     selectedStars: 'TG Stars',
+    rights: '© {year} Agnopol. Todos los derechos reservados.',
     disclaimer:
       'Aviso: Este servicio es una plataforma independiente y no está afiliada con Telegram. Todos los productos digitales se entregan virtualmente y no son reembolsables una vez procesados.',
-    rights: '© {year} Agnopol. Todos los derechos reservados.',
     affiliation:
       'Agnopol es un proveedor independiente de servicios digitales y no está afiliado con Telegram. Todas las marcas y nombres de productos pertenecen a sus respectivos propietarios.',
     paymentWarning:
@@ -155,9 +155,9 @@ const messages: Record<
     starsPriceHint: 'Le prix est calculé automatiquement',
     selectedPremium: 'TG Premium',
     selectedStars: 'TG Stars',
+    rights: '© {year} Agnopol. Tous droits réservés.',
     disclaimer:
       'Avertissement : Ce service est une plateforme indépendante et n’est pas affiliée à Telegram. Tous les produits numériques sont livrés virtuellement et ne sont pas remboursables une fois traités.',
-    rights: '© {year} Agnopol. Tous droits réservés.',
     affiliation:
       'Agnopol est un prestataire indépendant de services numériques et n’est pas affilié à Telegram. Toutes les marques et tous les noms de produits appartiennent à leurs propriétaires respectifs.',
     paymentWarning:
@@ -183,9 +183,9 @@ const messages: Record<
     starsPriceHint: '価格は自動計算されます',
     selectedPremium: 'TG Premium',
     selectedStars: 'TG Stars',
+    rights: '© {year} Agnopol. All rights reserved.',
     disclaimer:
       '免責事項：このサービスは独立したプラットフォームであり、Telegram とは提携していません。すべてのデジタル商品はバーチャルで提供され、処理後の返金はできません。',
-    rights: '© {year} Agnopol. All rights reserved.',
     affiliation:
       'Agnopol は独立したデジタルサービス事業者であり、Telegram とは提携していません。すべての商標および製品名は各権利者に帰属します。',
     paymentWarning:
@@ -211,9 +211,9 @@ const messages: Record<
     starsPriceHint: '가격은 자동으로 계산됩니다',
     selectedPremium: 'TG Premium',
     selectedStars: 'TG Stars',
+    rights: '© {year} Agnopol. All rights reserved.',
     disclaimer:
       '고지: 이 서비스는 독립 플랫폼이며 Telegram과 제휴되어 있지 않습니다. 모든 디지털 상품은 가상으로 제공되며 처리 후 환불되지 않습니다.',
-    rights: '© {year} Agnopol. All rights reserved.',
     affiliation:
       'Agnopol은 독립 디지털 서비스 제공업체이며 Telegram과 제휴되어 있지 않습니다. 모든 상표와 제품명은 각 소유자에게 귀속됩니다.',
     paymentWarning:
@@ -239,9 +239,9 @@ const messages: Record<
     starsPriceHint: '价格将自动计算',
     selectedPremium: 'TG Premium',
     selectedStars: 'TG Stars',
+    rights: '© {year} Agnopol。保留所有权利。',
     disclaimer:
       '免责声明：本服务为独立平台，与 Telegram 无关联。所有数字商品均为虚拟交付，一经处理不支持退款。',
-    rights: '© {year} Agnopol。保留所有权利。',
     affiliation:
       'Agnopol 是独立数字服务提供商，与 Telegram 无关联。所有商标及产品名称归其各自权利人所有。',
     paymentWarning:
@@ -267,9 +267,9 @@ const messages: Record<
     starsPriceHint: '價格將自動計算',
     selectedPremium: 'TG Premium',
     selectedStars: 'TG Stars',
+    rights: '© {year} Agnopol。保留所有權利。',
     disclaimer:
       '免責聲明：本服務為獨立平台，與 Telegram 無關聯。所有數位商品均為虛擬交付，一經處理不支援退款。',
-    rights: '© {year} Agnopol。保留所有權利。',
     affiliation:
       'Agnopol 是獨立數位服務提供商，與 Telegram 無關聯。所有商標及產品名稱均屬其各自權利人所有。',
     paymentWarning:
@@ -278,17 +278,17 @@ const messages: Record<
   },
 }
 
-export default function Home() {
-  const [prices, setPrices] = useState<PriceData | null>(null)
+export default function Page() {
   const [lang, setLang] = useState<LangType>('en')
-  const [selectedProduct, setSelectedProduct] = useState<ProductType>('premium')
-  const [selectedDuration, setSelectedDuration] = useState<DurationType>('12m')
-  const [starsAmount, setStarsAmount] = useState<string>('50')
+  const [prices, setPrices] = useState<PriceData | null>(null)
+  const [tab, setTab] = useState<ProductType>('premium')
+  const [duration, setDuration] = useState<DurationType>('12m')
+  const [stars, setStars] = useState(50)
   const [email, setEmail] = useState('')
 
   useEffect(() => {
     fetch('/api/getPrices')
-      .then((res) => res.json())
+      .then((r) => r.json())
       .then((data) => {
         setPrices({
           tg_premium_3m: Number(data.tg_premium_3m),
@@ -297,81 +297,40 @@ export default function Home() {
           tg_stars_rate: Number(data.tg_stars_rate),
         })
       })
-      .catch(() => {
-        setPrices(null)
-      })
+      .catch(() => setPrices(null))
   }, [])
 
   const t = messages[lang]
   const currentYear = new Date().getFullYear()
 
-  const safeStarsAmount = useMemo(() => {
-    const num = Number(starsAmount)
-    if (!Number.isFinite(num)) return 50
-    if (num < 50) return 50
-    return Math.floor(num)
-  }, [starsAmount])
+  const safeStars = useMemo(() => {
+    if (!Number.isFinite(stars)) return 50
+    if (stars < 50) return 50
+    return Math.floor(stars)
+  }, [stars])
 
-  const currentPremiumPrice = useMemo(() => {
+  const premiumPrice = useMemo(() => {
     if (!prices) return null
-    if (selectedDuration === '3m') return prices.tg_premium_3m
-    if (selectedDuration === '6m') return prices.tg_premium_6m
+    if (duration === '3m') return prices.tg_premium_3m
+    if (duration === '6m') return prices.tg_premium_6m
     return prices.tg_premium_12m
-  }, [prices, selectedDuration])
+  }, [prices, duration])
 
-  const currentStarsPrice = useMemo(() => {
+  const starsPrice = useMemo(() => {
     if (!prices) return null
-    return Number((safeStarsAmount * prices.tg_stars_rate).toFixed(2))
-  }, [prices, safeStarsAmount])
+    return Number((safeStars * prices.tg_stars_rate).toFixed(2))
+  }, [prices, safeStars])
 
   const selectedTitle = useMemo(() => {
-    if (selectedProduct === 'premium') {
-      const durationLabel =
-        selectedDuration === '3m'
-          ? t.plan3m
-          : selectedDuration === '6m'
-          ? t.plan6m
-          : t.plan12m
-      return `${t.selectedPremium} ${durationLabel}`
+    if (tab === 'premium') {
+      const durationText =
+        duration === '3m' ? t.plan3m : duration === '6m' ? t.plan6m : t.plan12m
+      return `${t.selectedPremium} ${durationText}`
     }
-    return `${t.selectedStars} ${safeStarsAmount}`
-  }, [selectedProduct, selectedDuration, safeStarsAmount, t])
+    return `${t.selectedStars} ${safeStars}`
+  }, [tab, duration, safeStars, t])
 
-  const selectedPrice =
-    selectedProduct === 'premium' ? currentPremiumPrice : currentStarsPrice
-
-  function cardStyle(active: boolean): React.CSSProperties {
-    return {
-      padding: 18,
-      borderRadius: 18,
-      border: active ? '1px solid #0b1733' : '1px solid #d1d5db',
-      background: active ? '#0b1733' : '#ffffff',
-      color: active ? '#ffffff' : '#111827',
-      cursor: 'pointer',
-      transition: 'all 0.2s ease',
-      width: '100%',
-      boxSizing: 'border-box',
-      minHeight: 108,
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'space-between',
-    }
-  }
-
-  function tabStyle(active: boolean): React.CSSProperties {
-    return {
-      flex: 1,
-      minWidth: 0,
-      padding: '12px 14px',
-      borderRadius: 12,
-      border: active ? '1px solid #0b1733' : '1px solid #d1d5db',
-      background: active ? '#0b1733' : '#ffffff',
-      color: active ? '#ffffff' : '#111827',
-      fontWeight: 700,
-      cursor: 'pointer',
-      transition: 'all 0.2s ease',
-    }
-  }
+  const selectedPrice = tab === 'premium' ? premiumPrice : starsPrice
 
   function handleCreateOrder() {
     const params = new URLSearchParams()
@@ -379,17 +338,49 @@ export default function Home() {
     params.set('lang', lang)
     params.set('email', email)
 
-    if (selectedProduct === 'premium') {
+    if (tab === 'premium') {
       params.set('product_type', 'tg_premium')
-      params.set('duration', selectedDuration)
-      params.set('price_usd', String(currentPremiumPrice ?? ''))
+      params.set('duration', duration)
+      params.set('price_usd', String(premiumPrice ?? ''))
     } else {
       params.set('product_type', 'tg_stars')
-      params.set('stars_amount', String(safeStarsAmount))
-      params.set('price_usd', String(currentStarsPrice ?? ''))
+      params.set('stars_amount', String(safeStars))
+      params.set('price_usd', String(starsPrice ?? ''))
     }
 
     window.location.href = `/pay?${params.toString()}`
+  }
+
+  function topTabStyle(active: boolean): React.CSSProperties {
+    return {
+      flex: 1,
+      minWidth: 0,
+      padding: '14px 16px',
+      borderRadius: 16,
+      border: active ? '1px solid #0b1733' : '1px solid #d1d5db',
+      background: active ? '#07163f' : '#ffffff',
+      color: active ? '#ffffff' : '#111827',
+      fontWeight: 800,
+      fontSize: 16,
+      cursor: 'pointer',
+    }
+  }
+
+  function planCardStyle(active: boolean): React.CSSProperties {
+    return {
+      padding: 22,
+      borderRadius: 22,
+      border: active ? '1px solid #07163f' : '1px solid #d1d5db',
+      background: active ? '#07163f' : '#ffffff',
+      color: active ? '#ffffff' : '#111827',
+      cursor: 'pointer',
+      minHeight: 148,
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'space-between',
+      boxSizing: 'border-box',
+      transition: 'all 0.2s ease',
+    }
   }
 
   return (
@@ -397,46 +388,46 @@ export default function Home() {
       style={{
         width: '100%',
         boxSizing: 'border-box',
-        padding: '20px 16px 36px',
+        padding: '20px 16px 40px',
         fontFamily: 'system-ui, Arial, sans-serif',
         background: '#ffffff',
       }}
     >
       <style>{`
-        .agnopol-shell {
+        .agnopol-container {
+          width: 100%;
           max-width: 1120px;
           margin: 0 auto;
-          width: 100%;
         }
 
         .agnopol-header {
           display: flex;
-          align-items: flex-start;
           justify-content: space-between;
+          align-items: flex-start;
           gap: 16px;
-          margin-bottom: 24px;
+          margin-bottom: 26px;
         }
 
-        .agnopol-header-left {
+        .agnopol-brand {
           flex: 1 1 auto;
           min-width: 0;
         }
 
-        .agnopol-header-right {
-          width: 220px;
-          flex: 0 0 220px;
+        .agnopol-lang {
+          width: 170px;
+          flex: 0 0 170px;
         }
 
         .agnopol-tabs {
           display: flex;
-          gap: 10px;
+          gap: 12px;
           margin-bottom: 18px;
         }
 
         .agnopol-plan-grid {
           display: grid;
           grid-template-columns: 1fr;
-          gap: 12px;
+          gap: 14px;
         }
 
         @media (min-width: 900px) {
@@ -446,27 +437,24 @@ export default function Home() {
         }
 
         @media (max-width: 640px) {
-          .agnopol-header {
-            align-items: flex-start;
-          }
-
-          .agnopol-header-right {
-            width: 140px;
-            flex: 0 0 140px;
+          .agnopol-lang {
+            width: 132px;
+            flex: 0 0 132px;
           }
         }
       `}</style>
 
-      <div className="agnopol-shell">
+      <div className="agnopol-container">
         <section className="agnopol-header">
-          <div className="agnopol-header-left">
+          <div className="agnopol-brand">
             <h1
               style={{
-                fontSize: 'clamp(34px, 6vw, 58px)',
-                fontWeight: 800,
+                fontSize: 'clamp(42px, 8vw, 76px)',
+                fontWeight: 900,
                 margin: 0,
                 color: '#111827',
-                lineHeight: 1.03,
+                lineHeight: 0.98,
+                letterSpacing: '-0.03em',
                 wordBreak: 'break-word',
               }}
             >
@@ -475,10 +463,10 @@ export default function Home() {
 
             <p
               style={{
-                marginTop: 10,
+                marginTop: 12,
                 marginBottom: 0,
                 color: '#6b7280',
-                fontSize: 'clamp(15px, 2.4vw, 18px)',
+                fontSize: 'clamp(15px, 2vw, 20px)',
                 fontWeight: 500,
               }}
             >
@@ -486,17 +474,18 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="agnopol-header-right">
+          <div className="agnopol-lang">
             <select
               value={lang}
               onChange={(e) => setLang(e.target.value as LangType)}
               style={{
                 width: '100%',
-                padding: 12,
-                borderRadius: 12,
+                height: 52,
+                padding: '10px 12px',
+                borderRadius: 14,
                 border: '1px solid #d1d5db',
                 background: '#ffffff',
-                fontSize: 16,
+                fontSize: 14,
                 boxSizing: 'border-box',
               }}
             >
@@ -512,53 +501,61 @@ export default function Home() {
         <div className="agnopol-tabs">
           <button
             type="button"
-            onClick={() => setSelectedProduct('premium')}
-            style={tabStyle(selectedProduct === 'premium')}
+            onClick={() => setTab('premium')}
+            style={topTabStyle(tab === 'premium')}
           >
             {t.tabPremium}
           </button>
+
           <button
             type="button"
-            onClick={() => setSelectedProduct('stars')}
-            style={tabStyle(selectedProduct === 'stars')}
+            onClick={() => setTab('stars')}
+            style={topTabStyle(tab === 'stars')}
           >
             {t.tabStars}
           </button>
         </div>
 
-        {selectedProduct === 'premium' ? (
+        {tab === 'premium' ? (
           <>
-            <p style={{ fontSize: 18, marginBottom: 12, color: '#4b5563' }}>
+            <p
+              style={{
+                fontSize: 'clamp(18px, 2.4vw, 24px)',
+                marginTop: 0,
+                marginBottom: 14,
+                color: '#4b5563',
+              }}
+            >
               {t.premiumTitle}
             </p>
 
             <div className="agnopol-plan-grid">
               <div
-                onClick={() => setSelectedDuration('3m')}
-                style={cardStyle(selectedDuration === '3m')}
+                onClick={() => setDuration('3m')}
+                style={planCardStyle(duration === '3m')}
               >
-                <div style={{ fontSize: 18, fontWeight: 700 }}>{t.plan3m}</div>
-                <div style={{ marginTop: 10, fontSize: 22, fontWeight: 800 }}>
+                <div style={{ fontSize: 20, fontWeight: 800 }}>{t.plan3m}</div>
+                <div style={{ marginTop: 16, fontSize: 24, fontWeight: 900 }}>
                   ${prices ? prices.tg_premium_3m : t.loading}
                 </div>
               </div>
 
               <div
-                onClick={() => setSelectedDuration('6m')}
-                style={cardStyle(selectedDuration === '6m')}
+                onClick={() => setDuration('6m')}
+                style={planCardStyle(duration === '6m')}
               >
-                <div style={{ fontSize: 18, fontWeight: 700 }}>{t.plan6m}</div>
-                <div style={{ marginTop: 10, fontSize: 22, fontWeight: 800 }}>
+                <div style={{ fontSize: 20, fontWeight: 800 }}>{t.plan6m}</div>
+                <div style={{ marginTop: 16, fontSize: 24, fontWeight: 900 }}>
                   ${prices ? prices.tg_premium_6m : t.loading}
                 </div>
               </div>
 
               <div
-                onClick={() => setSelectedDuration('12m')}
-                style={cardStyle(selectedDuration === '12m')}
+                onClick={() => setDuration('12m')}
+                style={planCardStyle(duration === '12m')}
               >
-                <div style={{ fontSize: 18, fontWeight: 700 }}>{t.plan12m}</div>
-                <div style={{ marginTop: 10, fontSize: 22, fontWeight: 800 }}>
+                <div style={{ fontSize: 20, fontWeight: 800 }}>{t.plan12m}</div>
+                <div style={{ marginTop: 16, fontSize: 24, fontWeight: 900 }}>
                   ${prices ? prices.tg_premium_12m : t.loading}
                 </div>
               </div>
@@ -566,20 +563,33 @@ export default function Home() {
           </>
         ) : (
           <>
-            <p style={{ fontSize: 18, marginBottom: 12, color: '#4b5563' }}>
+            <p
+              style={{
+                fontSize: 'clamp(18px, 2.4vw, 24px)',
+                marginTop: 0,
+                marginBottom: 14,
+                color: '#4b5563',
+              }}
+            >
               {t.starsTitle}
             </p>
 
             <div
               style={{
-                padding: 16,
-                borderRadius: 18,
+                padding: 18,
+                borderRadius: 22,
                 border: '1px solid #d1d5db',
                 background: '#ffffff',
-                marginBottom: 12,
               }}
             >
-              <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 10 }}>
+              <div
+                style={{
+                  fontSize: 18,
+                  fontWeight: 800,
+                  marginBottom: 12,
+                  color: '#111827',
+                }}
+              >
                 {t.starsInputLabel}
               </div>
 
@@ -587,20 +597,20 @@ export default function Home() {
                 type="number"
                 min={50}
                 step={1}
-                value={starsAmount}
-                onChange={(e) => setStarsAmount(e.target.value)}
+                value={stars}
+                onChange={(e) => setStars(Number(e.target.value))}
                 placeholder={t.starsInputPlaceholder}
                 style={{
                   width: '100%',
                   boxSizing: 'border-box',
-                  padding: 12,
-                  borderRadius: 12,
+                  padding: 14,
+                  borderRadius: 14,
                   border: '1px solid #d1d5db',
                   fontSize: 16,
                 }}
               />
 
-              <div style={{ marginTop: 10, fontSize: 13, color: '#6b7280' }}>
+              <div style={{ marginTop: 12, fontSize: 13, color: '#6b7280' }}>
                 {t.starsMinHint}
               </div>
               <div style={{ marginTop: 4, fontSize: 13, color: '#6b7280' }}>
@@ -613,8 +623,8 @@ export default function Home() {
         <div
           style={{
             marginTop: 20,
-            padding: 18,
-            borderRadius: 18,
+            padding: 20,
+            borderRadius: 22,
             border: '1px solid #e5e7eb',
             background: '#f8fafc',
           }}
@@ -622,16 +632,24 @@ export default function Home() {
           <div style={{ fontSize: 14, color: '#6b7280', marginBottom: 8 }}>
             {t.currentSelection}
           </div>
-          <div style={{ fontSize: 18, fontWeight: 700, color: '#111827' }}>
-            {selectedTitle}
-          </div>
+
           <div
             style={{
-              marginTop: 8,
-              fontSize: 'clamp(28px, 5vw, 38px)',
+              fontSize: 'clamp(20px, 3vw, 28px)',
               fontWeight: 800,
               color: '#111827',
-              wordBreak: 'break-word',
+            }}
+          >
+            {selectedTitle}
+          </div>
+
+          <div
+            style={{
+              marginTop: 10,
+              fontSize: 'clamp(34px, 5vw, 48px)',
+              fontWeight: 900,
+              color: '#111827',
+              lineHeight: 1,
             }}
           >
             {selectedPrice === null ? t.loading : `$${selectedPrice}`}
@@ -646,7 +664,7 @@ export default function Home() {
             marginTop: 20,
             width: '100%',
             boxSizing: 'border-box',
-            padding: 14,
+            padding: 15,
             borderRadius: 14,
             border: '1px solid #d1d5db',
             fontSize: 16,
@@ -659,11 +677,11 @@ export default function Home() {
             marginTop: 18,
             width: '100%',
             padding: 16,
-            background: '#0b1733',
+            background: '#07163f',
             color: '#ffffff',
-            borderRadius: 14,
+            borderRadius: 16,
             border: 'none',
-            fontWeight: 800,
+            fontWeight: 900,
             fontSize: 16,
             cursor: 'pointer',
           }}
@@ -673,12 +691,12 @@ export default function Home() {
 
         <footer
           style={{
-            marginTop: 32,
+            marginTop: 34,
             paddingTop: 18,
             borderTop: '1px solid #e5e7eb',
             fontSize: 12,
             color: '#6b7280',
-            lineHeight: 1.7,
+            lineHeight: 1.75,
           }}
         >
           <p>{t.rights.replace('{year}', String(currentYear))}</p>
