@@ -3,173 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Agnopol Admin | Secure Console</title>
+    <title>Agnopol Admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        tailwind.config = { theme: { extend: { colors: { space: '#020617', panel: '#0f172a', brand: '#38bdf8' } } } }
+        tailwind.config = { theme: { extend: { colors: { space: '#020617', brand: '#38bdf8' } } } }
     </script>
-    <style>
-        body { background-color: #020617; color: #e2e8f0; font-family: sans-serif; -webkit-font-smoothing: antialiased; }
-        .glass { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(12px); border: 1px solid #1e293b; }
-        .hidden { display: none !important; }
-    </style>
 </head>
-<body class="p-4 md:p-8 flex flex-col items-center min-h-screen select-none">
-
-    <div id="login-box" class="mt-24 w-full max-w-sm">
-        <div class="glass p-8 rounded-3xl text-center shadow-2xl">
-            <h1 class="text-3xl font-bold text-brand mb-8 tracking-tighter">AGNOPOL</h1>
-            <input type="password" id="pw" placeholder="Admin Password" class="w-full bg-space border border-slate-700 p-4 rounded-xl mb-4 text-center outline-none focus:border-brand">
-            <button onclick="login()" class="w-full bg-brand text-white py-4 rounded-xl font-bold shadow-lg shadow-brand/20 active:scale-95 transition">Access God Mode</button>
-        </div>
+<body class="bg-space text-slate-300 p-4 md:p-10 font-sans">
+    <div id="login" class="max-w-sm mx-auto mt-32 text-center">
+        <h1 class="text-3xl font-bold text-brand mb-8">GOD MODE</h1>
+        <input type="password" id="pw" class="w-full bg-slate-900 border border-slate-800 p-4 rounded-xl mb-4 text-center outline-none focus:border-brand">
+        <button onclick="login()" class="w-full bg-brand text-white py-4 rounded-xl font-bold">Access Dashboard</button>
     </div>
 
-    <div id="dashboard" class="hidden w-full max-w-5xl">
-        <header class="flex flex-col md:flex-row justify-between items-start md:items-center py-6 gap-4">
-            <div>
-                <h1 class="text-3xl font-bold text-white" id="admin-title">System Control</h1>
-                <p class="text-[10px] text-green-500 font-mono uppercase mt-1">● Secure Mode Active</p>
-            </div>
-            <div class="flex flex-wrap gap-2">
-                <select id="adminLang" onchange="updateAdminLang()" class="bg-slate-800 text-[10px] p-2 rounded-lg border border-slate-700 text-brand outline-none">
-                    <option value="en">English</option>
-                    <option value="zh-CN">简体中文</option>
-                    <option value="zh-TW">繁體中文</option>
-                    <option value="ja">日本語</option>
-                    <option value="de">Deutsch</option>
-                    <option value="fr">Français</option>
-                    <option value="es">Español</option>
-                </select>
-                <button onclick="cleanup()" class="bg-red-500/20 text-red-500 border border-red-500/20 px-3 py-1.5 rounded-lg text-[10px] font-bold">PURGE 48H</button>
-                <button onclick="localStorage.clear(); location.reload();" class="bg-slate-800 text-slate-400 px-3 py-1.5 rounded-lg text-[10px]">LOGOUT</button>
-            </div>
+    <div id="main" class="hidden max-w-5xl mx-auto">
+        <header class="flex justify-between items-center py-6 border-b border-slate-800 mb-8">
+            <h1 class="text-2xl font-bold text-white">System Console</h1>
+            <button onclick="cleanup()" class="bg-red-500/10 text-red-500 text-[10px] px-3 py-1 rounded border border-red-500/20">PURGE 48H</button>
         </header>
 
-        <div class="glass p-6 rounded-2xl mb-8 border-brand/10">
-            <h2 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Cloud Pricing Management</h2>
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4" id="price-fields"></div>
-            <button onclick="savePrices()" class="w-full mt-6 bg-brand/10 border border-brand/30 text-brand py-2.5 rounded-xl text-xs font-bold hover:bg-brand hover:text-white transition">SYNC ALL PRICES</button>
-        </div>
+        <section class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10 bg-slate-900/50 p-6 rounded-2xl" id="prices"></section>
+        <button onclick="save()" class="w-full bg-slate-800 py-3 rounded-xl text-xs font-bold mb-10">SYNC CLOUD PRICES</button>
 
-        <div class="flex justify-between items-center mb-4 gap-4">
-            <h2 class="text-xs font-bold text-slate-500 uppercase tracking-widest">Order Management</h2>
-            <input type="text" id="search" oninput="renderOrders()" placeholder="Search Email / Order No..." class="flex-1 max-w-xs bg-slate-900 border border-slate-800 rounded-xl px-4 py-2 text-xs outline-none focus:border-brand">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xs font-bold text-slate-500 uppercase">Live Orders</h2>
+            <input type="text" id="q" oninput="render()" placeholder="Search Email / Order..." class="bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5 text-xs outline-none focus:border-brand">
         </div>
-
-        <div id="order-list" class="space-y-4 pb-20"></div>
+        <div id="list" class="space-y-4"></div>
     </div>
 
-    <div id="modal" class="hidden fixed inset-0 bg-space/95 z-50 p-4 flex items-center justify-center" onclick="this.classList.add('hidden')">
-        <img id="modal-img" class="max-w-full max-h-[85vh] rounded-2xl shadow-2xl">
+    <div id="viewer" class="hidden fixed inset-0 bg-black/95 z-50 flex items-center justify-center" onclick="this.classList.add('hidden')">
+        <img id="vimg" class="max-w-full max-h-[90vh]">
     </div>
 
     <script>
-        let sessionPw = "";
+        let auth = "";
         let orders = [];
         let settings = [];
 
-        const adminI18n = {
-            en: { title: "System Control", search: "Search Email / Order No..." },
-            'zh-CN': { title: "系统控制台", search: "搜索邮箱或订单号..." },
-            'zh-TW': { title: "系統控制台", search: "搜尋郵箱或訂單號..." }
-        };
-
-        window.onload = () => {
-            const saved = localStorage.getItem('agn_pw');
-            const time = localStorage.getItem('agn_time');
-            if (saved && time && (Date.now() - time < 24 * 60 * 60 * 1000)) {
-                sessionPw = saved;
-                initApp();
-            }
-        };
-
         async function login() {
-            const input = document.getElementById('pw').value;
-            const res = await api('fetch_all', {}, input);
-            if(res.error) return alert("Access Denied");
-            sessionPw = input;
-            localStorage.setItem('agn_pw', input);
-            localStorage.setItem('agn_time', Date.now());
-            initApp();
+            auth = document.getElementById('pw').value;
+            const res = await api('fetch_all');
+            if(res.error) return alert("Fail");
+            localStorage.setItem('agn_pw', auth);
+            init(res);
         }
 
-        async function api(action, data = {}, pw = sessionPw) {
-            const res = await fetch('/api/admin', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ password: pw, action, data })
-            });
-            return await res.json();
+        async function api(a, d={}) {
+            const r = await fetch('/api/admin', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: auth, action: a, data: d }) });
+            return await r.json();
         }
 
-        async function initApp() {
-            document.getElementById('login-box').classList.add('hidden');
-            document.getElementById('dashboard').classList.remove('hidden');
-            updateAdminLang();
-            await refresh();
-            setInterval(refresh, 30000);
-        }
-
-        async function refresh() {
-            const data = await api('fetch_all');
-            orders = data.orders;
+        function init(data) {
+            document.getElementById('login').classList.add('hidden');
+            document.getElementById('main').classList.remove('hidden');
             settings = data.settings;
-            renderPrices();
-            renderOrders();
+            orders = data.orders;
+            const p = document.getElementById('prices');
+            p.innerHTML = settings.map(s => `<div><label class="text-[9px] uppercase">${s.key}</label><input id="s-${s.key}" value="${s.value}" class="w-full bg-transparent border-b border-slate-800 text-brand font-bold py-1"></div>`).join('');
+            render();
+            setInterval(async () => { const d = await api('fetch_all'); orders = d.orders; render(); }, 20000);
         }
 
-        function renderPrices() {
-            const box = document.getElementById('price-fields');
-            box.innerHTML = settings.map(s => `
-                <div class="flex flex-col gap-1">
-                    <label class="text-[9px] text-slate-500 uppercase">${s.key}</label>
-                    <input id="in-${s.key}" value="${s.value}" class="bg-space border border-slate-800 rounded-lg p-2 text-brand font-bold text-sm">
-                </div>
-            `).join('');
-        }
-
-        function renderOrders() {
-            const query = document.getElementById('search').value.toLowerCase();
-            const filtered = orders.filter(o => o.email.toLowerCase().includes(query) || o.order_no.toLowerCase().includes(query));
-            const list = document.getElementById('order-list');
-            list.innerHTML = filtered.map(o => `
-                <div class="glass p-4 rounded-xl flex flex-col md:flex-row justify-between gap-4">
-                    <div>
-                        <div class="flex gap-2 items-center"><span class="text-brand font-bold text-xs">${o.order_no}</span><span class="text-[10px] text-slate-500">${new Date(o.created_at).toLocaleString()}</span></div>
-                        <p class="text-white text-sm font-medium mt-1">${o.product_type} - $${o.amount}</p>
-                        <p class="text-[10px] text-slate-400 uppercase tracking-tighter">${o.email} ${o.username?'| @'+o.username:''}</p>
+        function render() {
+            const q = document.getElementById('q').value.toLowerCase();
+            const filtered = orders.filter(o => o.email.toLowerCase().includes(q) || o.order_no.toLowerCase().includes(q));
+            document.getElementById('list').innerHTML = filtered.map(o => `
+                <div class="bg-slate-900/50 p-4 rounded-xl border border-slate-800 flex justify-between items-center">
+                    <div><b class="text-brand text-xs">${o.order_no}</b><p class="text-white text-sm">${o.product_type} ($${o.amount})</p><p class="text-[10px] opacity-50">${o.email}</p></div>
+                    <div class="flex gap-2">
+                        <button onclick="view('${o.proof_file_key}')" class="text-[10px] bg-slate-800 px-2 py-1 rounded">Proof</button>
+                        <select onchange="update('${o.id}', this.value)" class="bg-black text-[10px] p-1 rounded"><option value="paid" ${o.status==='paid'?'selected':''}>Paid</option><option value="completed" ${o.status==='completed'?'selected':''}>Done</option></select>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <button onclick="showP('${o.proof_file_key}')" class="bg-slate-800 text-[10px] font-bold px-3 py-1.5 rounded-lg hover:text-brand">PROOF</button>
-                        <select onchange="upS('${o.id}', this.value)" class="bg-space border border-slate-700 text-[10px] p-1.5 rounded-lg font-bold">
-                            <option value="paid" ${o.status==='paid'?'selected':''}>PAID</option>
-                            <option value="completed" ${o.status==='completed'?'selected':''}>DONE</option>
-                            <option value="cancelled" ${o.status==='cancelled'?'selected':''}>CANCEL</option>
-                        </select>
-                        <button onclick="delO('${o.id}')" class="text-slate-600 hover:text-red-500 text-xl px-2">&times;</button>
-                    </div>
-                </div>
-            `).join('');
+                </div>`).join('');
         }
 
-        function updateAdminLang() {
-            const l = document.getElementById('adminLang').value;
-            const dict = adminI18n[l] || adminI18n['en'];
-            document.getElementById('admin-title').innerText = dict.title;
-            document.getElementById('search').placeholder = dict.search;
-        }
-
-        async function savePrices() {
-            const up = settings.map(s => ({ key: s.key, value: document.getElementById(`in-${s.key}`).value }));
+        async function save() {
+            const up = settings.map(s => ({ key: s.key, value: document.getElementById('s-'+s.key).value }));
             await api('update_prices', { settings: up });
-            alert("Cloud Synced! Prices Updated.");
-            refresh();
+            alert("Updated");
         }
 
-        async function upS(id, status) { await api('update_order', { id, update: { status } }); }
-        async function delO(id) { if(confirm("Delete order?")) { await api('update_order', { id, action: 'delete' }); refresh(); } }
-        function showP(src) { document.getElementById('modal-img').src = src; document.getElementById('modal').classList.remove('hidden'); }
-        async function cleanup() { if(confirm("Purge 48h?")) { const th = new Date(Date.now() - 48*60*60*1000).toISOString(); await api('cleanup', { threshold: th }); refresh(); } }
+        async function update(id, s) { await api('update_order', { id, update: { status: s } }); }
+        function view(s) { document.getElementById('vimg').src = s; document.getElementById('viewer').classList.remove('hidden'); }
+        async function cleanup() { const t = new Date(Date.now() - 48*3600000).toISOString(); await api('cleanup', { threshold: t }); }
+        
+        window.onload = () => { if(localStorage.getItem('agn_pw')) { document.getElementById('pw').value = localStorage.getItem('agn_pw'); login(); } };
     </script>
 </body>
 </html>
