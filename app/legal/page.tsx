@@ -1,10 +1,7 @@
 'use client'
-
 import { useMemo } from 'react'
 import { useSearchParams } from 'next/navigation'
-
 type LangType = 'de' | 'en' | 'es' | 'fr' | 'ja' | 'ko' | 'zh-cn' | 'zh-tw'
-
 const legalUi: Record<
   LangType,
   {
