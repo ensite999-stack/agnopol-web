@@ -409,15 +409,22 @@ export default function Home() {
           width: 100%;
         }
 
-        .agnopol-lang-row {
+        .agnopol-header {
           display: flex;
-          justify-content: flex-end;
-          margin-bottom: 18px;
+          align-items: flex-start;
+          justify-content: space-between;
+          gap: 16px;
+          margin-bottom: 24px;
         }
 
-        .agnopol-lang-box {
-          width: 100%;
-          max-width: 220px;
+        .agnopol-header-left {
+          flex: 1 1 auto;
+          min-width: 0;
+        }
+
+        .agnopol-header-right {
+          width: 220px;
+          flex: 0 0 220px;
         }
 
         .agnopol-tabs {
@@ -439,15 +446,47 @@ export default function Home() {
         }
 
         @media (max-width: 640px) {
-          .agnopol-lang-box {
-            max-width: 100%;
+          .agnopol-header {
+            align-items: flex-start;
+          }
+
+          .agnopol-header-right {
+            width: 140px;
+            flex: 0 0 140px;
           }
         }
       `}</style>
 
       <div className="agnopol-shell">
-        <div className="agnopol-lang-row">
-          <div className="agnopol-lang-box">
+        <section className="agnopol-header">
+          <div className="agnopol-header-left">
+            <h1
+              style={{
+                fontSize: 'clamp(34px, 6vw, 58px)',
+                fontWeight: 800,
+                margin: 0,
+                color: '#111827',
+                lineHeight: 1.03,
+                wordBreak: 'break-word',
+              }}
+            >
+              {t.brand}
+            </h1>
+
+            <p
+              style={{
+                marginTop: 10,
+                marginBottom: 0,
+                color: '#6b7280',
+                fontSize: 'clamp(15px, 2.4vw, 18px)',
+                fontWeight: 500,
+              }}
+            >
+              {t.slogan}
+            </p>
+          </div>
+
+          <div className="agnopol-header-right">
             <select
               value={lang}
               onChange={(e) => setLang(e.target.value as LangType)}
@@ -468,33 +507,6 @@ export default function Home() {
               ))}
             </select>
           </div>
-        </div>
-
-        <section style={{ marginBottom: 24 }}>
-          <h1
-            style={{
-              fontSize: 'clamp(34px, 6vw, 58px)',
-              fontWeight: 800,
-              margin: 0,
-              color: '#111827',
-              lineHeight: 1.03,
-              wordBreak: 'break-word',
-            }}
-          >
-            {t.brand}
-          </h1>
-
-          <p
-            style={{
-              marginTop: 10,
-              marginBottom: 0,
-              color: '#6b7280',
-              fontSize: 'clamp(15px, 2.4vw, 18px)',
-              fontWeight: 500,
-            }}
-          >
-            {t.slogan}
-          </p>
         </section>
 
         <div className="agnopol-tabs">
