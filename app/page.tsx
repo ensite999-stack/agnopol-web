@@ -354,31 +354,33 @@ export default function Page() {
     return {
       flex: 1,
       minWidth: 0,
-      padding: '14px 16px',
-      borderRadius: 16,
-      border: active ? '1px solid #07163f' : '1px solid #d1d5db',
+      padding: '12px 14px',
+      borderRadius: 14,
+      border: active ? '1px solid #07163f' : '1px solid #d7dbe3',
       background: active ? '#07163f' : '#ffffff',
       color: active ? '#ffffff' : '#111827',
       fontWeight: 800,
       fontSize: 16,
       cursor: 'pointer',
+      boxShadow: active ? 'none' : '0 2px 10px rgba(15, 23, 42, 0.03)',
     }
   }
 
   function planCardStyle(active: boolean): React.CSSProperties {
     return {
-      padding: 22,
-      borderRadius: 22,
-      border: active ? '1px solid #07163f' : '1px solid #d1d5db',
+      padding: 18,
+      borderRadius: 18,
+      border: active ? '1px solid #07163f' : '1px solid #d7dbe3',
       background: active ? '#07163f' : '#ffffff',
       color: active ? '#ffffff' : '#111827',
       cursor: 'pointer',
-      minHeight: 148,
+      minHeight: 112,
       display: 'flex',
       flexDirection: 'column',
       justifyContent: 'space-between',
       boxSizing: 'border-box',
       transition: 'all 0.2s ease',
+      boxShadow: active ? 'none' : '0 6px 18px rgba(15, 23, 42, 0.04)',
     }
   }
 
@@ -387,9 +389,10 @@ export default function Page() {
       style={{
         width: '100%',
         boxSizing: 'border-box',
-        padding: '20px 16px 40px',
+        padding: '18px 14px 34px',
         fontFamily: 'system-ui, Arial, sans-serif',
-        background: '#ffffff',
+        background: '#f7f8fa',
+        minHeight: '100vh',
       }}
     >
       <style>{`
@@ -403,8 +406,8 @@ export default function Page() {
           display: flex;
           justify-content: space-between;
           align-items: flex-start;
-          gap: 12px;
-          margin-bottom: 26px;
+          gap: 10px;
+          margin-bottom: 20px;
         }
 
         .agnopol-brand {
@@ -413,20 +416,20 @@ export default function Page() {
         }
 
         .agnopol-lang {
-          width: 110px;
-          flex: 0 0 110px;
+          width: 86px;
+          flex: 0 0 86px;
         }
 
         .agnopol-tabs {
           display: flex;
-          gap: 12px;
-          margin-bottom: 18px;
+          gap: 10px;
+          margin-bottom: 14px;
         }
 
         .agnopol-plan-grid {
           display: grid;
           grid-template-columns: 1fr;
-          gap: 14px;
+          gap: 12px;
         }
 
         @media (min-width: 900px) {
@@ -437,8 +440,8 @@ export default function Page() {
 
         @media (max-width: 640px) {
           .agnopol-lang {
-            width: 104px;
-            flex: 0 0 104px;
+            width: 82px;
+            flex: 0 0 82px;
           }
         }
       `}</style>
@@ -448,12 +451,12 @@ export default function Page() {
           <div className="agnopol-brand">
             <h1
               style={{
-                fontSize: 'clamp(48px, 9vw, 84px)',
+                fontSize: 'clamp(54px, 10vw, 90px)',
                 fontWeight: 900,
                 margin: 0,
                 color: '#111827',
-                lineHeight: 1,
-                letterSpacing: '-0.04em',
+                lineHeight: 0.94,
+                letterSpacing: '-0.05em',
                 wordBreak: 'break-word',
               }}
             >
@@ -465,7 +468,7 @@ export default function Page() {
                 marginTop: 8,
                 marginBottom: 0,
                 color: '#6b7280',
-                fontSize: 'clamp(14px, 2vw, 18px)',
+                fontSize: 'clamp(14px, 1.8vw, 18px)',
                 fontWeight: 500,
               }}
             >
@@ -477,16 +480,19 @@ export default function Page() {
             <select
               value={lang}
               onChange={(e) => setLang(e.target.value as LangType)}
+              aria-label="Language"
+              title="Language"
               style={{
                 width: '100%',
-                height: 38,
-                padding: '4px 8px',
+                height: 34,
+                padding: '0 8px',
                 borderRadius: 10,
-                border: '1px solid #d1d5db',
+                border: '1px solid #d7dbe3',
                 background: '#ffffff',
-                fontSize: 12,
+                fontSize: 11,
                 color: '#374151',
                 boxSizing: 'border-box',
+                boxShadow: '0 2px 10px rgba(15, 23, 42, 0.03)',
               }}
             >
               {languageOptions.map((item) => (
@@ -520,9 +526,9 @@ export default function Page() {
           <>
             <p
               style={{
-                fontSize: 'clamp(18px, 2.4vw, 24px)',
+                fontSize: 'clamp(18px, 2.2vw, 22px)',
                 marginTop: 0,
-                marginBottom: 14,
+                marginBottom: 12,
                 color: '#4b5563',
               }}
             >
@@ -534,8 +540,8 @@ export default function Page() {
                 onClick={() => setDuration('3m')}
                 style={planCardStyle(duration === '3m')}
               >
-                <div style={{ fontSize: 20, fontWeight: 800 }}>{t.plan3m}</div>
-                <div style={{ marginTop: 16, fontSize: 24, fontWeight: 900 }}>
+                <div style={{ fontSize: 18, fontWeight: 800 }}>{t.plan3m}</div>
+                <div style={{ marginTop: 12, fontSize: 22, fontWeight: 900 }}>
                   ${prices ? prices.tg_premium_3m : t.loading}
                 </div>
               </div>
@@ -544,8 +550,8 @@ export default function Page() {
                 onClick={() => setDuration('6m')}
                 style={planCardStyle(duration === '6m')}
               >
-                <div style={{ fontSize: 20, fontWeight: 800 }}>{t.plan6m}</div>
-                <div style={{ marginTop: 16, fontSize: 24, fontWeight: 900 }}>
+                <div style={{ fontSize: 18, fontWeight: 800 }}>{t.plan6m}</div>
+                <div style={{ marginTop: 12, fontSize: 22, fontWeight: 900 }}>
                   ${prices ? prices.tg_premium_6m : t.loading}
                 </div>
               </div>
@@ -554,8 +560,8 @@ export default function Page() {
                 onClick={() => setDuration('12m')}
                 style={planCardStyle(duration === '12m')}
               >
-                <div style={{ fontSize: 20, fontWeight: 800 }}>{t.plan12m}</div>
-                <div style={{ marginTop: 16, fontSize: 24, fontWeight: 900 }}>
+                <div style={{ fontSize: 18, fontWeight: 800 }}>{t.plan12m}</div>
+                <div style={{ marginTop: 12, fontSize: 22, fontWeight: 900 }}>
                   ${prices ? prices.tg_premium_12m : t.loading}
                 </div>
               </div>
@@ -565,9 +571,9 @@ export default function Page() {
           <>
             <p
               style={{
-                fontSize: 'clamp(18px, 2.4vw, 24px)',
+                fontSize: 'clamp(18px, 2.2vw, 22px)',
                 marginTop: 0,
-                marginBottom: 14,
+                marginBottom: 12,
                 color: '#4b5563',
               }}
             >
@@ -576,17 +582,18 @@ export default function Page() {
 
             <div
               style={{
-                padding: 18,
-                borderRadius: 22,
-                border: '1px solid #d1d5db',
+                padding: 16,
+                borderRadius: 18,
+                border: '1px solid #d7dbe3',
                 background: '#ffffff',
+                boxShadow: '0 6px 18px rgba(15, 23, 42, 0.04)',
               }}
             >
               <div
                 style={{
-                  fontSize: 18,
+                  fontSize: 17,
                   fontWeight: 800,
-                  marginBottom: 12,
+                  marginBottom: 10,
                   color: '#111827',
                 }}
               >
@@ -603,14 +610,15 @@ export default function Page() {
                 style={{
                   width: '100%',
                   boxSizing: 'border-box',
-                  padding: 14,
-                  borderRadius: 14,
+                  padding: 13,
+                  borderRadius: 12,
                   border: '1px solid #d1d5db',
                   fontSize: 16,
+                  background: '#fff',
                 }}
               />
 
-              <div style={{ marginTop: 12, fontSize: 13, color: '#6b7280' }}>
+              <div style={{ marginTop: 10, fontSize: 13, color: '#6b7280' }}>
                 {t.starsMinHint}
               </div>
               <div style={{ marginTop: 4, fontSize: 13, color: '#6b7280' }}>
@@ -622,11 +630,12 @@ export default function Page() {
 
         <div
           style={{
-            marginTop: 20,
-            padding: 20,
-            borderRadius: 22,
+            marginTop: 18,
+            padding: 18,
+            borderRadius: 18,
             border: '1px solid #e5e7eb',
-            background: '#f8fafc',
+            background: '#fbfcfe',
+            boxShadow: '0 6px 18px rgba(15, 23, 42, 0.035)',
           }}
         >
           <div style={{ fontSize: 14, color: '#6b7280', marginBottom: 8 }}>
@@ -635,7 +644,7 @@ export default function Page() {
 
           <div
             style={{
-              fontSize: 'clamp(20px, 3vw, 28px)',
+              fontSize: 'clamp(19px, 3vw, 26px)',
               fontWeight: 800,
               color: '#111827',
             }}
@@ -645,8 +654,8 @@ export default function Page() {
 
           <div
             style={{
-              marginTop: 10,
-              fontSize: 'clamp(34px, 5vw, 48px)',
+              marginTop: 8,
+              fontSize: 'clamp(32px, 5vw, 44px)',
               fontWeight: 900,
               color: '#111827',
               lineHeight: 1,
@@ -661,25 +670,27 @@ export default function Page() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           style={{
-            marginTop: 20,
+            marginTop: 18,
             width: '100%',
             boxSizing: 'border-box',
-            padding: 15,
-            borderRadius: 14,
+            padding: 14,
+            borderRadius: 12,
             border: '1px solid #d1d5db',
             fontSize: 16,
+            background: '#fff',
+            boxShadow: '0 2px 10px rgba(15, 23, 42, 0.02)',
           }}
         />
 
         <button
           onClick={handleCreateOrder}
           style={{
-            marginTop: 18,
+            marginTop: 16,
             width: '100%',
-            padding: 16,
+            padding: 15,
             background: '#07163f',
             color: '#ffffff',
-            borderRadius: 16,
+            borderRadius: 14,
             border: 'none',
             fontWeight: 900,
             fontSize: 16,
@@ -691,8 +702,8 @@ export default function Page() {
 
         <footer
           style={{
-            marginTop: 34,
-            paddingTop: 18,
+            marginTop: 30,
+            paddingTop: 16,
             borderTop: '1px solid #e5e7eb',
             fontSize: 12,
             color: '#6b7280',
