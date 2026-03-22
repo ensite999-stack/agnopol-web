@@ -356,13 +356,14 @@ export default function Page() {
       minWidth: 0,
       padding: '12px 14px',
       borderRadius: 14,
-      border: active ? '1px solid #07163f' : '1px solid #d7dbe3',
-      background: active ? '#07163f' : '#ffffff',
-      color: active ? '#ffffff' : '#111827',
+      border: active ? '1px solid #0f234f' : '1px solid rgba(15, 23, 42, 0.08)',
+      background: active ? '#0b1733' : 'rgba(255,255,255,0.72)',
+      color: active ? '#ffffff' : '#0f172a',
       fontWeight: 800,
-      fontSize: 16,
+      fontSize: 15,
       cursor: 'pointer',
-      boxShadow: active ? 'none' : '0 2px 10px rgba(15, 23, 42, 0.03)',
+      boxShadow: active ? '0 8px 24px rgba(11, 23, 51, 0.16)' : '0 4px 18px rgba(15, 23, 42, 0.04)',
+      backdropFilter: 'blur(10px)',
     }
   }
 
@@ -370,17 +371,18 @@ export default function Page() {
     return {
       padding: 18,
       borderRadius: 18,
-      border: active ? '1px solid #07163f' : '1px solid #d7dbe3',
-      background: active ? '#07163f' : '#ffffff',
+      border: active ? '1px solid #0f234f' : '1px solid rgba(15, 23, 42, 0.08)',
+      background: active ? '#0b1733' : 'rgba(255,255,255,0.82)',
       color: active ? '#ffffff' : '#111827',
       cursor: 'pointer',
-      minHeight: 112,
+      minHeight: 106,
       display: 'flex',
       flexDirection: 'column',
       justifyContent: 'space-between',
       boxSizing: 'border-box',
       transition: 'all 0.2s ease',
-      boxShadow: active ? 'none' : '0 6px 18px rgba(15, 23, 42, 0.04)',
+      boxShadow: active ? '0 10px 28px rgba(11, 23, 51, 0.18)' : '0 8px 24px rgba(15, 23, 42, 0.04)',
+      backdropFilter: 'blur(10px)',
     }
   }
 
@@ -389,9 +391,10 @@ export default function Page() {
       style={{
         width: '100%',
         boxSizing: 'border-box',
-        padding: '18px 14px 34px',
+        padding: '22px 14px 36px',
         fontFamily: 'system-ui, Arial, sans-serif',
-        background: '#f7f8fa',
+        background:
+          'radial-gradient(circle at top, rgba(224,231,255,0.45), rgba(247,248,250,0) 38%), linear-gradient(180deg, #f8fafc 0%, #f5f7fb 100%)',
         minHeight: '100vh',
       }}
     >
@@ -402,30 +405,26 @@ export default function Page() {
           margin: 0 auto;
         }
 
-        .agnopol-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: flex-start;
-          gap: 12px;
-          margin-bottom: 20px;
+        .agnopol-hero {
+          text-align: center;
+          margin-bottom: 22px;
         }
 
-        .agnopol-brand {
-          flex: 1 1 auto;
-          min-width: 0;
+        .agnopol-lang-wrap {
+          display: flex;
+          justify-content: center;
+          margin-top: 12px;
         }
 
         .agnopol-lang {
-          width: 102px;
-          flex: 0 0 102px;
-          display: flex;
-          justify-content: flex-end;
+          width: 104px;
         }
 
         .agnopol-tabs {
           display: flex;
           gap: 10px;
-          margin-bottom: 14px;
+          margin: 0 auto 14px;
+          max-width: 420px;
         }
 
         .agnopol-plan-grid {
@@ -442,67 +441,66 @@ export default function Page() {
 
         @media (max-width: 640px) {
           .agnopol-lang {
-            width: 96px;
-            flex: 0 0 96px;
+            width: 98px;
           }
         }
       `}</style>
 
       <div className="agnopol-container">
-        <section className="agnopol-header">
-          <div className="agnopol-brand">
-            <h1
-              style={{
-                fontSize: 'clamp(52px, 10vw, 88px)',
-                fontWeight: 900,
-                margin: 0,
-                color: '#111827',
-                lineHeight: 0.95,
-                letterSpacing: '-0.05em',
-                wordBreak: 'break-word',
-              }}
-            >
-              {t.brand}
-            </h1>
+        <section className="agnopol-hero">
+          <h1
+            style={{
+              fontSize: 'clamp(58px, 12vw, 108px)',
+              fontWeight: 900,
+              margin: 0,
+              color: '#0f172a',
+              lineHeight: 0.92,
+              letterSpacing: '-0.06em',
+            }}
+          >
+            {t.brand}
+          </h1>
 
-            <p
-              style={{
-                marginTop: 8,
-                marginBottom: 0,
-                color: '#6b7280',
-                fontSize: 'clamp(14px, 1.8vw, 18px)',
-                fontWeight: 500,
-              }}
-            >
-              {t.slogan}
-            </p>
-          </div>
+          <p
+            style={{
+              marginTop: 10,
+              marginBottom: 0,
+              color: '#64748b',
+              fontSize: 'clamp(14px, 2vw, 18px)',
+              fontWeight: 500,
+            }}
+          >
+            {t.slogan}
+          </p>
 
-          <div className="agnopol-lang">
-            <select
-              value={lang}
-              onChange={(e) => setLang(e.target.value as LangType)}
-              aria-label="Language"
-              title="Language"
-              style={{
-                width: '100%',
-                height: 36,
-                padding: '0 8px',
-                borderRadius: 12,
-                border: '1px solid #d7dbe3',
-                background: '#ffffff',
-                fontSize: 11,
-                color: '#374151',
-                boxSizing: 'border-box',
-                boxShadow: '0 2px 10px rgba(15, 23, 42, 0.03)',
-              }}
-            >
-              {languageOptions.map((item) => (
-                <option key={item.code} value={item.code}>
-                  {item.label}
-                </option>
-              ))}
-            </select>
+          <div className="agnopol-lang-wrap">
+            <div className="agnopol-lang">
+              <select
+                value={lang}
+                onChange={(e) => setLang(e.target.value as LangType)}
+                aria-label="Language"
+                title="Language"
+                style={{
+                  width: '100%',
+                  height: 36,
+                  padding: '0 10px',
+                  borderRadius: 999,
+                  border: '1px solid rgba(15, 23, 42, 0.08)',
+                  background: 'rgba(255,255,255,0.72)',
+                  fontSize: 11,
+                  color: '#475569',
+                  boxSizing: 'border-box',
+                  boxShadow: '0 4px 18px rgba(15, 23, 42, 0.04)',
+                  backdropFilter: 'blur(10px)',
+                }}
+              >
+                {languageOptions.map((item) => (
+                  <option key={item.code} value={item.code}>
+                    {item.label}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
         </section>
 
@@ -531,7 +529,8 @@ export default function Page() {
                 fontSize: 'clamp(18px, 2.2vw, 22px)',
                 marginTop: 0,
                 marginBottom: 12,
-                color: '#4b5563',
+                color: '#475569',
+                textAlign: 'center',
               }}
             >
               {t.premiumTitle}
@@ -543,7 +542,7 @@ export default function Page() {
                 style={planCardStyle(duration === '3m')}
               >
                 <div style={{ fontSize: 18, fontWeight: 800 }}>{t.plan3m}</div>
-                <div style={{ marginTop: 12, fontSize: 22, fontWeight: 900 }}>
+                <div style={{ marginTop: 10, fontSize: 22, fontWeight: 900 }}>
                   ${prices ? prices.tg_premium_3m : t.loading}
                 </div>
               </div>
@@ -553,7 +552,7 @@ export default function Page() {
                 style={planCardStyle(duration === '6m')}
               >
                 <div style={{ fontSize: 18, fontWeight: 800 }}>{t.plan6m}</div>
-                <div style={{ marginTop: 12, fontSize: 22, fontWeight: 900 }}>
+                <div style={{ marginTop: 10, fontSize: 22, fontWeight: 900 }}>
                   ${prices ? prices.tg_premium_6m : t.loading}
                 </div>
               </div>
@@ -563,7 +562,7 @@ export default function Page() {
                 style={planCardStyle(duration === '12m')}
               >
                 <div style={{ fontSize: 18, fontWeight: 800 }}>{t.plan12m}</div>
-                <div style={{ marginTop: 12, fontSize: 22, fontWeight: 900 }}>
+                <div style={{ marginTop: 10, fontSize: 22, fontWeight: 900 }}>
                   ${prices ? prices.tg_premium_12m : t.loading}
                 </div>
               </div>
@@ -576,7 +575,8 @@ export default function Page() {
                 fontSize: 'clamp(18px, 2.2vw, 22px)',
                 marginTop: 0,
                 marginBottom: 12,
-                color: '#4b5563',
+                color: '#475569',
+                textAlign: 'center',
               }}
             >
               {t.starsTitle}
@@ -586,9 +586,12 @@ export default function Page() {
               style={{
                 padding: 16,
                 borderRadius: 18,
-                border: '1px solid #d7dbe3',
-                background: '#ffffff',
-                boxShadow: '0 6px 18px rgba(15, 23, 42, 0.04)',
+                border: '1px solid rgba(15, 23, 42, 0.08)',
+                background: 'rgba(255,255,255,0.82)',
+                boxShadow: '0 8px 24px rgba(15, 23, 42, 0.04)',
+                backdropFilter: 'blur(10px)',
+                maxWidth: 720,
+                margin: '0 auto',
               }}
             >
               <div
@@ -635,9 +638,13 @@ export default function Page() {
             marginTop: 18,
             padding: 18,
             borderRadius: 18,
-            border: '1px solid #e5e7eb',
-            background: '#fbfcfe',
-            boxShadow: '0 6px 18px rgba(15, 23, 42, 0.035)',
+            border: '1px solid rgba(15, 23, 42, 0.07)',
+            background: 'rgba(255,255,255,0.78)',
+            boxShadow: '0 8px 24px rgba(15, 23, 42, 0.035)',
+            backdropFilter: 'blur(10px)',
+            maxWidth: 760,
+            marginLeft: 'auto',
+            marginRight: 'auto',
           }}
         >
           <div style={{ fontSize: 14, color: '#6b7280', marginBottom: 8 }}>
@@ -667,40 +674,43 @@ export default function Page() {
           </div>
         </div>
 
-        <input
-          placeholder={t.emailPlaceholder}
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          style={{
-            marginTop: 18,
-            width: '100%',
-            boxSizing: 'border-box',
-            padding: 14,
-            borderRadius: 12,
-            border: '1px solid #d1d5db',
-            fontSize: 16,
-            background: '#fff',
-            boxShadow: '0 2px 10px rgba(15, 23, 42, 0.02)',
-          }}
-        />
+        <div style={{ maxWidth: 760, margin: '0 auto' }}>
+          <input
+            placeholder={t.emailPlaceholder}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            style={{
+              marginTop: 18,
+              width: '100%',
+              boxSizing: 'border-box',
+              padding: 14,
+              borderRadius: 12,
+              border: '1px solid #d1d5db',
+              fontSize: 16,
+              background: '#fff',
+              boxShadow: '0 2px 10px rgba(15, 23, 42, 0.02)',
+            }}
+          />
 
-        <button
-          onClick={handleCreateOrder}
-          style={{
-            marginTop: 16,
-            width: '100%',
-            padding: 15,
-            background: '#07163f',
-            color: '#ffffff',
-            borderRadius: 14,
-            border: 'none',
-            fontWeight: 900,
-            fontSize: 16,
-            cursor: 'pointer',
-          }}
-        >
-          {t.createOrder}
-        </button>
+          <button
+            onClick={handleCreateOrder}
+            style={{
+              marginTop: 16,
+              width: '100%',
+              padding: 15,
+              background: '#07163f',
+              color: '#ffffff',
+              borderRadius: 14,
+              border: 'none',
+              fontWeight: 900,
+              fontSize: 16,
+              cursor: 'pointer',
+              boxShadow: '0 10px 26px rgba(7, 22, 63, 0.18)',
+            }}
+          >
+            {t.createOrder}
+          </button>
+        </div>
 
         <footer
           style={{
@@ -710,6 +720,9 @@ export default function Page() {
             fontSize: 12,
             color: '#6b7280',
             lineHeight: 1.75,
+            maxWidth: 760,
+            marginLeft: 'auto',
+            marginRight: 'auto',
           }}
         >
           <p>{t.rights.replace('{year}', String(currentYear))}</p>
