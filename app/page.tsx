@@ -26,6 +26,13 @@ const languageOptions: { code: LangType; label: string }[] = [
   { code: 'zh-tw', label: '繁體中文' },
 ]
 
+const prices = {
+  tg_premium_3m: 13.1,
+  tg_premium_6m: 17.1,
+  tg_premium_12m: 31.1,
+  tg_stars_rate: 0.02,
+}
+
 const messages: Record<
   LangType,
   {
@@ -39,7 +46,7 @@ const messages: Record<
     plan6m: string
     plan12m: string
     currentSelection: string
-    tgUsernamePlaceholder: string
+    usernamePlaceholder: string
     emailPlaceholder: string
     createOrder: string
     starsInputLabel: string
@@ -65,9 +72,9 @@ const messages: Record<
     plan6m: '6 Monate',
     plan12m: '12 Monate',
     currentSelection: 'Aktuelle Auswahl',
-    tgUsernamePlaceholder: 'Telegram Username',
+    usernamePlaceholder: 'Telegram Username',
     emailPlaceholder: 'E-Mail',
-    createOrder: 'Bestellung erstellen',
+    createOrder: 'Create Order',
     starsInputLabel: 'Stars Menge',
     starsInputPlaceholder: 'Mindestens 50',
     starsMinHint: 'Mindestbestellmenge: 50 Stars',
@@ -90,7 +97,7 @@ const messages: Record<
     plan6m: '6 Months',
     plan12m: '12 Months',
     currentSelection: 'Current Selection',
-    tgUsernamePlaceholder: 'Telegram Username',
+    usernamePlaceholder: 'Telegram Username',
     emailPlaceholder: 'Email',
     createOrder: 'Create Order',
     starsInputLabel: 'Stars Amount',
@@ -115,9 +122,9 @@ const messages: Record<
     plan6m: '6 Meses',
     plan12m: '12 Meses',
     currentSelection: 'Selección actual',
-    tgUsernamePlaceholder: 'Telegram Username',
+    usernamePlaceholder: 'Telegram Username',
     emailPlaceholder: 'Correo electrónico',
-    createOrder: 'Crear pedido',
+    createOrder: 'Create Order',
     starsInputLabel: 'Cantidad de Stars',
     starsInputPlaceholder: 'Mínimo 50',
     starsMinHint: 'Pedido mínimo: 50 stars',
@@ -140,9 +147,9 @@ const messages: Record<
     plan6m: '6 Mois',
     plan12m: '12 Mois',
     currentSelection: 'Sélection actuelle',
-    tgUsernamePlaceholder: 'Telegram Username',
+    usernamePlaceholder: 'Telegram Username',
     emailPlaceholder: 'E-mail',
-    createOrder: 'Créer la commande',
+    createOrder: 'Create Order',
     starsInputLabel: 'Quantité de Stars',
     starsInputPlaceholder: 'Minimum 50',
     starsMinHint: 'Commande minimum : 50 stars',
@@ -165,9 +172,9 @@ const messages: Record<
     plan6m: '6か月',
     plan12m: '12か月',
     currentSelection: '現在の選択',
-    tgUsernamePlaceholder: 'Telegram ユーザー名',
+    usernamePlaceholder: 'Telegram ユーザー名',
     emailPlaceholder: 'メールアドレス',
-    createOrder: '注文を作成',
+    createOrder: 'Create Order',
     starsInputLabel: 'Stars 数量',
     starsInputPlaceholder: '最低 50',
     starsMinHint: '最低注文数：50 Stars',
@@ -190,9 +197,9 @@ const messages: Record<
     plan6m: '6개월',
     plan12m: '12개월',
     currentSelection: '현재 선택',
-    tgUsernamePlaceholder: 'Telegram 사용자 이름',
+    usernamePlaceholder: 'Telegram 사용자 이름',
     emailPlaceholder: '이메일',
-    createOrder: '주문 생성',
+    createOrder: 'Create Order',
     starsInputLabel: 'Stars 수량',
     starsInputPlaceholder: '최소 50',
     starsMinHint: '최소 주문: 50 stars',
@@ -215,7 +222,7 @@ const messages: Record<
     plan6m: '6个月',
     plan12m: '12个月',
     currentSelection: '当前选择',
-    tgUsernamePlaceholder: 'TG 用户名（如 @username）',
+    usernamePlaceholder: 'TG 用户名（如 @username）',
     emailPlaceholder: '电子邮件',
     createOrder: '创建订单',
     starsInputLabel: 'Stars 数量',
@@ -240,7 +247,7 @@ const messages: Record<
     plan6m: '6個月',
     plan12m: '12個月',
     currentSelection: '目前選擇',
-    tgUsernamePlaceholder: 'TG 用戶名（如 @username）',
+    usernamePlaceholder: 'TG 用戶名（如 @username）',
     emailPlaceholder: '電子郵件',
     createOrder: '建立訂單',
     starsInputLabel: 'Stars 數量',
@@ -254,13 +261,6 @@ const messages: Record<
     footerPrivacy: '隱私政策',
     footerRisk: '風險披露',
   },
-}
-
-const prices = {
-  tg_premium_3m: 13.1,
-  tg_premium_6m: 17.1,
-  tg_premium_12m: 31.1,
-  tg_stars_rate: 0.02,
 }
 
 export default function Page() {
@@ -581,7 +581,9 @@ export default function Page() {
             marginRight: 'auto',
           }}
         >
-          <div style={{ fontSize: 14, color: '#6b7280', marginBottom: 8 }}>{t.currentSelection}</div>
+          <div style={{ fontSize: 14, color: '#6b7280', marginBottom: 8 }}>
+            {t.currentSelection}
+          </div>
 
           <div
             style={{
@@ -608,7 +610,7 @@ export default function Page() {
 
         <div style={{ maxWidth: 760, margin: '0 auto' }}>
           <input
-            placeholder={t.tgUsernamePlaceholder}
+            placeholder={t.usernamePlaceholder}
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             style={{
