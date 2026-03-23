@@ -1,9 +1,9 @@
 'use client'
 
 import { useMemo, useState, type CSSProperties } from 'react'
-import { useI18n } from '@/components/language-provider'
-import LanguageSwitcher from '@/components/language-switcher'
-import { withLang } from '@/lib/i18n'
+import { useI18n } from '../components/language-provider'
+import LanguageSwitcher from '../components/language-switcher'
+import { withLang, type Messages } from '../lib/i18n'
 
 type ProductType = 'premium' | 'stars'
 type DurationType = '3m' | '6m' | '12m'
@@ -28,7 +28,7 @@ const prices = {
   tg_stars_rate: 0.02,
 }
 
-function getStatusLabel(status: string | null | undefined, t: ReturnType<typeof useI18n>['t']) {
+function getStatusLabel(status: string | null | undefined, t: Messages) {
   const value = String(status || '').toLowerCase()
   if (value === 'pending') return t.lookup.pending
   if (value === 'processing') return t.lookup.processing
@@ -181,8 +181,8 @@ export default function HomePage() {
     return `${t.home.tgStars} ${safeStars}`
   }, [tab, duration, safeStars, t])
 
-  function topTabStyle(active: boolean): CSSProperties {
-    return active ? { } : { }
+  function topTabStyle(_active: boolean): CSSProperties {
+    return {}
   }
 
   function goPay() {
@@ -351,9 +351,7 @@ export default function HomePage() {
 
           <p style={{ marginTop: 4 }}>
             <span style={{ marginRight: 6 }}>{t.common.officialEmail}:</span>
-            <a href="mailto:hello@agnopol.com">
-              hello@agnopol.com
-            </a>
+            <a href="mailto:hello@agnopol.com">hello@agnopol.com</a>
           </p>
 
           <div className="footer-links">
