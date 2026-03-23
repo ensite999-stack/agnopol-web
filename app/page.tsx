@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState, type CSSProperties } from 'react'
+import { useEffect, useMemo, useState, type CSSProperties } from 'react'
 
 type LangType =
   | 'de'
@@ -59,6 +59,7 @@ type HomeText = {
   lookupButton: string
   lookupLoading: string
   lookupNotFound: string
+  lookupEmail: string
   lookupOrderNo: string
   lookupStatus: string
   lookupProduct: string
@@ -116,11 +117,12 @@ const homeEn: HomeText = {
   footerRisk: 'Risk Disclosure',
   officialEmail: 'Official Email',
   lookupTitle: 'Order Lookup',
-  lookupSubtitle: 'Enter your order number to check the latest status.',
-  lookupPlaceholder: 'Enter order number, e.g. APXXXXXX',
-  lookupButton: 'Check Order',
+  lookupSubtitle: 'Enter your email to check recent order records.',
+  lookupPlaceholder: 'Enter your email',
+  lookupButton: 'Check Orders',
   lookupLoading: 'Checking...',
-  lookupNotFound: 'Order not found.',
+  lookupNotFound: 'No orders found for this email.',
+  lookupEmail: 'Email',
   lookupOrderNo: 'Order No',
   lookupStatus: 'Status',
   lookupProduct: 'Product',
@@ -160,11 +162,12 @@ const homeZhCn: HomeText = {
   footerRisk: '风险披露',
   officialEmail: '官方邮箱',
   lookupTitle: '订单查询',
-  lookupSubtitle: '输入订单号，查看最新处理状态。',
-  lookupPlaceholder: '输入订单号，例如 APXXXXXX',
+  lookupSubtitle: '输入邮箱，查看该邮箱下最近订单记录。',
+  lookupPlaceholder: '输入下单邮箱',
   lookupButton: '查询订单',
   lookupLoading: '查询中...',
-  lookupNotFound: '未找到该订单。',
+  lookupNotFound: '该邮箱下未找到订单。',
+  lookupEmail: '邮箱',
   lookupOrderNo: '订单号',
   lookupStatus: '状态',
   lookupProduct: '产品',
@@ -204,11 +207,12 @@ const homeZhTw: HomeText = {
   footerRisk: '風險披露',
   officialEmail: '官方郵箱',
   lookupTitle: '訂單查詢',
-  lookupSubtitle: '輸入訂單號，查看最新處理狀態。',
-  lookupPlaceholder: '輸入訂單號，例如 APXXXXXX',
+  lookupSubtitle: '輸入電子郵件，查看該郵箱下最近訂單記錄。',
+  lookupPlaceholder: '輸入下單電子郵件',
   lookupButton: '查詢訂單',
   lookupLoading: '查詢中...',
-  lookupNotFound: '未找到該訂單。',
+  lookupNotFound: '該郵箱下未找到訂單。',
+  lookupEmail: '電子郵件',
   lookupOrderNo: '訂單號',
   lookupStatus: '狀態',
   lookupProduct: '產品',
@@ -242,34 +246,34 @@ function getStatusLabel(status: string | null | undefined, t: HomeText) {
   return status || '-'
 }
 
-function OrderLookupSection({ lang, t }: { lang: LangType; t: HomeText }) {
-  const [orderNo, setOrderNo] = useState('')
+function OrderLookupSection({ t }: { t: HomeText }) {
+  const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
   const [errorText, setErrorText] = useState('')
-  const [result, setResult] = useState<OrderResult | null>(null)
+  const [results, setResults] = useState<OrderResult[]>([])
 
-  const productLabel = useMemo(() => {
-    if (!result) return '-'
-    if (result.product_type === 'tg_stars') {
-      return `${t.selectedStars} ${result.stars_amount ?? 0}`
+  function getProductLabel(item: OrderResult) {
+    if (item.product_type === 'tg_stars') {
+      return `${t.selectedStars} ${item.stars_amount ?? 0}`
     }
-    if (result.duration === '3m') return `${t.selectedPremium} ${t.plan3m}`
-    if (result.duration === '6m') return `${t.selectedPremium} ${t.plan6m}`
+    if (item.duration === '3m') return `${t.selectedPremium} ${t.plan3m}`
+    if (item.duration === '6m') return `${t.selectedPremium} ${t.plan6m}`
     return `${t.selectedPremium} ${t.plan12m}`
-  }, [result, t])
+  }
 
   async function handleLookup() {
     setLoading(true)
     setErrorText('')
-    setResult(null)
+    setResults([])
 
     try {
-      const response = await fetch('/api/queryOrder', {
+      const response = await fetch(`${window.location.origin}/api/queryOrder`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          order_no: orderNo.trim().toUpperCase(),
+          email: email.trim(),
         }),
+        cache: 'no-store',
       })
 
       const data = await response.json()
@@ -278,7 +282,7 @@ function OrderLookupSection({ lang, t }: { lang: LangType; t: HomeText }) {
         throw new Error(data?.error || t.lookupNotFound)
       }
 
-      setResult(data.order)
+      setResults(data.orders || [])
     } catch (error) {
       setErrorText(error instanceof Error ? error.message : t.lookupNotFound)
     } finally {
@@ -321,8 +325,8 @@ function OrderLookupSection({ lang, t }: { lang: LangType; t: HomeText }) {
       </div>
 
       <input
-        value={orderNo}
-        onChange={(e) => setOrderNo(e.target.value)}
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
         placeholder={t.lookupPlaceholder}
         style={{
           width: '100%',
@@ -368,30 +372,41 @@ function OrderLookupSection({ lang, t }: { lang: LangType; t: HomeText }) {
         </div>
       ) : null}
 
-      {result ? (
+      {results.length > 0 ? (
         <div
           style={{
             marginTop: 14,
-            padding: 16,
-            borderRadius: 16,
-            background: 'rgba(15, 23, 42, 0.035)',
-            border: '1px solid rgba(15, 23, 42, 0.06)',
             display: 'grid',
-            gap: 10,
+            gap: 12,
           }}
         >
-          <div><strong>{t.lookupOrderNo}:</strong> {result.order_no}</div>
-          <div><strong>{t.lookupStatus}:</strong> {getStatusLabel(result.status, t)}</div>
-          <div><strong>{t.lookupProduct}:</strong> {productLabel}</div>
-          <div><strong>{t.lookupAmount}:</strong> ${result.price_usd ?? result.amount ?? 0}</div>
-          <div><strong>{t.lookupNetwork}:</strong> {result.payment_network || '-'}</div>
-          <div>
-            <strong>{t.lookupCreatedAt}:</strong>{' '}
-            {result.created_at ? new Date(result.created_at).toLocaleString() : '-'}
-          </div>
-          {result.admin_note ? (
-            <div><strong>{t.lookupNote}:</strong> {result.admin_note}</div>
-          ) : null}
+          {results.map((item) => (
+            <div
+              key={item.order_no}
+              style={{
+                padding: 16,
+                borderRadius: 16,
+                background: 'rgba(15, 23, 42, 0.035)',
+                border: '1px solid rgba(15, 23, 42, 0.06)',
+                display: 'grid',
+                gap: 8,
+              }}
+            >
+              <div><strong>{t.lookupOrderNo}:</strong> {item.order_no}</div>
+              <div><strong>{t.lookupEmail}:</strong> {email}</div>
+              <div><strong>{t.lookupStatus}:</strong> {getStatusLabel(item.status, t)}</div>
+              <div><strong>{t.lookupProduct}:</strong> {getProductLabel(item)}</div>
+              <div><strong>{t.lookupAmount}:</strong> ${item.price_usd ?? item.amount ?? 0}</div>
+              <div><strong>{t.lookupNetwork}:</strong> {item.payment_network || '-'}</div>
+              <div>
+                <strong>{t.lookupCreatedAt}:</strong>{' '}
+                {item.created_at ? new Date(item.created_at).toLocaleString() : '-'}
+              </div>
+              {item.admin_note ? (
+                <div><strong>{t.lookupNote}:</strong> {item.admin_note}</div>
+              ) : null}
+            </div>
+          ))}
         </div>
       ) : null}
     </section>
@@ -405,6 +420,20 @@ export default function Page() {
   const [stars, setStars] = useState(50)
   const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
+
+  useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search)
+    const queryLang = searchParams.get('lang') as LangType | null
+    if (queryLang && messages[queryLang]) {
+      setLang(queryLang)
+    }
+  }, [])
+
+  useEffect(() => {
+    const url = new URL(window.location.href)
+    url.searchParams.set('lang', lang)
+    window.history.replaceState({}, '', url.toString())
+  }, [lang])
 
   const t = messages[lang]
   const currentYear = new Date().getFullYear()
@@ -830,7 +859,7 @@ export default function Page() {
         </div>
 
         <div style={{ marginTop: 28 }}>
-          <OrderLookupSection lang={lang} t={t} />
+          <OrderLookupSection t={t} />
         </div>
 
         <footer
