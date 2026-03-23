@@ -15,15 +15,23 @@ type PayParams = {
   priceUsd: string
 }
 
-const NETWORKS: Record<PaymentNetwork, { label: string; address: string }> = {
-  trc20_usdt: {
-    label: 'TRC20 USDT',
-    address: 'TD6sQK9NmqxKzP6WHvmUdkHQRZvwX6Cy1e',
-  },
-  base_usdc: {
-    label: 'Base USDC',
-    address: '0x21E43Ddaa992A0B5cfcCeFE98838239b9E91B40E',
-  },
+type PublicConfig = {
+  premium_3m_price: number
+  premium_6m_price: number
+  premium_12m_price: number
+  stars_rate: number
+  trc20_address: string
+  base_address: string
+  updated_at?: string
+}
+
+const defaultConfig: PublicConfig = {
+  premium_3m_price: 13.1,
+  premium_6m_price: 17.1,
+  premium_12m_price: 31.1,
+  stars_rate: 0.02,
+  trc20_address: 'TD6sQK9NmqxKzP6WHvmUdkHQRZvwX6Cy1e',
+  base_address: '0x21E43Ddaa992A0B5cfcCeFE98838239b9E91B40E',
 }
 
 function getQueryParams(): PayParams {
@@ -52,6 +60,7 @@ function getQueryParams(): PayParams {
 
 export default function PayPage() {
   const { lang, t } = useI18n()
+
   const [params, setParams] = useState<PayParams>({
     username: '',
     email: '',
@@ -61,6 +70,8 @@ export default function PayPage() {
     priceUsd: '0',
   })
 
+  const [config, setConfig] = useState<PublicConfig>(defaultConfig)
+  const [configError, setConfigError] = useState('')
   const [ready, setReady] = useState(false)
   const [selectedNetwork, setSelectedNetwork] = useState<PaymentNetwork>('trc20_usdt')
   const [copiedNetwork, setCopiedNetwork] = useState<PaymentNetwork | null>(null)
@@ -74,11 +85,53 @@ export default function PayPage() {
   const fileRef = useRef<HTMLInputElement | null>(null)
 
   useEffect(() => {
-    setParams(getQueryParams())
-    setReady(true)
+    let active = true
+
+    async function boot() {
+      setParams(getQueryParams())
+
+      try {
+        const response = await fetch('/api/public/config', {
+          cache: 'no-store',
+        })
+        const data = await response.json()
+
+        if (!response.ok) {
+          throw new Error(data?.error || 'Failed to load config')
+        }
+
+        if (active && data?.item) {
+          setConfig({
+            premium_3m_price: Number(data.item.premium_3m_price ?? defaultConfig.premium_3m_price),
+            premium_6m_price: Number(data.item.premium_6m_price ?? defaultConfig.premium_6m_price),
+            premium_12m_price: Number(data.item.premium_12m_price ?? defaultConfig.premium_12m_price),
+            stars_rate: Number(data.item.stars_rate ?? defaultConfig.stars_rate),
+            trc20_address: String(data.item.trc20_address ?? defaultConfig.trc20_address),
+            base_address: String(data.item.base_address ?? defaultConfig.base_address),
+            updated_at: data.item.updated_at,
+          })
+        }
+      } catch (error) {
+        if (active) {
+          setConfigError(error instanceof Error ? error.message : 'Failed to load config')
+          setConfig(defaultConfig)
+        }
+      } finally {
+        if (active) {
+          setReady(true)
+        }
+      }
+    }
+
+    boot()
+
+    return () => {
+      active = false
+    }
   }, [])
 
-  const selectedAddress = NETWORKS[selectedNetwork].address
+  const networkAddress =
+    selectedNetwork === 'trc20_usdt' ? config.trc20_address : config.base_address
 
   const productLabel = useMemo(() => {
     if (params.productType === 'tg_stars') {
@@ -136,12 +189,12 @@ export default function PayPage() {
         stars_amount: params.productType === 'tg_stars' ? Number(params.starsAmount) : null,
         price_usd: Number(params.priceUsd),
         payment_network: selectedNetwork,
-        payment_address: selectedAddress,
+        payment_address: networkAddress,
         proof_image_base64: proofBase64 || null,
         tx_hash: txHash.trim() || null,
       }
 
-      const response = await fetch(`${window.location.origin}/api/createOrder`, {
+      const response = await fetch('/api/createOrder', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -212,6 +265,12 @@ export default function PayPage() {
             {t.pay.subtitle}
           </p>
         </header>
+
+        {configError ? (
+          <div className="status-box-error" style={{ maxWidth: 1120, margin: '0 auto 16px' }}>
+            {configError}
+          </div>
+        ) : null}
 
         <div className="two-col">
           <section className="card">
@@ -340,13 +399,13 @@ export default function PayPage() {
                       : '1px solid rgba(15, 23, 42, 0.08)',
                 }}
               >
-                {selectedAddress}
+                {networkAddress}
               </div>
 
               <button
                 type="button"
                 className="btn-secondary"
-                onClick={() => handleCopy(selectedAddress, selectedNetwork)}
+                onClick={() => handleCopy(networkAddress, selectedNetwork)}
                 style={{ marginTop: 10 }}
               >
                 {copiedNetwork === selectedNetwork ? `${t.common.copied} ✓` : t.common.copy}
