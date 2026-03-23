@@ -35,17 +35,11 @@ export async function POST(req: Request) {
       : null
 
     if (!email || !orderNo) {
-      return noStoreJson(
-        { error: 'Email and order number are required.' },
-        { status: 400 }
-      )
+      return noStoreJson({ error: 'Email and order number are required.' }, { status: 400 })
     }
 
     if (!txHash && !proofImageBase64) {
-      return noStoreJson(
-        { error: '请上传付款截图或填写交易哈希。' },
-        { status: 400 }
-      )
+      return noStoreJson({ error: '请上传付款截图或填写交易哈希。' }, { status: 400 })
     }
 
     const { data: existing, error: findError } = await supabase
@@ -89,9 +83,7 @@ export async function POST(req: Request) {
     })
   } catch (error) {
     return noStoreJson(
-      {
-        error: error instanceof Error ? error.message : 'Server error',
-      },
+      { error: error instanceof Error ? error.message : 'Server error' },
       { status: 500 }
     )
   }
