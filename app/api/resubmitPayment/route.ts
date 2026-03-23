@@ -43,7 +43,7 @@ export async function POST(req: Request) {
 
     if (!txHash && !proofImageBase64) {
       return noStoreJson(
-        { error: 'Please upload payment proof or provide a transaction hash.' },
+        { error: '请上传付款截图或填写交易哈希。' },
         { status: 400 }
       )
     }
@@ -66,8 +66,7 @@ export async function POST(req: Request) {
     const patch: Record<string, any> = {
       updated_at: new Date().toISOString(),
       status: 'paid',
-      public_note:
-        'Your updated payment proof has been received. The order is back in processing. Please check again in a few minutes.',
+      public_note: '已收到您重新提交的付款凭证，订单重新进入处理中，请稍后再次查询。',
     }
 
     if (txHash) patch.tx_hash = txHash
