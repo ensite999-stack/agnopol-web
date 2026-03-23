@@ -1,8 +1,8 @@
 'use client'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useI18n } from '@/components/language-provider'
-import LanguageSwitcher from '@/components/language-switcher'
+import { useI18n } from '../../components/language-provider'
+import LanguageSwitcher from '../../components/language-switcher'
 
 type PaymentNetwork = 'trc20_usdt' | 'base_usdc'
 
@@ -175,7 +175,16 @@ export default function PayPage() {
   return (
     <main className="site-shell">
       <div className="site-container">
-        <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
+        <div
+          style={{
+            marginBottom: 16,
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            gap: 12,
+            flexWrap: 'wrap',
+          }}
+        >
           <a href={`/?lang=${lang}`} style={{ textDecoration: 'none', color: '#475569', fontSize: 14 }}>
             ← {t.common.back}
           </a>
@@ -436,9 +445,7 @@ export default function PayPage() {
                 <div style={{ marginTop: 6 }}>
                   {t.pay.orderNo}: {successOrderNo}
                 </div>
-                <div style={{ marginTop: 8 }}>
-                  {t.pay.successDesc}
-                </div>
+                <div style={{ marginTop: 8 }}>{t.pay.successDesc}</div>
               </div>
             ) : null}
 
