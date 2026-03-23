@@ -20,7 +20,7 @@ export async function PATCH(
   { params }: { params: { id: string } }
 ) {
   try {
-    requireAdminSession(req)
+    requireAdminSession()
 
     const supabase = getSupabase()
     const body = await req.json()
@@ -70,8 +70,7 @@ export async function PATCH(
   } catch (error) {
     return NextResponse.json(
       {
-        error:
-          error instanceof Error ? error.message : 'Server error',
+        error: error instanceof Error ? error.message : 'Server error',
       },
       { status: error instanceof Error && error.message === 'Unauthorized' ? 401 : 500 }
     )
@@ -79,11 +78,11 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  req: Request,
+  _req: Request,
   { params }: { params: { id: string } }
 ) {
   try {
-    requireAdminSession(req)
+    requireAdminSession()
 
     const supabase = getSupabase()
     const id = Number(params.id)
@@ -105,8 +104,7 @@ export async function DELETE(
   } catch (error) {
     return NextResponse.json(
       {
-        error:
-          error instanceof Error ? error.message : 'Server error',
+        error: error instanceof Error ? error.message : 'Server error',
       },
       { status: error instanceof Error && error.message === 'Unauthorized' ? 401 : 500 }
     )
