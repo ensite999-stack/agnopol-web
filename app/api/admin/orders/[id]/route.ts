@@ -77,9 +77,7 @@ export async function PATCH(
     })
   } catch (error) {
     return noStoreJson(
-      {
-        error: error instanceof Error ? error.message : 'Server error',
-      },
+      { error: error instanceof Error ? error.message : 'Server error' },
       { status: error instanceof Error && error.message === 'Unauthorized' ? 401 : 500 }
     )
   }
@@ -111,9 +109,7 @@ export async function DELETE(
     })
   } catch (error) {
     return noStoreJson(
-      {
-        error: error instanceof Error ? error.message : 'Server error',
-      },
+      { error: error instanceof Error ? error.message : 'Server error' },
       { status: error instanceof Error && error.message === 'Unauthorized' ? 401 : 500 }
     )
   }
