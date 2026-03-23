@@ -1,5 +1,5 @@
 import './globals.css'
-import { LanguageProvider } from '@/components/language-provider'
+import { LanguageProvider } from '../components/language-provider'
 
 export const metadata = {
   title: 'Agnopol',
