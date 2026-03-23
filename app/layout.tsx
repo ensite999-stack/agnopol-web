@@ -1,6 +1,9 @@
+import './globals.css'
+import { LanguageProvider } from '@/components/language-provider'
+
 export const metadata = {
   title: 'Agnopol',
-  description: 'Agnopol web',
+  description: 'One world, one breath.',
 }
 
 export default function RootLayout({
@@ -9,8 +12,10 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
-      <body>{children}</body>
+    <html suppressHydrationWarning>
+      <body>
+        <LanguageProvider>{children}</LanguageProvider>
+      </body>
     </html>
   )
 }
