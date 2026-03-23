@@ -4,6 +4,8 @@ import { useEffect, useMemo, useState } from 'react'
 import { useI18n } from '../../components/language-provider'
 import LanguageSwitcher from '../../components/language-switcher'
 
+type AdminOrderStatus = 'pending_payment' | 'paid' | 'completed' | 'cancelled'
+
 type AdminOrder = {
   id: number
   order_no: string
@@ -16,7 +18,8 @@ type AdminOrder = {
   price_usd: number | null
   payment_network: string | null
   tx_hash: string | null
-  status: 'pending_payment' | 'paid' | 'cancelled'
+  proof_image_base64: string | null
+  status: AdminOrderStatus
   public_note: string | null
   admin_note: string | null
   created_at: string | null
@@ -35,289 +38,9 @@ type SiteSettings = {
 }
 
 const adminTexts = {
-  de: {
-    checking: 'Checking session...',
-    unauthorized: 'Not logged in. Redirecting...',
-    logout: 'Logout',
-    loggingOut: 'Logging out...',
-    tabOrders: 'Orders',
-    tabSettings: 'Pricing & Addresses',
-    search: 'Search by email / order no / username',
-    statusAll: 'All',
-    statusPending: 'Pending Payment',
-    statusPaid: 'Paid',
-    statusCancelled: 'Cancelled',
-    autoRefresh: 'Auto Refresh',
-    refreshNow: 'Refresh Now',
-    saveChanges: 'Save Changes',
-    deleteOrder: 'Delete Order',
-    confirmPaid: 'Mark Paid',
-    restorePayment: 'Restore Payment',
-    cancelOrder: 'Cancel Order',
-    saving: 'Saving...',
-    deleting: 'Deleting...',
-    noOrders: 'No orders found.',
-    editTitle: 'Edit Order',
-    publicNote: 'User Visible Note',
-    adminNote: 'Internal Admin Note',
-    txHash: 'Transaction Hash',
-    username: 'Telegram Username',
-    email: 'Email',
-    paymentNetwork: 'Payment Network',
-    createdAt: 'Created At',
-    orderNo: 'Order No',
-    product: 'Product',
-    amount: 'Amount',
-    status: 'Status',
-    settingsTitle: 'Site Settings',
-    premium3: 'Premium 3 Months',
-    premium6: 'Premium 6 Months',
-    premium12: 'Premium 12 Months',
-    starsRate: 'Stars Rate',
-    trc20: 'TRC20 Address',
-    base: 'Base Address',
-    saveSettings: 'Save Settings',
-    settingsSaved: 'Settings saved successfully.',
-    ordersUpdated: 'Order updated successfully.',
-    orderDeleted: 'Order deleted successfully.',
-    noSettings: 'No settings data.',
-  },
-  en: {
-    checking: 'Checking session...',
-    unauthorized: 'Not logged in. Redirecting...',
-    logout: 'Logout',
-    loggingOut: 'Logging out...',
-    tabOrders: 'Orders',
-    tabSettings: 'Pricing & Addresses',
-    search: 'Search by email / order no / username',
-    statusAll: 'All',
-    statusPending: 'Pending Payment',
-    statusPaid: 'Paid',
-    statusCancelled: 'Cancelled',
-    autoRefresh: 'Auto Refresh',
-    refreshNow: 'Refresh Now',
-    saveChanges: 'Save Changes',
-    deleteOrder: 'Delete Order',
-    confirmPaid: 'Mark Paid',
-    restorePayment: 'Restore Payment',
-    cancelOrder: 'Cancel Order',
-    saving: 'Saving...',
-    deleting: 'Deleting...',
-    noOrders: 'No orders found.',
-    editTitle: 'Edit Order',
-    publicNote: 'User Visible Note',
-    adminNote: 'Internal Admin Note',
-    txHash: 'Transaction Hash',
-    username: 'Telegram Username',
-    email: 'Email',
-    paymentNetwork: 'Payment Network',
-    createdAt: 'Created At',
-    orderNo: 'Order No',
-    product: 'Product',
-    amount: 'Amount',
-    status: 'Status',
-    settingsTitle: 'Site Settings',
-    premium3: 'Premium 3 Months',
-    premium6: 'Premium 6 Months',
-    premium12: 'Premium 12 Months',
-    starsRate: 'Stars Rate',
-    trc20: 'TRC20 Address',
-    base: 'Base Address',
-    saveSettings: 'Save Settings',
-    settingsSaved: 'Settings saved successfully.',
-    ordersUpdated: 'Order updated successfully.',
-    orderDeleted: 'Order deleted successfully.',
-    noSettings: 'No settings data.',
-  },
-  es: {
-    checking: 'Comprobando sesión...',
-    unauthorized: 'No has iniciado sesión. Redirigiendo...',
-    logout: 'Cerrar sesión',
-    loggingOut: 'Cerrando sesión...',
-    tabOrders: 'Pedidos',
-    tabSettings: 'Precios y direcciones',
-    search: 'Buscar por correo / pedido / usuario',
-    statusAll: 'Todos',
-    statusPending: 'Pendiente de pago',
-    statusPaid: 'Pagado',
-    statusCancelled: 'Cancelado',
-    autoRefresh: 'Auto actualización',
-    refreshNow: 'Actualizar ahora',
-    saveChanges: 'Guardar cambios',
-    deleteOrder: 'Eliminar pedido',
-    confirmPaid: 'Marcar pagado',
-    restorePayment: 'Restaurar pago',
-    cancelOrder: 'Cancelar pedido',
-    saving: 'Guardando...',
-    deleting: 'Eliminando...',
-    noOrders: 'No se encontraron pedidos.',
-    editTitle: 'Editar pedido',
-    publicNote: 'Nota visible al usuario',
-    adminNote: 'Nota interna',
-    txHash: 'Hash de transacción',
-    username: 'Usuario de Telegram',
-    email: 'Correo electrónico',
-    paymentNetwork: 'Red de pago',
-    createdAt: 'Fecha de creación',
-    orderNo: 'N.º de pedido',
-    product: 'Producto',
-    amount: 'Importe',
-    status: 'Estado',
-    settingsTitle: 'Configuración del sitio',
-    premium3: 'Premium 3 Meses',
-    premium6: 'Premium 6 Meses',
-    premium12: 'Premium 12 Meses',
-    starsRate: 'Tarifa Stars',
-    trc20: 'Dirección TRC20',
-    base: 'Dirección Base',
-    saveSettings: 'Guardar configuración',
-    settingsSaved: 'Configuración guardada.',
-    ordersUpdated: 'Pedido actualizado.',
-    orderDeleted: 'Pedido eliminado.',
-    noSettings: 'No hay datos de configuración.',
-  },
-  fr: {
-    checking: 'Vérification de la session...',
-    unauthorized: 'Non connecté. Redirection...',
-    logout: 'Se déconnecter',
-    loggingOut: 'Déconnexion...',
-    tabOrders: 'Commandes',
-    tabSettings: 'Tarifs et adresses',
-    search: 'Rechercher par e-mail / commande / utilisateur',
-    statusAll: 'Toutes',
-    statusPending: 'En attente de paiement',
-    statusPaid: 'Payée',
-    statusCancelled: 'Annulée',
-    autoRefresh: 'Rafraîchissement auto',
-    refreshNow: 'Rafraîchir',
-    saveChanges: 'Enregistrer',
-    deleteOrder: 'Supprimer',
-    confirmPaid: 'Marquer payée',
-    restorePayment: 'Restaurer paiement',
-    cancelOrder: 'Annuler commande',
-    saving: 'Enregistrement...',
-    deleting: 'Suppression...',
-    noOrders: 'Aucune commande trouvée.',
-    editTitle: 'Modifier la commande',
-    publicNote: 'Note visible utilisateur',
-    adminNote: 'Note interne',
-    txHash: 'Hash de transaction',
-    username: 'Nom Telegram',
-    email: 'E-mail',
-    paymentNetwork: 'Réseau de paiement',
-    createdAt: 'Date de création',
-    orderNo: 'N° de commande',
-    product: 'Produit',
-    amount: 'Montant',
-    status: 'Statut',
-    settingsTitle: 'Paramètres du site',
-    premium3: 'Premium 3 Mois',
-    premium6: 'Premium 6 Mois',
-    premium12: 'Premium 12 Mois',
-    starsRate: 'Taux Stars',
-    trc20: 'Adresse TRC20',
-    base: 'Adresse Base',
-    saveSettings: 'Enregistrer',
-    settingsSaved: 'Paramètres enregistrés.',
-    ordersUpdated: 'Commande mise à jour.',
-    orderDeleted: 'Commande supprimée.',
-    noSettings: 'Aucune donnée de configuration.',
-  },
-  ja: {
-    checking: 'セッションを確認中...',
-    unauthorized: '未ログインです。リダイレクト中...',
-    logout: 'ログアウト',
-    loggingOut: 'ログアウト中...',
-    tabOrders: '注文管理',
-    tabSettings: '価格とアドレス',
-    search: 'メール / 注文番号 / ユーザー名で検索',
-    statusAll: 'すべて',
-    statusPending: '未払い',
-    statusPaid: '支払い済み',
-    statusCancelled: 'キャンセル済み',
-    autoRefresh: '自動更新',
-    refreshNow: '今すぐ更新',
-    saveChanges: '変更を保存',
-    deleteOrder: '注文削除',
-    confirmPaid: '支払い済みにする',
-    restorePayment: '支払い待ちに戻す',
-    cancelOrder: '注文を取消',
-    saving: '保存中...',
-    deleting: '削除中...',
-    noOrders: '注文が見つかりません。',
-    editTitle: '注文編集',
-    publicNote: 'ユーザー表示メモ',
-    adminNote: '管理メモ',
-    txHash: '取引ハッシュ',
-    username: 'Telegram ユーザー名',
-    email: 'メールアドレス',
-    paymentNetwork: '支払いネットワーク',
-    createdAt: '作成日時',
-    orderNo: '注文番号',
-    product: '商品',
-    amount: '金額',
-    status: '状態',
-    settingsTitle: 'サイト設定',
-    premium3: 'Premium 3か月',
-    premium6: 'Premium 6か月',
-    premium12: 'Premium 12か月',
-    starsRate: 'Stars レート',
-    trc20: 'TRC20 アドレス',
-    base: 'Base アドレス',
-    saveSettings: '設定を保存',
-    settingsSaved: '設定を保存しました。',
-    ordersUpdated: '注文を更新しました。',
-    orderDeleted: '注文を削除しました。',
-    noSettings: '設定データがありません。',
-  },
-  ko: {
-    checking: '세션 확인 중...',
-    unauthorized: '로그인되지 않았습니다. 이동 중...',
-    logout: '로그아웃',
-    loggingOut: '로그아웃 중...',
-    tabOrders: '주문 관리',
-    tabSettings: '가격 및 주소',
-    search: '이메일 / 주문번호 / 사용자명 검색',
-    statusAll: '전체',
-    statusPending: '결제 대기',
-    statusPaid: '결제 완료',
-    statusCancelled: '취소됨',
-    autoRefresh: '자동 새로고침',
-    refreshNow: '지금 새로고침',
-    saveChanges: '변경 저장',
-    deleteOrder: '주문 삭제',
-    confirmPaid: '결제 완료로 변경',
-    restorePayment: '결제 대기로 복원',
-    cancelOrder: '주문 취소',
-    saving: '저장 중...',
-    deleting: '삭제 중...',
-    noOrders: '주문이 없습니다.',
-    editTitle: '주문 수정',
-    publicNote: '사용자 표시 메모',
-    adminNote: '관리자 메모',
-    txHash: '거래 해시',
-    username: 'Telegram 사용자 이름',
-    email: '이메일',
-    paymentNetwork: '결제 네트워크',
-    createdAt: '생성 시간',
-    orderNo: '주문번호',
-    product: '상품',
-    amount: '금액',
-    status: '상태',
-    settingsTitle: '사이트 설정',
-    premium3: 'Premium 3개월',
-    premium6: 'Premium 6개월',
-    premium12: 'Premium 12개월',
-    starsRate: 'Stars 요율',
-    trc20: 'TRC20 주소',
-    base: 'Base 주소',
-    saveSettings: '설정 저장',
-    settingsSaved: '설정이 저장되었습니다.',
-    ordersUpdated: '주문이 수정되었습니다.',
-    orderDeleted: '주문이 삭제되었습니다.',
-    noSettings: '설정 데이터가 없습니다.',
-  },
   'zh-cn': {
+    title: '后台管理',
+    subtitle: '订单管理、价格配置与收款地址管理',
     checking: '正在检查登录状态...',
     unauthorized: '尚未登录，正在跳转...',
     logout: '退出登录',
@@ -328,29 +51,35 @@ const adminTexts = {
     statusAll: '全部',
     statusPending: '待支付',
     statusPaid: '已支付',
+    statusCompleted: '已完成',
     statusCancelled: '已取消',
     autoRefresh: '自动刷新',
     refreshNow: '立即刷新',
-    saveChanges: '保存修改',
-    deleteOrder: '删除订单',
-    confirmPaid: '标记已支付',
-    restorePayment: '恢复支付',
-    cancelOrder: '取消订单',
-    saving: '保存中...',
-    deleting: '删除中...',
+    refreshing: '刷新中...',
     noOrders: '暂无订单。',
     editTitle: '编辑订单',
-    publicNote: '用户可见提示',
-    adminNote: '后台备注',
-    txHash: '交易哈希',
-    username: 'TG 用户名',
-    email: '邮箱',
-    paymentNetwork: '支付网络',
-    createdAt: '创建时间',
     orderNo: '订单号',
     product: '产品',
     amount: '金额',
     status: '状态',
+    createdAt: '创建时间',
+    updatedAt: '更新时间',
+    username: 'TG 用户名',
+    email: '邮箱',
+    paymentNetwork: '支付网络',
+    txHash: '交易哈希',
+    proofImage: '付款截图',
+    openImage: '查看大图',
+    publicNote: '用户可见提示',
+    adminNote: '后台备注',
+    saveChanges: '保存修改',
+    saveHint: '保存订单信息、用户可见提示与后台备注',
+    completeOrder: '已完成',
+    restorePayment: '恢复支付',
+    cancelOrder: '取消订单',
+    deleteOrder: '删除订单',
+    saving: '保存中...',
+    deleting: '删除中...',
     settingsTitle: '站点配置',
     premium3: 'Premium 3个月',
     premium6: 'Premium 6个月',
@@ -359,12 +88,20 @@ const adminTexts = {
     trc20: 'TRC20 地址',
     base: 'Base 地址',
     saveSettings: '保存配置',
-    settingsSaved: '配置保存成功。',
-    ordersUpdated: '订单更新成功。',
-    orderDeleted: '订单删除成功。',
+    settingsSaved: '价格与收款地址已保存，前台刷新后会同步。',
+    orderSaved: '订单信息与用户可见提示已保存。',
+    orderCompleted: '订单已改为已完成，前台查询会显示已完成。',
+    orderRestored: '订单已恢复为待支付。',
+    orderCancelled: '订单已取消。',
+    orderDeleted: '订单已删除。',
     noSettings: '暂无配置数据。',
+    confirmDelete: '确认删除这个订单吗？删除后无法恢复。',
+    proofMissing: '该订单暂无上传图片。',
+    timezoneHint: '所有时间均按美国波士顿时区显示。',
   },
   'zh-tw': {
+    title: '後台管理',
+    subtitle: '訂單管理、價格配置與收款地址管理',
     checking: '正在檢查登入狀態...',
     unauthorized: '尚未登入，正在跳轉...',
     logout: '登出',
@@ -375,29 +112,35 @@ const adminTexts = {
     statusAll: '全部',
     statusPending: '待支付',
     statusPaid: '已支付',
+    statusCompleted: '已完成',
     statusCancelled: '已取消',
     autoRefresh: '自動刷新',
     refreshNow: '立即刷新',
-    saveChanges: '保存修改',
-    deleteOrder: '刪除訂單',
-    confirmPaid: '標記已支付',
-    restorePayment: '恢復支付',
-    cancelOrder: '取消訂單',
-    saving: '保存中...',
-    deleting: '刪除中...',
+    refreshing: '刷新中...',
     noOrders: '暫無訂單。',
     editTitle: '編輯訂單',
-    publicNote: '用戶可見提示',
-    adminNote: '後台備註',
-    txHash: '交易哈希',
-    username: 'TG 用戶名',
-    email: '電子郵件',
-    paymentNetwork: '支付網路',
-    createdAt: '建立時間',
     orderNo: '訂單號',
     product: '產品',
     amount: '金額',
     status: '狀態',
+    createdAt: '建立時間',
+    updatedAt: '更新時間',
+    username: 'TG 用戶名',
+    email: '電子郵件',
+    paymentNetwork: '支付網路',
+    txHash: '交易哈希',
+    proofImage: '付款截圖',
+    openImage: '查看大圖',
+    publicNote: '用戶可見提示',
+    adminNote: '後台備註',
+    saveChanges: '保存修改',
+    saveHint: '保存訂單資訊、用戶可見提示與後台備註',
+    completeOrder: '已完成',
+    restorePayment: '恢復支付',
+    cancelOrder: '取消訂單',
+    deleteOrder: '刪除訂單',
+    saving: '保存中...',
+    deleting: '刪除中...',
     settingsTitle: '站點配置',
     premium3: 'Premium 3個月',
     premium6: 'Premium 6個月',
@@ -406,12 +149,100 @@ const adminTexts = {
     trc20: 'TRC20 地址',
     base: 'Base 地址',
     saveSettings: '保存配置',
-    settingsSaved: '配置保存成功。',
-    ordersUpdated: '訂單更新成功。',
-    orderDeleted: '訂單刪除成功。',
+    settingsSaved: '價格與收款地址已保存，前台刷新後會同步。',
+    orderSaved: '訂單資訊與用戶可見提示已保存。',
+    orderCompleted: '訂單已改為已完成，前台查詢會顯示已完成。',
+    orderRestored: '訂單已恢復為待支付。',
+    orderCancelled: '訂單已取消。',
+    orderDeleted: '訂單已刪除。',
     noSettings: '暫無配置資料。',
+    confirmDelete: '確認刪除這個訂單嗎？刪除後無法恢復。',
+    proofMissing: '此訂單暫無上傳圖片。',
+    timezoneHint: '所有時間均按美國波士頓時區顯示。',
+  },
+  en: {
+    title: 'Admin Console',
+    subtitle: 'Order management, pricing settings and payment address management',
+    checking: 'Checking session...',
+    unauthorized: 'Not logged in. Redirecting...',
+    logout: 'Logout',
+    loggingOut: 'Logging out...',
+    tabOrders: 'Orders',
+    tabSettings: 'Pricing & Addresses',
+    search: 'Search by email / order no / username',
+    statusAll: 'All',
+    statusPending: 'Pending Payment',
+    statusPaid: 'Paid',
+    statusCompleted: 'Completed',
+    statusCancelled: 'Cancelled',
+    autoRefresh: 'Auto Refresh',
+    refreshNow: 'Refresh Now',
+    refreshing: 'Refreshing...',
+    noOrders: 'No orders found.',
+    editTitle: 'Edit Order',
+    orderNo: 'Order No',
+    product: 'Product',
+    amount: 'Amount',
+    status: 'Status',
+    createdAt: 'Created At',
+    updatedAt: 'Updated At',
+    username: 'Telegram Username',
+    email: 'Email',
+    paymentNetwork: 'Payment Network',
+    txHash: 'Transaction Hash',
+    proofImage: 'Payment Screenshot',
+    openImage: 'Open Full Image',
+    publicNote: 'User Visible Note',
+    adminNote: 'Internal Admin Note',
+    saveChanges: 'Save Changes',
+    saveHint: 'Save order info, public note and admin note',
+    completeOrder: 'Mark Completed',
+    restorePayment: 'Restore Payment',
+    cancelOrder: 'Cancel Order',
+    deleteOrder: 'Delete Order',
+    saving: 'Saving...',
+    deleting: 'Deleting...',
+    settingsTitle: 'Site Settings',
+    premium3: 'Premium 3 Months',
+    premium6: 'Premium 6 Months',
+    premium12: 'Premium 12 Months',
+    starsRate: 'Stars Rate',
+    trc20: 'TRC20 Address',
+    base: 'Base Address',
+    saveSettings: 'Save Settings',
+    settingsSaved: 'Pricing and payment addresses saved. Frontend will sync after refresh.',
+    orderSaved: 'Order information and user-visible note saved.',
+    orderCompleted: 'Order marked as completed. Frontend lookup will show completed.',
+    orderRestored: 'Order restored to pending payment.',
+    orderCancelled: 'Order cancelled.',
+    orderDeleted: 'Order deleted.',
+    noSettings: 'No settings data.',
+    confirmDelete: 'Delete this order? This action cannot be undone.',
+    proofMissing: 'No uploaded proof image for this order.',
+    timezoneHint: 'All times are displayed in Boston time.',
   },
 } as const
+
+function getStatusLabel(status: AdminOrderStatus, text: (typeof adminTexts)[keyof typeof adminTexts]) {
+  if (status === 'pending_payment') return text.statusPending
+  if (status === 'paid') return text.statusPaid
+  if (status === 'completed') return text.statusCompleted
+  return text.statusCancelled
+}
+
+function getStatusColor(status: AdminOrderStatus) {
+  if (status === 'completed') return '#166534'
+  if (status === 'paid') return '#1d4ed8'
+  if (status === 'cancelled') return '#991b1b'
+  return '#475569'
+}
+
+function getStatusBg(status: AdminOrderStatus) {
+  if (status === 'completed') return 'rgba(22, 101, 52, 0.08)'
+  if (status === 'paid') return 'rgba(29, 78, 216, 0.08)'
+  if (status === 'cancelled') return 'rgba(153, 27, 27, 0.08)'
+  return 'rgba(71, 85, 105, 0.08)'
+}
 
 function getProductLabel(item: AdminOrder) {
   if (item.product_type === 'tg_stars') {
@@ -423,21 +254,42 @@ function getProductLabel(item: AdminOrder) {
   return item.product_type || '-'
 }
 
+function formatBostonTime(value: string | null) {
+  if (!value) return '-'
+
+  try {
+    return new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/New_York',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false,
+    }).format(new Date(value))
+  } catch {
+    return value
+  }
+}
+
 export default function AdminPage() {
-  const { lang, t } = useI18n()
-  const text = useMemo(() => adminTexts[lang] || adminTexts.en, [lang])
+  const { lang } = useI18n()
+  const langKey = lang === 'zh-cn' || lang === 'zh-tw' || lang === 'en' ? lang : 'en'
+  const text = useMemo(() => adminTexts[langKey], [langKey])
 
   const [authStatus, setAuthStatus] = useState<'checking' | 'ok' | 'unauthorized'>('checking')
   const [loggingOut, setLoggingOut] = useState(false)
 
   const [tab, setTab] = useState<'orders' | 'settings'>('orders')
+
   const [orders, setOrders] = useState<AdminOrder[]>([])
   const [selectedOrder, setSelectedOrder] = useState<AdminOrder | null>(null)
   const [ordersLoading, setOrdersLoading] = useState(false)
   const [ordersMessage, setOrdersMessage] = useState('')
   const [ordersError, setOrdersError] = useState('')
   const [query, setQuery] = useState('')
-  const [statusFilter, setStatusFilter] = useState<'all' | 'pending_payment' | 'paid' | 'cancelled'>('all')
+  const [statusFilter, setStatusFilter] = useState<'all' | AdminOrderStatus>('all')
   const [autoRefresh, setAutoRefresh] = useState(true)
 
   const [settings, setSettings] = useState<SiteSettings | null>(null)
@@ -458,7 +310,7 @@ export default function AdminPage() {
         if (!data?.authenticated) {
           setAuthStatus('unauthorized')
           setTimeout(() => {
-            window.location.href = `/admin/login?lang=${lang}`
+            window.location.href = `/admin/login?lang=${langKey}`
           }, 500)
           return
         }
@@ -467,13 +319,13 @@ export default function AdminPage() {
       } catch {
         setAuthStatus('unauthorized')
         setTimeout(() => {
-          window.location.href = `/admin/login?lang=${lang}`
+          window.location.href = `/admin/login?lang=${langKey}`
         }, 500)
       }
     }
 
     run()
-  }, [lang])
+  }, [langKey])
 
   async function fetchOrders() {
     setOrdersLoading(true)
@@ -482,7 +334,7 @@ export default function AdminPage() {
     try {
       const params = new URLSearchParams()
       params.set('status', statusFilter)
-      params.set('q', query)
+      params.set('q', query.trim())
       params.set('page', '1')
       params.set('page_size', '50')
 
@@ -496,12 +348,13 @@ export default function AdminPage() {
         throw new Error(data?.error || 'Failed to load orders')
       }
 
-      setOrders(data.items || [])
+      const nextOrders: AdminOrder[] = data.items || []
+      setOrders(nextOrders)
 
       setSelectedOrder((prev) => {
-        if (!prev) return data.items?.[0] || null
-        const matched = (data.items || []).find((item: AdminOrder) => item.id === prev.id)
-        return matched || data.items?.[0] || null
+        if (!prev) return nextOrders[0] || null
+        const matched = nextOrders.find((item) => item.id === prev.id)
+        return matched || nextOrders[0] || null
       })
     } catch (error) {
       setOrdersError(error instanceof Error ? error.message : 'Failed to load orders')
@@ -563,7 +416,7 @@ export default function AdminPage() {
         credentials: 'include',
       })
     } finally {
-      window.location.href = `/admin/login?lang=${lang}`
+      window.location.href = `/admin/login?lang=${langKey}`
     }
   }
 
@@ -577,16 +430,16 @@ export default function AdminPage() {
       const response = await fetch(`/api/admin/orders/${selectedOrder.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({
           username: selectedOrder.username || '',
           email: selectedOrder.email || '',
-          status: selectedOrder.status,
+          payment_network: selectedOrder.payment_network || '',
+          tx_hash: selectedOrder.tx_hash || '',
           public_note: selectedOrder.public_note || '',
           admin_note: selectedOrder.admin_note || '',
-          tx_hash: selectedOrder.tx_hash || '',
-          payment_network: selectedOrder.payment_network || '',
+          status: selectedOrder.status,
         }),
-        credentials: 'include',
       })
 
       const data = await response.json()
@@ -595,9 +448,9 @@ export default function AdminPage() {
         throw new Error(data?.error || 'Failed to save order')
       }
 
-      setOrdersMessage(text.ordersUpdated)
-      await fetchOrders()
+      setOrdersMessage(text.orderSaved)
       setSelectedOrder(data.item)
+      await fetchOrders()
     } catch (error) {
       setOrdersError(error instanceof Error ? error.message : 'Failed to save order')
     }
@@ -605,8 +458,7 @@ export default function AdminPage() {
 
   async function handleDeleteOrder() {
     if (!selectedOrder) return
-    const confirmed = window.confirm(`${text.deleteOrder} #${selectedOrder.order_no}?`)
-    if (!confirmed) return
+    if (!window.confirm(text.confirmDelete)) return
 
     setOrdersMessage('')
     setOrdersError('')
@@ -631,18 +483,20 @@ export default function AdminPage() {
     }
   }
 
-  async function updateStatus(status: 'pending_payment' | 'paid' | 'cancelled') {
+  async function updateStatus(status: AdminOrderStatus) {
     if (!selectedOrder) return
 
-    const next = { ...selectedOrder, status }
-    setSelectedOrder(next)
+    setOrdersMessage('')
+    setOrdersError('')
 
     try {
       const response = await fetch(`/api/admin/orders/${selectedOrder.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status }),
         credentials: 'include',
+        body: JSON.stringify({
+          status,
+        }),
       })
 
       const data = await response.json()
@@ -651,9 +505,18 @@ export default function AdminPage() {
         throw new Error(data?.error || 'Failed to update status')
       }
 
-      setOrdersMessage(text.ordersUpdated)
-      await fetchOrders()
+      if (status === 'completed') {
+        setOrdersMessage(text.orderCompleted)
+      } else if (status === 'pending_payment') {
+        setOrdersMessage(text.orderRestored)
+      } else if (status === 'cancelled') {
+        setOrdersMessage(text.orderCancelled)
+      } else {
+        setOrdersMessage(text.orderSaved)
+      }
+
       setSelectedOrder(data.item)
+      await fetchOrders()
     } catch (error) {
       setOrdersError(error instanceof Error ? error.message : 'Failed to update status')
     }
@@ -663,13 +526,14 @@ export default function AdminPage() {
     if (!settings) return
 
     setSavingSettings(true)
-    setSettingsError('')
     setSettingsMessage('')
+    setSettingsError('')
 
     try {
       const response = await fetch('/api/admin/settings', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({
           premium_3m_price: settings.premium_3m_price,
           premium_6m_price: settings.premium_6m_price,
@@ -678,7 +542,6 @@ export default function AdminPage() {
           trc20_address: settings.trc20_address,
           base_address: settings.base_address,
         }),
-        credentials: 'include',
       })
 
       const data = await response.json()
@@ -718,7 +581,7 @@ export default function AdminPage() {
 
   return (
     <main className="site-shell">
-      <div className="site-container">
+      <div className="site-container" style={{ minWidth: 0 }}>
         <div
           style={{
             display: 'flex',
@@ -731,10 +594,13 @@ export default function AdminPage() {
         >
           <div>
             <h1 style={{ margin: 0, fontSize: 'clamp(28px, 4vw, 42px)', fontWeight: 900 }}>
-              {t.admin.title}
+              {text.title}
             </h1>
             <p className="small-muted" style={{ marginTop: 8 }}>
-              {t.admin.subtitle}
+              {text.subtitle}
+            </p>
+            <p className="small-muted" style={{ marginTop: 6 }}>
+              {text.timezoneHint}
             </p>
           </div>
 
@@ -771,7 +637,7 @@ export default function AdminPage() {
 
         {tab === 'orders' ? (
           <div className="admin-grid">
-            <aside className="admin-side">
+            <aside className="admin-side" style={{ minWidth: 0 }}>
               <div className="card-soft">
                 <input
                   className="input"
@@ -781,11 +647,12 @@ export default function AdminPage() {
                 />
 
                 <button
+                  type="button"
                   className="btn-secondary"
                   style={{ marginTop: 10 }}
                   onClick={fetchOrders}
                 >
-                  {ordersLoading ? text.saving : text.refreshNow}
+                  {ordersLoading ? text.refreshing : text.refreshNow}
                 </button>
 
                 <div style={{ marginTop: 12 }}>
@@ -793,12 +660,13 @@ export default function AdminPage() {
                     className="input"
                     value={statusFilter}
                     onChange={(e) =>
-                      setStatusFilter(e.target.value as 'all' | 'pending_payment' | 'paid' | 'cancelled')
+                      setStatusFilter(e.target.value as 'all' | AdminOrderStatus)
                     }
                   >
                     <option value="all">{text.statusAll}</option>
                     <option value="pending_payment">{text.statusPending}</option>
                     <option value="paid">{text.statusPaid}</option>
+                    <option value="completed">{text.statusCompleted}</option>
                     <option value="cancelled">{text.statusCancelled}</option>
                   </select>
                 </div>
@@ -856,17 +724,68 @@ export default function AdminPage() {
                             ? 'rgba(11, 23, 51, 0.06)'
                             : '#fff',
                         cursor: 'pointer',
+                        minWidth: 0,
+                        overflow: 'hidden',
                       }}
                     >
-                      <div style={{ fontWeight: 800, color: '#0f172a' }}>{item.order_no}</div>
-                      <div className="small-muted" style={{ marginTop: 6 }}>
+                      <div style={{ fontWeight: 800, color: '#0f172a', wordBreak: 'break-all' }}>
+                        {item.order_no}
+                      </div>
+
+                      <div className="small-muted" style={{ marginTop: 6, wordBreak: 'break-all' }}>
                         {item.email || '-'}
                       </div>
+
                       <div className="small-muted" style={{ marginTop: 4 }}>
                         {getProductLabel(item)}
                       </div>
-                      <div style={{ marginTop: 6, fontSize: 12, color: '#475569' }}>
-                        {item.status}
+
+                      {item.proof_image_base64 ? (
+                        <img
+                          src={item.proof_image_base64}
+                          alt="thumb"
+                          style={{
+                            marginTop: 8,
+                            width: 76,
+                            height: 76,
+                            objectFit: 'cover',
+                            borderRadius: 10,
+                            border: '1px solid rgba(15, 23, 42, 0.08)',
+                            display: 'block',
+                          }}
+                        />
+                      ) : null}
+
+                      {item.tx_hash ? (
+                        <div
+                          style={{
+                            marginTop: 8,
+                            fontSize: 12,
+                            color: '#475569',
+                            wordBreak: 'break-all',
+                            overflowWrap: 'anywhere',
+                            whiteSpace: 'pre-wrap',
+                          }}
+                        >
+                          {item.tx_hash}
+                        </div>
+                      ) : null}
+
+                      <div
+                        style={{
+                          marginTop: 8,
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          padding: '6px 10px',
+                          borderRadius: 999,
+                          background: getStatusBg(item.status),
+                          color: getStatusColor(item.status),
+                          fontWeight: 800,
+                          fontSize: 12,
+                        }}
+                      >
+                        {getStatusLabel(item.status, text)}
                       </div>
                     </button>
                   ))
@@ -874,8 +793,8 @@ export default function AdminPage() {
               </div>
             </aside>
 
-            <section className="admin-main">
-              <div className="card-soft">
+            <section className="admin-main" style={{ minWidth: 0 }}>
+              <div className="card-soft" style={{ minWidth: 0, overflow: 'hidden' }}>
                 <div
                   style={{
                     fontSize: 'clamp(18px, 2.2vw, 22px)',
@@ -890,11 +809,49 @@ export default function AdminPage() {
                 {!selectedOrder ? (
                   <div className="small-muted">{text.noOrders}</div>
                 ) : (
-                  <div style={{ display: 'grid', gap: 12 }}>
-                    <div><strong>{text.orderNo}:</strong> {selectedOrder.order_no}</div>
-                    <div><strong>{text.product}:</strong> {getProductLabel(selectedOrder)}</div>
-                    <div><strong>{text.amount}:</strong> ${selectedOrder.price_usd ?? selectedOrder.amount ?? 0}</div>
-                    <div><strong>{text.createdAt}:</strong> {selectedOrder.created_at ? new Date(selectedOrder.created_at).toLocaleString() : '-'}</div>
+                  <div style={{ display: 'grid', gap: 12, minWidth: 0 }}>
+                    <div style={{ wordBreak: 'break-all' }}>
+                      <strong>{text.orderNo}:</strong> {selectedOrder.order_no}
+                    </div>
+
+                    <div>
+                      <strong>{text.product}:</strong> {getProductLabel(selectedOrder)}
+                    </div>
+
+                    <div>
+                      <strong>{text.amount}:</strong> ${selectedOrder.price_usd ?? selectedOrder.amount ?? 0}
+                    </div>
+
+                    <div>
+                      <strong>{text.createdAt}:</strong> {formatBostonTime(selectedOrder.created_at)}
+                    </div>
+
+                    <div>
+                      <strong>{text.updatedAt}:</strong> {formatBostonTime(selectedOrder.updated_at)}
+                    </div>
+
+                    <div>
+                      <div style={{ marginBottom: 6, fontSize: 13, color: '#64748b' }}>
+                        {text.status}
+                      </div>
+                      <div
+                        style={{
+                          width: '100%',
+                          minHeight: 52,
+                          borderRadius: 16,
+                          border: '1px solid rgba(15, 23, 42, 0.1)',
+                          background: getStatusBg(selectedOrder.status),
+                          color: getStatusColor(selectedOrder.status),
+                          display: 'flex',
+                          alignItems: 'center',
+                          padding: '0 16px',
+                          fontWeight: 800,
+                          boxSizing: 'border-box',
+                        }}
+                      >
+                        {getStatusLabel(selectedOrder.status, text)}
+                      </div>
+                    </div>
 
                     <input
                       className="input"
@@ -923,29 +880,70 @@ export default function AdminPage() {
                       }
                     />
 
-                    <input
-                      className="input"
-                      placeholder={text.txHash}
-                      value={selectedOrder.tx_hash || ''}
-                      onChange={(e) =>
-                        setSelectedOrder({ ...selectedOrder, tx_hash: e.target.value })
-                      }
-                    />
+                    <div>
+                      <div style={{ marginBottom: 6, fontSize: 13, color: '#64748b' }}>
+                        {text.txHash}
+                      </div>
+                      <textarea
+                        className="textarea"
+                        placeholder={text.txHash}
+                        value={selectedOrder.tx_hash || ''}
+                        onChange={(e) =>
+                          setSelectedOrder({ ...selectedOrder, tx_hash: e.target.value })
+                        }
+                        style={{
+                          minHeight: 96,
+                          wordBreak: 'break-all',
+                          overflowWrap: 'anywhere',
+                          whiteSpace: 'pre-wrap',
+                        }}
+                      />
+                    </div>
 
-                    <select
-                      className="input"
-                      value={selectedOrder.status}
-                      onChange={(e) =>
-                        setSelectedOrder({
-                          ...selectedOrder,
-                          status: e.target.value as 'pending_payment' | 'paid' | 'cancelled',
-                        })
-                      }
-                    >
-                      <option value="pending_payment">{text.statusPending}</option>
-                      <option value="paid">{text.statusPaid}</option>
-                      <option value="cancelled">{text.statusCancelled}</option>
-                    </select>
+                    <div>
+                      <div style={{ marginBottom: 6, fontSize: 13, color: '#64748b' }}>
+                        {text.proofImage}
+                      </div>
+
+                      {selectedOrder.proof_image_base64 ? (
+                        <div style={{ display: 'grid', gap: 10 }}>
+                          <a
+                            href={selectedOrder.proof_image_base64}
+                            target="_blank"
+                            rel="noreferrer"
+                            style={{ display: 'inline-block', maxWidth: '100%' }}
+                          >
+                            <img
+                              src={selectedOrder.proof_image_base64}
+                              alt="payment proof"
+                              style={{
+                                width: '100%',
+                                maxWidth: 280,
+                                borderRadius: 14,
+                                border: '1px solid rgba(15, 23, 42, 0.08)',
+                                display: 'block',
+                              }}
+                            />
+                          </a>
+
+                          <a
+                            href={selectedOrder.proof_image_base64}
+                            target="_blank"
+                            rel="noreferrer"
+                            style={{
+                              color: '#0f234f',
+                              fontWeight: 700,
+                              textDecoration: 'none',
+                              fontSize: 14,
+                            }}
+                          >
+                            {text.openImage}
+                          </a>
+                        </div>
+                      ) : (
+                        <div className="small-muted">{text.proofMissing}</div>
+                      )}
+                    </div>
 
                     <textarea
                       className="textarea"
@@ -965,6 +963,8 @@ export default function AdminPage() {
                       }
                     />
 
+                    <div className="small-muted">{text.saveHint}</div>
+
                     <div
                       style={{
                         display: 'grid',
@@ -976,15 +976,27 @@ export default function AdminPage() {
                         {text.saveChanges}
                       </button>
 
-                      <button className="btn-secondary" onClick={() => updateStatus('paid')}>
-                        {text.confirmPaid}
+                      <button
+                        className="btn-secondary"
+                        onClick={() => updateStatus('completed')}
+                        disabled={selectedOrder.status === 'completed'}
+                      >
+                        {text.completeOrder}
                       </button>
 
-                      <button className="btn-secondary" onClick={() => updateStatus('pending_payment')}>
+                      <button
+                        className="btn-secondary"
+                        onClick={() => updateStatus('pending_payment')}
+                        disabled={selectedOrder.status === 'pending_payment'}
+                      >
                         {text.restorePayment}
                       </button>
 
-                      <button className="btn-secondary" onClick={() => updateStatus('cancelled')}>
+                      <button
+                        className="btn-secondary"
+                        onClick={() => updateStatus('cancelled')}
+                        disabled={selectedOrder.status === 'cancelled'}
+                      >
                         {text.cancelOrder}
                       </button>
 
@@ -995,13 +1007,22 @@ export default function AdminPage() {
                   </div>
                 )}
 
-                {ordersMessage ? <div className="status-box-success">{ordersMessage}</div> : null}
-                {ordersError ? <div className="status-box-error">{ordersError}</div> : null}
+                {ordersMessage ? (
+                  <div className="status-box-success" style={{ marginTop: 16 }}>
+                    <strong>{ordersMessage}</strong>
+                  </div>
+                ) : null}
+
+                {ordersError ? (
+                  <div className="status-box-error" style={{ marginTop: 16 }}>
+                    <strong>{ordersError}</strong>
+                  </div>
+                ) : null}
               </div>
             </section>
           </div>
         ) : (
-          <section className="card-soft">
+          <section className="card-soft" style={{ minWidth: 0 }}>
             <div
               style={{
                 fontSize: 'clamp(18px, 2.2vw, 22px)',
@@ -1081,6 +1102,10 @@ export default function AdminPage() {
                   }
                 />
 
+                <div className="small-muted">
+                  {text.updatedAt}: {formatBostonTime(settings.updated_at)}
+                </div>
+
                 <button
                   className="btn-primary"
                   onClick={handleSaveSettings}
@@ -1092,8 +1117,17 @@ export default function AdminPage() {
               </div>
             )}
 
-            {settingsMessage ? <div className="status-box-success">{settingsMessage}</div> : null}
-            {settingsError ? <div className="status-box-error">{settingsError}</div> : null}
+            {settingsMessage ? (
+              <div className="status-box-success" style={{ marginTop: 16 }}>
+                <strong>{settingsMessage}</strong>
+              </div>
+            ) : null}
+
+            {settingsError ? (
+              <div className="status-box-error" style={{ marginTop: 16 }}>
+                <strong>{settingsError}</strong>
+              </div>
+            ) : null}
           </section>
         )}
       </div>
