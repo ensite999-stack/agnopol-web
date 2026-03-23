@@ -1,13 +1,20 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+function getSupabase() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+  if (!supabaseUrl || !supabaseAnonKey) {
+    throw new Error('Missing Supabase environment variables')
+  }
+
+  return createClient(supabaseUrl, supabaseAnonKey)
+}
 
 export async function POST(req: Request) {
   try {
+    const supabase = getSupabase()
     const body = await req.json()
 
     const {
@@ -61,7 +68,10 @@ export async function POST(req: Request) {
     })
   } catch (err) {
     return NextResponse.json(
-      { error: 'Server error' },
+      {
+        error:
+          err instanceof Error ? err.message : 'Server error',
+      },
       { status: 500 }
     )
   }
