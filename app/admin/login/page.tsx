@@ -88,7 +88,7 @@ const loginTexts = {
 } as const
 
 export default function AdminLoginPage() {
-  const { lang, t } = useI18n()
+  const { lang } = useI18n()
   const text = useMemo(() => loginTexts[lang] || loginTexts.en, [lang])
 
   const [password, setPassword] = useState('')
@@ -100,8 +100,10 @@ export default function AdminLoginPage() {
       try {
         const response = await fetch('/api/admin/session', {
           cache: 'no-store',
+          credentials: 'include',
         })
         const data = await response.json()
+
         if (data?.authenticated) {
           window.location.href = `/admin?lang=${lang}`
         }
@@ -121,6 +123,7 @@ export default function AdminLoginPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ password }),
+        credentials: 'include',
       })
 
       const data = await response.json()
@@ -192,6 +195,11 @@ export default function AdminLoginPage() {
               placeholder={text.password}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !submitting) {
+                  handleLogin()
+                }
+              }}
             />
 
             <button
