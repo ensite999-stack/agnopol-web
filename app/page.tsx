@@ -59,6 +59,7 @@ const messages: Record<
     footerTerms: string
     footerPrivacy: string
     footerRisk: string
+    officialEmail: string
   }
 > = {
   de: {
@@ -85,6 +86,7 @@ const messages: Record<
     footerTerms: 'Terms of Service',
     footerPrivacy: 'Privacy Policy',
     footerRisk: 'Risk Disclosure',
+    officialEmail: 'Official Email',
   },
   en: {
     brand: 'Agnopol',
@@ -110,6 +112,7 @@ const messages: Record<
     footerTerms: 'Terms of Service',
     footerPrivacy: 'Privacy Policy',
     footerRisk: 'Risk Disclosure',
+    officialEmail: 'Official Email',
   },
   es: {
     brand: 'Agnopol',
@@ -135,6 +138,7 @@ const messages: Record<
     footerTerms: 'Terms of Service',
     footerPrivacy: 'Privacy Policy',
     footerRisk: 'Risk Disclosure',
+    officialEmail: 'Official Email',
   },
   fr: {
     brand: 'Agnopol',
@@ -160,6 +164,7 @@ const messages: Record<
     footerTerms: 'Terms of Service',
     footerPrivacy: 'Privacy Policy',
     footerRisk: 'Risk Disclosure',
+    officialEmail: 'Official Email',
   },
   ja: {
     brand: 'Agnopol',
@@ -185,6 +190,7 @@ const messages: Record<
     footerTerms: 'Terms of Service',
     footerPrivacy: 'Privacy Policy',
     footerRisk: 'Risk Disclosure',
+    officialEmail: 'Official Email',
   },
   ko: {
     brand: 'Agnopol',
@@ -210,6 +216,7 @@ const messages: Record<
     footerTerms: 'Terms of Service',
     footerPrivacy: 'Privacy Policy',
     footerRisk: 'Risk Disclosure',
+    officialEmail: 'Official Email',
   },
   'zh-cn': {
     brand: 'Agnopol',
@@ -235,6 +242,7 @@ const messages: Record<
     footerTerms: '服务条款',
     footerPrivacy: '隐私政策',
     footerRisk: '风险披露',
+    officialEmail: '官方邮箱',
   },
   'zh-tw': {
     brand: 'Agnopol',
@@ -260,6 +268,7 @@ const messages: Record<
     footerTerms: '服務條款',
     footerPrivacy: '隱私政策',
     footerRisk: '風險披露',
+    officialEmail: '官方郵箱',
   },
 }
 
@@ -348,6 +357,7 @@ export default function Page() {
       boxSizing: 'border-box',
       boxShadow: active ? '0 10px 28px rgba(11, 23, 51, 0.18)' : '0 8px 24px rgba(15, 23, 42, 0.04)',
       backdropFilter: 'blur(10px)',
+      transition: 'all 0.2s ease',
     }
   }
 
@@ -409,6 +419,21 @@ export default function Page() {
         .agnopol-footer-links a {
           color: #475569;
           text-decoration: none;
+        }
+
+        .agnopol-footer-links a:hover {
+          color: #0f172a;
+          text-decoration: underline;
+        }
+
+        .agnopol-email-link {
+          color: #64748b;
+          text-decoration: none;
+        }
+
+        .agnopol-email-link:hover {
+          color: #0f172a;
+          text-decoration: underline;
         }
 
         @media (min-width: 900px) {
@@ -503,17 +528,23 @@ export default function Page() {
             <div className="agnopol-plan-grid">
               <div onClick={() => setDuration('3m')} style={planCardStyle(duration === '3m')}>
                 <div style={{ fontSize: 18, fontWeight: 800 }}>{t.plan3m}</div>
-                <div style={{ marginTop: 10, fontSize: 22, fontWeight: 900 }}>${prices.tg_premium_3m}</div>
+                <div style={{ marginTop: 10, fontSize: 22, fontWeight: 900 }}>
+                  ${prices.tg_premium_3m}
+                </div>
               </div>
 
               <div onClick={() => setDuration('6m')} style={planCardStyle(duration === '6m')}>
                 <div style={{ fontSize: 18, fontWeight: 800 }}>{t.plan6m}</div>
-                <div style={{ marginTop: 10, fontSize: 22, fontWeight: 900 }}>${prices.tg_premium_6m}</div>
+                <div style={{ marginTop: 10, fontSize: 22, fontWeight: 900 }}>
+                  ${prices.tg_premium_6m}
+                </div>
               </div>
 
               <div onClick={() => setDuration('12m')} style={planCardStyle(duration === '12m')}>
                 <div style={{ fontSize: 18, fontWeight: 800 }}>{t.plan12m}</div>
-                <div style={{ marginTop: 10, fontSize: 22, fontWeight: 900 }}>${prices.tg_premium_12m}</div>
+                <div style={{ marginTop: 10, fontSize: 22, fontWeight: 900 }}>
+                  ${prices.tg_premium_12m}
+                </div>
               </div>
             </div>
           </>
@@ -539,9 +570,18 @@ export default function Page() {
                 background: 'rgba(255,255,255,0.82)',
                 maxWidth: 720,
                 margin: '0 auto',
+                boxShadow: '0 8px 24px rgba(15, 23, 42, 0.04)',
+                backdropFilter: 'blur(10px)',
               }}
             >
-              <div style={{ fontSize: 17, fontWeight: 800, marginBottom: 10, color: '#111827' }}>
+              <div
+                style={{
+                  fontSize: 17,
+                  fontWeight: 800,
+                  marginBottom: 10,
+                  color: '#111827',
+                }}
+              >
                 {t.starsInputLabel}
               </div>
 
@@ -579,6 +619,8 @@ export default function Page() {
             maxWidth: 760,
             marginLeft: 'auto',
             marginRight: 'auto',
+            boxShadow: '0 8px 24px rgba(15, 23, 42, 0.035)',
+            backdropFilter: 'blur(10px)',
           }}
         >
           <div style={{ fontSize: 14, color: '#6b7280', marginBottom: 8 }}>
@@ -654,6 +696,7 @@ export default function Page() {
               fontWeight: 900,
               fontSize: 16,
               cursor: 'pointer',
+              boxShadow: '0 10px 26px rgba(7, 22, 63, 0.18)',
             }}
           >
             {t.createOrder}
@@ -675,6 +718,13 @@ export default function Page() {
           }}
         >
           <p>{t.rights.replace('{year}', String(currentYear))}</p>
+
+          <p style={{ marginTop: 4 }}>
+            <span style={{ marginRight: 6 }}>{t.officialEmail}:</span>
+            <a href="mailto:hello@agnopol.com" className="agnopol-email-link">
+              hello@agnopol.com
+            </a>
+          </p>
 
           <div className="agnopol-footer-links">
             <a href={`/legal?lang=${lang}#terms`}>{t.footerTerms}</a>
