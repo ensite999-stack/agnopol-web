@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
+import { tenMinutesAgoIso } from '../../../lib/time'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -28,6 +29,15 @@ function noStoreJson(data: any, init?: ResponseInit) {
   return response
 }
 
+function getDeviceId(req: Request, body: any) {
+  const bodyDevice = String(body?.device_id || '').trim()
+  if (bodyDevice) return bodyDevice
+
+  const forwarded = req.headers.get('x-forwarded-for') || ''
+  const ua = req.headers.get('user-agent') || ''
+  return `${forwarded}__${ua}`.slice(0, 240)
+}
+
 export async function POST(req: Request) {
   try {
     const supabase = getSupabase()
@@ -47,6 +57,7 @@ export async function POST(req: Request) {
     const proofImageBase64 = body?.proof_image_base64
       ? String(body.proof_image_base64)
       : null
+    const deviceId = getDeviceId(req, body)
 
     if (!email) {
       return noStoreJson({ error: 'Email is required' }, { status: 400 })
@@ -61,9 +72,24 @@ export async function POST(req: Request) {
     }
 
     if (!proofImageBase64 && !txHash) {
+      return noStoreJson({ error: '请上传付款截图或填写交易哈希。' }, { status: 400 })
+    }
+
+    const { count, error: countError } = await supabase
+      .from('orders')
+      .select('id', { count: 'exact', head: true })
+      .eq('email', email)
+      .eq('device_id', deviceId)
+      .gte('created_at', tenMinutesAgoIso())
+
+    if (countError) {
+      throw new Error(countError.message)
+    }
+
+    if ((count || 0) >= 5) {
       return noStoreJson(
-        { error: '请上传付款截图或填写交易哈希。' },
-        { status: 400 }
+        { error: '同邮箱同设备 10 分钟内最多提交 5 单，请稍后再试。' },
+        { status: 429 }
       )
     }
 
@@ -73,6 +99,7 @@ export async function POST(req: Request) {
       order_no: orderNo,
       username: username || null,
       email,
+      device_id: deviceId,
       product_type: productType,
       duration,
       stars_amount: starsAmount,
@@ -82,8 +109,7 @@ export async function POST(req: Request) {
       tx_hash: txHash,
       proof_image_base64: proofImageBase64,
       status: 'paid',
-      public_note:
-        '已收到您的付款凭证，订单正在处理中。预计五分钟内完成，请稍后查询订单详情。',
+      public_note: '已收到您的付款凭证，订单正在处理中。预计五分钟内完成，请稍后查询订单详情。',
       admin_note: null,
       updated_at: new Date().toISOString(),
     }
@@ -106,9 +132,7 @@ export async function POST(req: Request) {
     })
   } catch (error) {
     return noStoreJson(
-      {
-        error: error instanceof Error ? error.message : 'Server error',
-      },
+      { error: error instanceof Error ? error.message : 'Server error' },
       { status: 500 }
     )
   }
