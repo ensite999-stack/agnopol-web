@@ -316,3 +316,46 @@ textarea {
     grid-template-columns: 280px minmax(0, 1fr);
   }
 }
+/* Remove mobile tap highlight / blue flash */
+a,
+button,
+input,
+select,
+textarea,
+.plan-card,
+.segment-btn,
+.network-tab,
+.btn-primary,
+.btn-secondary,
+.card,
+.card-soft {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button,
+.plan-card,
+.segment-btn,
+.network-tab,
+.btn-primary,
+.btn-secondary {
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  touch-action: manipulation;
+}
+
+button:focus,
+button:focus-visible,
+.plan-card:focus,
+.plan-card:focus-visible,
+.segment-btn:focus,
+.segment-btn:focus-visible,
+.network-tab:focus,
+.network-tab:focus-visible,
+.btn-primary:focus,
+.btn-primary:focus-visible,
+.btn-secondary:focus,
+.btn-secondary:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
