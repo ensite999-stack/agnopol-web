@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 import { requireAdminSession } from '../../../../lib/admin-auth'
+import { expirePendingOrders } from '../../../../lib/order-maintenance'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -28,6 +29,8 @@ export async function GET(req: Request) {
     requireAdminSession()
 
     const supabase = getSupabase()
+    await expirePendingOrders(supabase)
+
     const { searchParams } = new URL(req.url)
 
     const status = String(searchParams.get('status') || 'all')
@@ -69,9 +72,7 @@ export async function GET(req: Request) {
     })
   } catch (error) {
     return noStoreJson(
-      {
-        error: error instanceof Error ? error.message : 'Server error',
-      },
+      { error: error instanceof Error ? error.message : 'Server error' },
       { status: error instanceof Error && error.message === 'Unauthorized' ? 401 : 500 }
     )
   }
