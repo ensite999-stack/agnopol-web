@@ -3,6 +3,8 @@ import { NextResponse } from 'next/server'
 import { requireAdminSession } from '../../../../lib/admin-auth'
 
 export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
 
 function getSupabase() {
   const supabaseUrl = process.env.SUPABASE_URL
@@ -13,6 +15,12 @@ function getSupabase() {
   }
 
   return createClient(supabaseUrl, serviceRoleKey)
+}
+
+function noStoreJson(data: any, init?: ResponseInit) {
+  const response = NextResponse.json(data, init)
+  response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+  return response
 }
 
 export async function GET(req: Request) {
@@ -32,7 +40,7 @@ export async function GET(req: Request) {
     let query = supabase
       .from('orders')
       .select(
-        'id, order_no, username, email, product_type, duration, stars_amount, amount, price_usd, payment_network, tx_hash, status, public_note, admin_note, created_at, updated_at',
+        'id, order_no, username, email, product_type, duration, stars_amount, amount, price_usd, payment_network, tx_hash, proof_image_base64, status, public_note, admin_note, created_at, updated_at',
         { count: 'exact' }
       )
       .order('created_at', { ascending: false })
@@ -49,10 +57,10 @@ export async function GET(req: Request) {
     const { data, error, count } = await query
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      return noStoreJson({ error: error.message }, { status: 500 })
     }
 
-    return NextResponse.json({
+    return noStoreJson({
       success: true,
       items: data || [],
       total: count || 0,
@@ -60,7 +68,7 @@ export async function GET(req: Request) {
       page_size: pageSize,
     })
   } catch (error) {
-    return NextResponse.json(
+    return noStoreJson(
       {
         error: error instanceof Error ? error.message : 'Server error',
       },
