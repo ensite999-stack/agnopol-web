@@ -13,16 +13,14 @@ function getSupabase() {
 }
 
 function generateOrderNo() {
-  const now = new Date()
-  const yyyy = now.getFullYear()
-  const mm = String(now.getMonth() + 1).padStart(2, '0')
-  const dd = String(now.getDate()).padStart(2, '0')
-  const hh = String(now.getHours()).padStart(2, '0')
-  const mi = String(now.getMinutes()).padStart(2, '0')
-  const ss = String(now.getSeconds()).padStart(2, '0')
-  const rand = Math.floor(1000 + Math.random() * 9000)
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
+  let randomPart = ''
 
-  return `AGN-${yyyy}${mm}${dd}-${hh}${mi}${ss}-${rand}`
+  for (let i = 0; i < 10; i++) {
+    randomPart += chars[Math.floor(Math.random() * chars.length)]
+  }
+
+  return `AP${randomPart}`
 }
 
 export async function POST(req: Request) {
@@ -59,46 +57,60 @@ export async function POST(req: Request) {
       )
     }
 
-    const order_no = generateOrderNo()
+    let orderNo = generateOrderNo()
+    let insertError: any = null
+    let insertedData: any = null
 
-    const { data, error } = await supabase
-      .from('orders')
-      .insert([
-        {
-          order_no,
-          username,
-          email,
-          product_type,
-          duration,
-          stars_amount: product_type === 'tg_stars' ? Number(stars_amount || 0) : null,
+    for (let i = 0; i < 3; i++) {
+      const { data, error } = await supabase
+        .from('orders')
+        .insert([
+          {
+            order_no: orderNo,
+            username,
+            email,
+            product_type,
+            duration,
+            stars_amount:
+              product_type === 'tg_stars' ? Number(stars_amount || 0) : null,
 
-          // 兼容旧表字段
-          amount: numericPrice,
+            // 兼容旧表
+            amount: numericPrice,
 
-          // 新字段
-          price_usd: numericPrice,
+            // 新字段
+            price_usd: numericPrice,
 
-          payment_network,
-          payment_address,
-          proof_image_base64,
-          tx_hash,
-          status: 'pending',
-        },
-      ])
-      .select()
-      .single()
+            payment_network,
+            payment_address,
+            proof_image_base64,
+            tx_hash,
+            status: 'pending',
+          },
+        ])
+        .select()
+        .single()
 
-    if (error) {
+      if (!error) {
+        insertedData = data
+        insertError = null
+        break
+      }
+
+      insertError = error
+      orderNo = generateOrderNo()
+    }
+
+    if (insertError) {
       return NextResponse.json(
-        { error: error.message },
+        { error: insertError.message },
         { status: 500 }
       )
     }
 
     return NextResponse.json({
       success: true,
-      order_id: data.id,
-      order_no: data.order_no,
+      order_id: insertedData.id,
+      order_no: insertedData.order_no,
     })
   } catch (err) {
     return NextResponse.json(
