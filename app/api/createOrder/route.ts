@@ -43,9 +43,18 @@ export async function POST(req: Request) {
       tx_hash,
     } = body
 
-    if (!email || !price_usd || !payment_network) {
+    if (!email || !payment_network) {
       return NextResponse.json(
         { error: 'Missing required fields' },
+        { status: 400 }
+      )
+    }
+
+    const numericPrice = Number(price_usd || 0)
+
+    if (!numericPrice || Number.isNaN(numericPrice) || numericPrice <= 0) {
+      return NextResponse.json(
+        { error: 'Invalid price_usd' },
         { status: 400 }
       )
     }
@@ -61,8 +70,14 @@ export async function POST(req: Request) {
           email,
           product_type,
           duration,
-          stars_amount,
-          price_usd,
+          stars_amount: product_type === 'tg_stars' ? Number(stars_amount || 0) : null,
+
+          // 兼容旧表字段
+          amount: numericPrice,
+
+          // 新字段
+          price_usd: numericPrice,
+
           payment_network,
           payment_address,
           proof_image_base64,
