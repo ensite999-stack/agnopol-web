@@ -3,6 +3,8 @@ import { NextResponse } from 'next/server'
 import { requireAdminSession } from '../../../../../lib/admin-auth'
 
 export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
 
 function getSupabase() {
   const supabaseUrl = process.env.SUPABASE_URL
@@ -13,6 +15,12 @@ function getSupabase() {
   }
 
   return createClient(supabaseUrl, serviceRoleKey)
+}
+
+function noStoreJson(data: any, init?: ResponseInit) {
+  const response = NextResponse.json(data, init)
+  response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+  return response
 }
 
 export async function PATCH(
@@ -27,15 +35,15 @@ export async function PATCH(
     const id = Number(params.id)
 
     if (!id) {
-      return NextResponse.json({ error: 'Invalid order id' }, { status: 400 })
+      return noStoreJson({ error: 'Invalid order id' }, { status: 400 })
     }
 
-    const allowedStatuses = ['pending_payment', 'paid', 'cancelled']
+    const allowedStatuses = ['pending_payment', 'paid', 'completed', 'cancelled']
     const nextStatus =
       typeof body?.status === 'string' ? body.status.trim() : undefined
 
     if (nextStatus && !allowedStatuses.includes(nextStatus)) {
-      return NextResponse.json({ error: 'Invalid status' }, { status: 400 })
+      return noStoreJson({ error: 'Invalid status' }, { status: 400 })
     }
 
     const patch: Record<string, any> = {
@@ -55,20 +63,20 @@ export async function PATCH(
       .update(patch)
       .eq('id', id)
       .select(
-        'id, order_no, username, email, product_type, duration, stars_amount, amount, price_usd, payment_network, tx_hash, status, public_note, admin_note, created_at, updated_at'
+        'id, order_no, username, email, product_type, duration, stars_amount, amount, price_usd, payment_network, tx_hash, proof_image_base64, status, public_note, admin_note, created_at, updated_at'
       )
       .single()
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      return noStoreJson({ error: error.message }, { status: 500 })
     }
 
-    return NextResponse.json({
+    return noStoreJson({
       success: true,
       item: data,
     })
   } catch (error) {
-    return NextResponse.json(
+    return noStoreJson(
       {
         error: error instanceof Error ? error.message : 'Server error',
       },
@@ -88,21 +96,21 @@ export async function DELETE(
     const id = Number(params.id)
 
     if (!id) {
-      return NextResponse.json({ error: 'Invalid order id' }, { status: 400 })
+      return noStoreJson({ error: 'Invalid order id' }, { status: 400 })
     }
 
     const { error } = await supabase.from('orders').delete().eq('id', id)
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      return noStoreJson({ error: error.message }, { status: 500 })
     }
 
-    return NextResponse.json({
+    return noStoreJson({
       success: true,
       deleted_id: id,
     })
   } catch (error) {
-    return NextResponse.json(
+    return noStoreJson(
       {
         error: error instanceof Error ? error.message : 'Server error',
       },
