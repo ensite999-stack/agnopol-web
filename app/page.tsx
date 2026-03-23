@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState, type CSSProperties } from 'react'
+import { useEffect, useMemo, useState, type ChangeEvent, type CSSProperties } from 'react'
 import { useI18n } from '../components/language-provider'
 import LanguageSwitcher from '../components/language-switcher'
 import { withLang, type Messages } from '../lib/i18n'
@@ -18,8 +18,8 @@ type OrderResult = {
   price_usd: number | null
   payment_network: string | null
   created_at: string | null
-  admin_note: string | null
   public_note: string | null
+  tx_hash: string | null
 }
 
 type PublicConfig = {
@@ -41,23 +41,126 @@ const defaultConfig: PublicConfig = {
   base_address: '0x21E43Ddaa992A0B5cfcCeFE98838239b9E91B40E',
 }
 
-function getStatusLabel(status: string | null | undefined, t: Messages) {
+function buildLookupUi(lang: string) {
+  if (lang === 'zh-cn') {
+    return {
+      title: '订单查询',
+      subtitle: '输入下单邮箱查询订单状态、系统提示，并可按提示重新补交付款凭证。',
+      placeholder: '输入下单邮箱',
+      button: '查询订单',
+      loading: '查询中...',
+      orderNo: '订单号',
+      email: '邮箱',
+      status: '状态',
+      product: '产品',
+      amount: '金额',
+      network: '支付网络',
+      createdAt: '创建时间',
+      note: '系统提示',
+      txHash: '交易哈希',
+      resubmit: '重新上传凭证',
+      chooseFile: '选择文件',
+      proofReady: '新凭证已就绪：',
+      hashPlaceholder: '重新填写交易哈希（可选）',
+      resubmitButton: '提交新的凭证',
+      resubmitting: '提交中...',
+      noOrders: '未找到相关订单。',
+      pending: '待支付',
+      paid: '已支付',
+      cancelled: '已取消',
+      resubmitSuccess: '新的付款凭证已提交成功，请稍后重新查询订单状态。',
+      resubmitError: '重新提交付款凭证失败。',
+    }
+  }
+
+  if (lang === 'zh-tw') {
+    return {
+      title: '訂單查詢',
+      subtitle: '輸入下單電子郵件查詢訂單狀態、系統提示，並可按提示重新補交付款憑證。',
+      placeholder: '輸入下單電子郵件',
+      button: '查詢訂單',
+      loading: '查詢中...',
+      orderNo: '訂單號',
+      email: '電子郵件',
+      status: '狀態',
+      product: '產品',
+      amount: '金額',
+      network: '支付網路',
+      createdAt: '建立時間',
+      note: '系統提示',
+      txHash: '交易哈希',
+      resubmit: '重新上傳憑證',
+      chooseFile: '選擇文件',
+      proofReady: '新憑證已就緒：',
+      hashPlaceholder: '重新填寫交易哈希（可選）',
+      resubmitButton: '提交新的憑證',
+      resubmitting: '提交中...',
+      noOrders: '未找到相關訂單。',
+      pending: '待支付',
+      paid: '已支付',
+      cancelled: '已取消',
+      resubmitSuccess: '新的付款憑證已提交成功，請稍後重新查詢訂單狀態。',
+      resubmitError: '重新提交付款憑證失敗。',
+    }
+  }
+
+  return {
+    title: 'Order Lookup',
+    subtitle: 'Enter your order email to check status, system notices, and resubmit payment proof if requested.',
+    placeholder: 'Enter your order email',
+    button: 'Check Orders',
+    loading: 'Loading...',
+    orderNo: 'Order No',
+    email: 'Email',
+    status: 'Status',
+    product: 'Product',
+    amount: 'Amount',
+    network: 'Payment Network',
+    createdAt: 'Created At',
+    note: 'System Notice',
+    txHash: 'Transaction Hash',
+    resubmit: 'Resubmit Proof',
+    chooseFile: 'Choose File',
+    proofReady: 'New proof ready:',
+    hashPlaceholder: 'Resubmit transaction hash (optional)',
+    resubmitButton: 'Submit New Proof',
+    resubmitting: 'Submitting...',
+    noOrders: 'No matching orders found.',
+    pending: 'Pending Payment',
+    paid: 'Paid',
+    cancelled: 'Cancelled',
+    resubmitSuccess: 'Updated payment proof submitted successfully. Please check the order again later.',
+    resubmitError: 'Failed to resubmit payment proof.',
+  }
+}
+
+function getStatusLabel(status: string | null | undefined, ui: ReturnType<typeof buildLookupUi>) {
   const value = String(status || '').toLowerCase()
 
-  if (value === 'pending' || value === 'pending_payment') return t.lookup.pending
-  if (value === 'processing') return t.lookup.processing
-  if (value === 'completed' || value === 'paid') return t.lookup.completed
-  if (value === 'failed' || value === 'cancelled') return t.lookup.failed
+  if (value === 'pending' || value === 'pending_payment') return ui.pending
+  if (value === 'processing') return ui.pending
+  if (value === 'completed' || value === 'paid') return ui.paid
+  if (value === 'failed' || value === 'cancelled') return ui.cancelled
 
   return status || '-'
 }
 
 function OrderLookupSection() {
-  const { t } = useI18n()
+  const { t, lang } = useI18n()
+  const ui = useMemo(() => buildLookupUi(lang), [lang])
+
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
   const [errorText, setErrorText] = useState('')
   const [results, setResults] = useState<OrderResult[]>([])
+
+  const [activeOrderNo, setActiveOrderNo] = useState('')
+  const [resubmitHash, setResubmitHash] = useState('')
+  const [resubmitProofName, setResubmitProofName] = useState('')
+  const [resubmitProofBase64, setResubmitProofBase64] = useState('')
+  const [resubmitLoading, setResubmitLoading] = useState(false)
+  const [resubmitMessage, setResubmitMessage] = useState('')
+  const [resubmitError, setResubmitError] = useState('')
 
   function getProductLabel(item: OrderResult) {
     if (item.product_type === 'tg_stars') {
@@ -72,6 +175,8 @@ function OrderLookupSection() {
     setLoading(true)
     setErrorText('')
     setResults([])
+    setResubmitMessage('')
+    setResubmitError('')
 
     try {
       const response = await fetch('/api/queryOrder', {
@@ -86,14 +191,75 @@ function OrderLookupSection() {
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data?.error || t.lookup.notFound)
+        throw new Error(data?.error || ui.noOrders)
       }
 
       setResults(data.orders || [])
     } catch (error) {
-      setErrorText(error instanceof Error ? error.message : t.lookup.notFound)
+      setErrorText(error instanceof Error ? error.message : ui.noOrders)
     } finally {
       setLoading(false)
+    }
+  }
+
+  function handleOpenResubmit(orderNo: string) {
+    setActiveOrderNo(orderNo)
+    setResubmitHash('')
+    setResubmitProofName('')
+    setResubmitProofBase64('')
+    setResubmitMessage('')
+    setResubmitError('')
+  }
+
+  function handleResubmitFileChange(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    setResubmitProofName(file.name)
+
+    const reader = new FileReader()
+    reader.onload = () => {
+      const result = reader.result as string
+      setResubmitProofBase64(result)
+    }
+    reader.readAsDataURL(file)
+  }
+
+  async function handleResubmit(orderNo: string) {
+    setResubmitLoading(true)
+    setResubmitMessage('')
+    setResubmitError('')
+
+    try {
+      const response = await fetch('/api/resubmitPayment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: email.trim(),
+          order_no: orderNo,
+          tx_hash: resubmitHash.trim() || null,
+          proof_image_base64: resubmitProofBase64 || null,
+        }),
+        cache: 'no-store',
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data?.error || ui.resubmitError)
+      }
+
+      setResubmitMessage(ui.resubmitSuccess)
+      setActiveOrderNo('')
+      setResubmitHash('')
+      setResubmitProofName('')
+      setResubmitProofBase64('')
+
+      await handleLookup()
+    } catch (error) {
+      setResubmitError(error instanceof Error ? error.message : ui.resubmitError)
+    } finally {
+      setResubmitLoading(false)
     }
   }
 
@@ -107,25 +273,27 @@ function OrderLookupSection() {
           marginBottom: 6,
         }}
       >
-        {t.lookup.title}
+        {ui.title}
       </div>
 
       <div className="small-muted" style={{ marginBottom: 12 }}>
-        {t.lookup.subtitle}
+        {ui.subtitle}
       </div>
 
       <input
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        placeholder={t.lookup.placeholder}
+        placeholder={ui.placeholder}
         className="input"
       />
 
       <button onClick={handleLookup} className="btn-primary" style={{ marginTop: 12 }}>
-        {loading ? t.lookup.loading : t.lookup.button}
+        {loading ? ui.loading : ui.button}
       </button>
 
       {errorText ? <div className="status-box-error">{errorText}</div> : null}
+      {resubmitMessage ? <div className="status-box-success">{resubmitMessage}</div> : null}
+      {resubmitError ? <div className="status-box-error">{resubmitError}</div> : null}
 
       {results.length > 0 ? (
         <div style={{ marginTop: 14, display: 'grid', gap: 12 }}>
@@ -142,30 +310,97 @@ function OrderLookupSection() {
               }}
             >
               <div>
-                <strong>{t.lookup.orderNo}:</strong> {item.order_no}
+                <strong>{ui.orderNo}:</strong> {item.order_no}
               </div>
               <div>
-                <strong>{t.lookup.email}:</strong> {email}
+                <strong>{ui.email}:</strong> {email}
               </div>
               <div>
-                <strong>{t.lookup.status}:</strong> {getStatusLabel(item.status, t)}
+                <strong>{ui.status}:</strong> {getStatusLabel(item.status, ui)}
               </div>
               <div>
-                <strong>{t.lookup.product}:</strong> {getProductLabel(item)}
+                <strong>{ui.product}:</strong> {getProductLabel(item)}
               </div>
               <div>
-                <strong>{t.lookup.amount}:</strong> ${item.price_usd ?? item.amount ?? 0}
+                <strong>{ui.amount}:</strong> ${item.price_usd ?? item.amount ?? 0}
               </div>
               <div>
-                <strong>{t.lookup.network}:</strong> {item.payment_network || '-'}
+                <strong>{ui.network}:</strong> {item.payment_network || '-'}
               </div>
               <div>
-                <strong>{t.lookup.createdAt}:</strong>{' '}
+                <strong>{ui.createdAt}:</strong>{' '}
                 {item.created_at ? new Date(item.created_at).toLocaleString() : '-'}
               </div>
+
+              {item.tx_hash ? (
+                <div
+                  style={{
+                    wordBreak: 'break-all',
+                    overflowWrap: 'anywhere',
+                    whiteSpace: 'pre-wrap',
+                  }}
+                >
+                  <strong>{ui.txHash}:</strong> {item.tx_hash}
+                </div>
+              ) : null}
+
               {item.public_note ? (
-                <div>
-                  <strong>{t.lookup.note}:</strong> {item.public_note}
+                <div
+                  style={{
+                    padding: 12,
+                    borderRadius: 12,
+                    background: 'rgba(255, 236, 179, 0.45)',
+                    border: '1px solid rgba(245, 158, 11, 0.25)',
+                    color: '#7c2d12',
+                    lineHeight: 1.7,
+                  }}
+                >
+                  <strong>{ui.note}:</strong> {item.public_note}
+                </div>
+              ) : null}
+
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={() => handleOpenResubmit(item.order_no)}
+              >
+                {ui.resubmit}
+              </button>
+
+              {activeOrderNo === item.order_no ? (
+                <div
+                  style={{
+                    marginTop: 6,
+                    padding: 12,
+                    borderRadius: 14,
+                    border: '1px dashed rgba(15, 23, 42, 0.18)',
+                    background: 'rgba(255,255,255,0.75)',
+                    display: 'grid',
+                    gap: 10,
+                  }}
+                >
+                  <input type="file" accept="image/*" onChange={handleResubmitFileChange} />
+
+                  {resubmitProofName ? (
+                    <div className="small-muted">
+                      {ui.proofReady} {resubmitProofName}
+                    </div>
+                  ) : null}
+
+                  <input
+                    value={resubmitHash}
+                    onChange={(e) => setResubmitHash(e.target.value)}
+                    placeholder={ui.hashPlaceholder}
+                    className="input"
+                  />
+
+                  <button
+                    type="button"
+                    className="btn-primary"
+                    onClick={() => handleResubmit(item.order_no)}
+                  >
+                    {resubmitLoading ? ui.resubmitting : ui.resubmitButton}
+                  </button>
                 </div>
               ) : null}
             </div>
@@ -312,7 +547,11 @@ export default function HomePage() {
           </button>
         </div>
 
-        {configError ? <div className="status-box-error" style={{ maxWidth: 760, margin: '0 auto 14px' }}>{configError}</div> : null}
+        {configError ? (
+          <div className="status-box-error" style={{ maxWidth: 760, margin: '0 auto 14px' }}>
+            {configError}
+          </div>
+        ) : null}
 
         {tab === 'premium' ? (
           <>
@@ -369,8 +608,12 @@ export default function HomePage() {
                 className="input"
               />
 
-              <div style={{ marginTop: 10, fontSize: 13, color: '#6b7280' }}>{t.home.starsMinHint}</div>
-              <div style={{ marginTop: 4, fontSize: 13, color: '#6b7280' }}>{t.home.autoPriceHint}</div>
+              <div style={{ marginTop: 10, fontSize: 13, color: '#6b7280' }}>
+                {t.home.starsMinHint}
+              </div>
+              <div style={{ marginTop: 4, fontSize: 13, color: '#6b7280' }}>
+                {t.home.autoPriceHint}
+              </div>
             </div>
           </>
         )}
