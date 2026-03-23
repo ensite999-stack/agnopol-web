@@ -1,8 +1,17 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 
-type LangType = 'de' | 'en' | 'es' | 'fr' | 'ja' | 'ko' | 'zh-cn' | 'zh-tw'
+type LangType =
+  | 'de'
+  | 'en'
+  | 'es'
+  | 'fr'
+  | 'ja'
+  | 'ko'
+  | 'zh-cn'
+  | 'zh-tw'
+
 type ProductType = 'premium' | 'stars'
 type DurationType = '3m' | '6m' | '12m'
 
@@ -37,6 +46,7 @@ const messages: Record<
     plan6m: string
     plan12m: string
     currentSelection: string
+    usernamePlaceholder: string
     emailPlaceholder: string
     createOrder: string
     starsInputLabel: string
@@ -63,6 +73,7 @@ const messages: Record<
     plan6m: '6 Monate',
     plan12m: '12 Monate',
     currentSelection: 'Aktuelle Auswahl',
+    usernamePlaceholder: 'Username',
     emailPlaceholder: 'E-Mail',
     createOrder: 'Bestellung erstellen',
     starsInputLabel: 'Stars Menge',
@@ -88,6 +99,7 @@ const messages: Record<
     plan6m: '6 Months',
     plan12m: '12 Months',
     currentSelection: 'Current Selection',
+    usernamePlaceholder: 'Username',
     emailPlaceholder: 'Email',
     createOrder: 'Create Order',
     starsInputLabel: 'Stars Amount',
@@ -113,6 +125,7 @@ const messages: Record<
     plan6m: '6 Meses',
     plan12m: '12 Meses',
     currentSelection: 'Selección actual',
+    usernamePlaceholder: 'Username',
     emailPlaceholder: 'Correo electrónico',
     createOrder: 'Crear pedido',
     starsInputLabel: 'Cantidad de Stars',
@@ -138,6 +151,7 @@ const messages: Record<
     plan6m: '6 Mois',
     plan12m: '12 Mois',
     currentSelection: 'Sélection actuelle',
+    usernamePlaceholder: 'Username',
     emailPlaceholder: 'E-mail',
     createOrder: 'Créer la commande',
     starsInputLabel: 'Quantité de Stars',
@@ -163,6 +177,7 @@ const messages: Record<
     plan6m: '6か月',
     plan12m: '12か月',
     currentSelection: '現在の選択',
+    usernamePlaceholder: 'ユーザー名',
     emailPlaceholder: 'メールアドレス',
     createOrder: '注文を作成',
     starsInputLabel: 'Stars 数量',
@@ -188,6 +203,7 @@ const messages: Record<
     plan6m: '6개월',
     plan12m: '12개월',
     currentSelection: '현재 선택',
+    usernamePlaceholder: '사용자 이름',
     emailPlaceholder: '이메일',
     createOrder: '주문 생성',
     starsInputLabel: 'Stars 수량',
@@ -213,6 +229,7 @@ const messages: Record<
     plan6m: '6个月',
     plan12m: '12个月',
     currentSelection: '当前选择',
+    usernamePlaceholder: '用户名',
     emailPlaceholder: '电子邮件',
     createOrder: '创建订单',
     starsInputLabel: 'Stars 数量',
@@ -238,6 +255,7 @@ const messages: Record<
     plan6m: '6個月',
     plan12m: '12個月',
     currentSelection: '目前選擇',
+    usernamePlaceholder: '用戶名',
     emailPlaceholder: '電子郵件',
     createOrder: '建立訂單',
     starsInputLabel: 'Stars 數量',
@@ -254,27 +272,20 @@ const messages: Record<
   },
 }
 
+const prices: PriceData = {
+  tg_premium_3m: 13.1,
+  tg_premium_6m: 17.1,
+  tg_premium_12m: 31.1,
+  tg_stars_rate: 0.02,
+}
+
 export default function Page() {
-  const [lang, setLang] = useState<LangType>('en')
-  const [prices, setPrices] = useState<PriceData | null>(null)
+  const [lang, setLang] = useState<LangType>('zh-cn')
   const [tab, setTab] = useState<ProductType>('premium')
   const [duration, setDuration] = useState<DurationType>('12m')
   const [stars, setStars] = useState(50)
+  const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
-
-  useEffect(() => {
-    fetch('/api/getPrices')
-      .then((r) => r.json())
-      .then((data) => {
-        setPrices({
-          tg_premium_3m: Number(data.tg_premium_3m),
-          tg_premium_6m: Number(data.tg_premium_6m),
-          tg_premium_12m: Number(data.tg_premium_12m),
-          tg_stars_rate: Number(data.tg_stars_rate),
-        })
-      })
-      .catch(() => setPrices(null))
-  }, [])
 
   const t = messages[lang]
   const currentYear = new Date().getFullYear()
@@ -285,17 +296,14 @@ export default function Page() {
     return Math.floor(stars)
   }, [stars])
 
-  const premiumPrice = useMemo(() => {
-    if (!prices) return null
-    if (duration === '3m') return prices.tg_premium_3m
-    if (duration === '6m') return prices.tg_premium_6m
-    return prices.tg_premium_12m
-  }, [prices, duration])
-
-  const starsPrice = useMemo(() => {
-    if (!prices) return null
+  const selectedPrice = useMemo(() => {
+    if (tab === 'premium') {
+      if (duration === '3m') return prices.tg_premium_3m
+      if (duration === '6m') return prices.tg_premium_6m
+      return prices.tg_premium_12m
+    }
     return Number((safeStars * prices.tg_stars_rate).toFixed(2))
-  }, [prices, safeStars])
+  }, [tab, duration, safeStars])
 
   const selectedTitle = useMemo(() => {
     if (tab === 'premium') {
@@ -306,23 +314,21 @@ export default function Page() {
     return `${t.selectedStars} ${safeStars}`
   }, [tab, duration, safeStars, t])
 
-  const selectedPrice = tab === 'premium' ? premiumPrice : starsPrice
-
-  function handleCreateOrder() {
+  function goPay() {
     const params = new URLSearchParams()
     params.set('lang', lang)
+    params.set('username', username)
     params.set('email', email)
 
     if (tab === 'premium') {
       params.set('product_type', 'tg_premium')
       params.set('duration', duration)
-      params.set('price_usd', String(premiumPrice ?? ''))
     } else {
       params.set('product_type', 'tg_stars')
       params.set('stars_amount', String(safeStars))
-      params.set('price_usd', String(starsPrice ?? ''))
     }
 
+    params.set('price_usd', String(selectedPrice))
     window.location.href = `/pay?${params.toString()}`
   }
 
@@ -533,21 +539,21 @@ export default function Page() {
               <div onClick={() => setDuration('3m')} style={planCardStyle(duration === '3m')}>
                 <div style={{ fontSize: 18, fontWeight: 800 }}>{t.plan3m}</div>
                 <div style={{ marginTop: 10, fontSize: 22, fontWeight: 900 }}>
-                  ${prices ? prices.tg_premium_3m : t.loading}
+                  ${prices.tg_premium_3m}
                 </div>
               </div>
 
               <div onClick={() => setDuration('6m')} style={planCardStyle(duration === '6m')}>
                 <div style={{ fontSize: 18, fontWeight: 800 }}>{t.plan6m}</div>
                 <div style={{ marginTop: 10, fontSize: 22, fontWeight: 900 }}>
-                  ${prices ? prices.tg_premium_6m : t.loading}
+                  ${prices.tg_premium_6m}
                 </div>
               </div>
 
               <div onClick={() => setDuration('12m')} style={planCardStyle(duration === '12m')}>
                 <div style={{ fontSize: 18, fontWeight: 800 }}>{t.plan12m}</div>
                 <div style={{ marginTop: 10, fontSize: 22, fontWeight: 900 }}>
-                  ${prices ? prices.tg_premium_12m : t.loading}
+                  ${prices.tg_premium_12m}
                 </div>
               </div>
             </div>
@@ -654,15 +660,15 @@ export default function Page() {
               lineHeight: 1,
             }}
           >
-            {selectedPrice === null ? t.loading : `$${selectedPrice}`}
+            ${selectedPrice}
           </div>
         </div>
 
         <div style={{ maxWidth: 760, margin: '0 auto' }}>
           <input
-            placeholder={t.emailPlaceholder}
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            placeholder={t.usernamePlaceholder}
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
             style={{
               marginTop: 18,
               width: '100%',
@@ -676,8 +682,25 @@ export default function Page() {
             }}
           />
 
+          <input
+            placeholder={t.emailPlaceholder}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            style={{
+              marginTop: 14,
+              width: '100%',
+              boxSizing: 'border-box',
+              padding: 14,
+              borderRadius: 12,
+              border: '1px solid #d1d5db',
+              fontSize: 16,
+              background: '#fff',
+              boxShadow: '0 2px 10px rgba(15, 23, 42, 0.02)',
+            }}
+          />
+
           <button
-            onClick={handleCreateOrder}
+            onClick={goPay}
             style={{
               marginTop: 16,
               width: '100%',
