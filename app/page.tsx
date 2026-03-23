@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState, type CSSProperties } from 'react'
+import { useEffect, useMemo, useState, type CSSProperties } from 'react'
 import { useI18n } from '../components/language-provider'
 import LanguageSwitcher from '../components/language-switcher'
 import { withLang, type Messages } from '../lib/i18n'
@@ -19,21 +19,36 @@ type OrderResult = {
   payment_network: string | null
   created_at: string | null
   admin_note: string | null
+  public_note: string | null
 }
 
-const prices = {
-  tg_premium_3m: 13.1,
-  tg_premium_6m: 17.1,
-  tg_premium_12m: 31.1,
-  tg_stars_rate: 0.02,
+type PublicConfig = {
+  premium_3m_price: number
+  premium_6m_price: number
+  premium_12m_price: number
+  stars_rate: number
+  trc20_address: string
+  base_address: string
+  updated_at?: string
+}
+
+const defaultConfig: PublicConfig = {
+  premium_3m_price: 13.1,
+  premium_6m_price: 17.1,
+  premium_12m_price: 31.1,
+  stars_rate: 0.02,
+  trc20_address: 'TD6sQK9NmqxKzP6WHvmUdkHQRZvwX6Cy1e',
+  base_address: '0x21E43Ddaa992A0B5cfcCeFE98838239b9E91B40E',
 }
 
 function getStatusLabel(status: string | null | undefined, t: Messages) {
   const value = String(status || '').toLowerCase()
-  if (value === 'pending') return t.lookup.pending
+
+  if (value === 'pending' || value === 'pending_payment') return t.lookup.pending
   if (value === 'processing') return t.lookup.processing
-  if (value === 'completed') return t.lookup.completed
-  if (value === 'failed') return t.lookup.failed
+  if (value === 'completed' || value === 'paid') return t.lookup.completed
+  if (value === 'failed' || value === 'cancelled') return t.lookup.failed
+
   return status || '-'
 }
 
@@ -59,7 +74,7 @@ function OrderLookupSection() {
     setResults([])
 
     try {
-      const response = await fetch(`${window.location.origin}/api/queryOrder`, {
+      const response = await fetch('/api/queryOrder', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -126,18 +141,32 @@ function OrderLookupSection() {
                 gap: 8,
               }}
             >
-              <div><strong>{t.lookup.orderNo}:</strong> {item.order_no}</div>
-              <div><strong>{t.lookup.email}:</strong> {email}</div>
-              <div><strong>{t.lookup.status}:</strong> {getStatusLabel(item.status, t)}</div>
-              <div><strong>{t.lookup.product}:</strong> {getProductLabel(item)}</div>
-              <div><strong>{t.lookup.amount}:</strong> ${item.price_usd ?? item.amount ?? 0}</div>
-              <div><strong>{t.lookup.network}:</strong> {item.payment_network || '-'}</div>
+              <div>
+                <strong>{t.lookup.orderNo}:</strong> {item.order_no}
+              </div>
+              <div>
+                <strong>{t.lookup.email}:</strong> {email}
+              </div>
+              <div>
+                <strong>{t.lookup.status}:</strong> {getStatusLabel(item.status, t)}
+              </div>
+              <div>
+                <strong>{t.lookup.product}:</strong> {getProductLabel(item)}
+              </div>
+              <div>
+                <strong>{t.lookup.amount}:</strong> ${item.price_usd ?? item.amount ?? 0}
+              </div>
+              <div>
+                <strong>{t.lookup.network}:</strong> {item.payment_network || '-'}
+              </div>
               <div>
                 <strong>{t.lookup.createdAt}:</strong>{' '}
                 {item.created_at ? new Date(item.created_at).toLocaleString() : '-'}
               </div>
-              {item.admin_note ? (
-                <div><strong>{t.lookup.note}:</strong> {item.admin_note}</div>
+              {item.public_note ? (
+                <div>
+                  <strong>{t.lookup.note}:</strong> {item.public_note}
+                </div>
               ) : null}
             </div>
           ))}
@@ -154,8 +183,58 @@ export default function HomePage() {
   const [stars, setStars] = useState(50)
   const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
+  const [config, setConfig] = useState<PublicConfig>(defaultConfig)
+  const [configError, setConfigError] = useState('')
+  const [configLoading, setConfigLoading] = useState(true)
 
   const currentYear = new Date().getFullYear()
+
+  useEffect(() => {
+    let active = true
+
+    async function loadConfig() {
+      setConfigLoading(true)
+      setConfigError('')
+
+      try {
+        const response = await fetch('/api/public/config', {
+          cache: 'no-store',
+        })
+        const data = await response.json()
+
+        if (!response.ok) {
+          throw new Error(data?.error || 'Failed to load config')
+        }
+
+        if (active && data?.item) {
+          setConfig({
+            premium_3m_price: Number(data.item.premium_3m_price ?? defaultConfig.premium_3m_price),
+            premium_6m_price: Number(data.item.premium_6m_price ?? defaultConfig.premium_6m_price),
+            premium_12m_price: Number(data.item.premium_12m_price ?? defaultConfig.premium_12m_price),
+            stars_rate: Number(data.item.stars_rate ?? defaultConfig.stars_rate),
+            trc20_address: String(data.item.trc20_address ?? defaultConfig.trc20_address),
+            base_address: String(data.item.base_address ?? defaultConfig.base_address),
+            updated_at: data.item.updated_at,
+          })
+        }
+      } catch (error) {
+        if (active) {
+          setConfigError(error instanceof Error ? error.message : 'Failed to load config')
+          setConfig(defaultConfig)
+        }
+      } finally {
+        if (active) {
+          setConfigLoading(false)
+        }
+      }
+    }
+
+    loadConfig()
+
+    return () => {
+      active = false
+    }
+  }, [])
 
   const safeStars = useMemo(() => {
     if (!Number.isFinite(stars)) return 50
@@ -165,12 +244,13 @@ export default function HomePage() {
 
   const selectedPrice = useMemo(() => {
     if (tab === 'premium') {
-      if (duration === '3m') return prices.tg_premium_3m
-      if (duration === '6m') return prices.tg_premium_6m
-      return prices.tg_premium_12m
+      if (duration === '3m') return Number(config.premium_3m_price)
+      if (duration === '6m') return Number(config.premium_6m_price)
+      return Number(config.premium_12m_price)
     }
-    return Number((safeStars * prices.tg_stars_rate).toFixed(2))
-  }, [tab, duration, safeStars])
+
+    return Number((safeStars * Number(config.stars_rate)).toFixed(2))
+  }, [tab, duration, safeStars, config])
 
   const selectedTitle = useMemo(() => {
     if (tab === 'premium') {
@@ -178,6 +258,7 @@ export default function HomePage() {
         duration === '3m' ? t.home.months3 : duration === '6m' ? t.home.months6 : t.home.months12
       return `${t.home.tgPremium} ${durationText}`
     }
+
     return `${t.home.tgStars} ${safeStars}`
   }, [tab, duration, safeStars, t])
 
@@ -188,8 +269,8 @@ export default function HomePage() {
   function goPay() {
     const params = new URLSearchParams()
     params.set('lang', lang)
-    params.set('username', username)
-    params.set('email', email)
+    params.set('username', username.trim())
+    params.set('email', email.trim())
     params.set('price_usd', String(selectedPrice))
 
     if (tab === 'premium') {
@@ -231,6 +312,8 @@ export default function HomePage() {
           </button>
         </div>
 
+        {configError ? <div className="status-box-error" style={{ maxWidth: 760, margin: '0 auto 14px' }}>{configError}</div> : null}
+
         {tab === 'premium' ? (
           <>
             <p className="section-caption">{t.home.premiumPlans}</p>
@@ -242,7 +325,7 @@ export default function HomePage() {
               >
                 <div style={{ fontSize: 18, fontWeight: 800 }}>{t.home.months3}</div>
                 <div style={{ marginTop: 10, fontSize: 22, fontWeight: 900 }}>
-                  ${prices.tg_premium_3m}
+                  ${Number(config.premium_3m_price)}
                 </div>
               </div>
 
@@ -252,7 +335,7 @@ export default function HomePage() {
               >
                 <div style={{ fontSize: 18, fontWeight: 800 }}>{t.home.months6}</div>
                 <div style={{ marginTop: 10, fontSize: 22, fontWeight: 900 }}>
-                  ${prices.tg_premium_6m}
+                  ${Number(config.premium_6m_price)}
                 </div>
               </div>
 
@@ -262,7 +345,7 @@ export default function HomePage() {
               >
                 <div style={{ fontSize: 18, fontWeight: 800 }}>{t.home.months12}</div>
                 <div style={{ marginTop: 10, fontSize: 22, fontWeight: 900 }}>
-                  ${prices.tg_premium_12m}
+                  ${Number(config.premium_12m_price)}
                 </div>
               </div>
             </div>
@@ -318,6 +401,12 @@ export default function HomePage() {
           >
             ${selectedPrice}
           </div>
+
+          {configLoading ? (
+            <div style={{ marginTop: 10, fontSize: 13, color: '#6b7280' }}>
+              {t.common.loading}
+            </div>
+          ) : null}
         </div>
 
         <div className="form-stack">
