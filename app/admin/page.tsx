@@ -20,9 +20,16 @@ export default function AdminPage() {
           }}
         >
           <div>
-            <h1 style={{ margin: 0, fontSize: 'clamp(28px, 4vw, 42px)', fontWeight: 900 }}>
+            <h1
+              style={{
+                margin: 0,
+                fontSize: 'clamp(28px, 4vw, 42px)',
+                fontWeight: 900,
+              }}
+            >
               {t.admin.title}
             </h1>
+
             <p className="small-muted" style={{ marginTop: 8 }}>
               {t.admin.subtitle}
             </p>
@@ -36,9 +43,11 @@ export default function AdminPage() {
             <div className="card-soft">
               <div style={{ fontWeight: 800 }}>{t.admin.orders}</div>
             </div>
+
             <div className="card-soft">
               <div style={{ fontWeight: 800 }}>{t.admin.pricing}</div>
             </div>
+
             <div className="card-soft">
               <div style={{ fontWeight: 800 }}>{t.admin.settings}</div>
             </div>
@@ -55,18 +64,25 @@ export default function AdminPage() {
               >
                 <div className="card">
                   <div className="small-muted">{t.admin.pendingOrders}</div>
-                  <div style={{ fontSize: 28, fontWeight: 900, marginTop: 6 }}>12</div>
+                  <div style={{ fontSize: 28, fontWeight: 900, marginTop: 6 }}>
+                    12
+                  </div>
                 </div>
 
                 <div className="card">
                   <div className="small-muted">{t.admin.totalOrders}</div>
-                  <div style={{ fontSize: 28, fontWeight: 900, marginTop: 6 }}>248</div>
+                  <div style={{ fontSize: 28, fontWeight: 900, marginTop: 6 }}>
+                    248
+                  </div>
                 </div>
               </div>
             </div>
 
             <div className="card-soft">
-              <input className="input" placeholder={t.admin.searchPlaceholder} />
+              <input
+                className="input"
+                placeholder={t.admin.searchPlaceholder}
+              />
 
               <div
                 style={{
@@ -76,11 +92,21 @@ export default function AdminPage() {
                 }}
               >
                 <div className="card">
-                  <div><strong>{t.admin.customerEmail}:</strong> demo@example.com</div>
-                  <div><strong>{t.admin.telegramUsername}:</strong> @demo_user</div>
-                  <div><strong>{t.admin.paymentNetwork}:</strong> TRC20 USDT</div>
-                  <div><strong>{t.admin.createdAt}:</strong> 2026-03-23 15:00</div>
-                  <div><strong>{t.admin.status}:</strong> pending</div>
+                  <div>
+                    <strong>{t.admin.customerEmail}:</strong> demo@example.com
+                  </div>
+                  <div>
+                    <strong>{t.admin.telegramUsername}:</strong> @demo_user
+                  </div>
+                  <div>
+                    <strong>{t.admin.paymentNetwork}:</strong> TRC20 USDT
+                  </div>
+                  <div>
+                    <strong>{t.admin.createdAt}:</strong> 2026-03-23 15:00
+                  </div>
+                  <div>
+                    <strong>{t.admin.status}:</strong> pending
+                  </div>
                 </div>
               </div>
 
