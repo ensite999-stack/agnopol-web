@@ -17,7 +17,7 @@ import {
   normalizeLang,
   type LangCode,
   type Messages,
-} from '@/lib/i18n'
+} from '../lib/i18n'
 
 type LanguageContextValue = {
   lang: LangCode
@@ -29,6 +29,7 @@ const LanguageContext = createContext<LanguageContextValue | null>(null)
 
 function setDocumentLang(lang: LangCode) {
   if (typeof document === 'undefined') return
+
   const map: Record<LangCode, string> = {
     de: 'de',
     en: 'en',
@@ -39,6 +40,7 @@ function setDocumentLang(lang: LangCode) {
     'zh-cn': 'zh-CN',
     'zh-tw': 'zh-TW',
   }
+
   document.documentElement.lang = map[lang]
 }
 
@@ -55,10 +57,13 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
   const applyLang = useCallback((nextLang: LangCode, syncUrl = true) => {
     setLangState(nextLang)
+
     if (typeof window !== 'undefined') {
       localStorage.setItem(LANG_STORAGE_KEY, nextLang)
     }
+
     setDocumentLang(nextLang)
+
     if (syncUrl) {
       syncUrlLang(nextLang)
     }
