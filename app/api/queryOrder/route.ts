@@ -1,6 +1,10 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 function getSupabase() {
   const supabaseUrl = process.env.SUPABASE_URL
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -12,60 +16,47 @@ function getSupabase() {
   return createClient(supabaseUrl, serviceRoleKey)
 }
 
-export async function GET() {
-  return NextResponse.json({
-    ok: true,
-    route: 'queryOrder',
-    message: 'Use POST with email to query orders.',
-  })
+function noStoreJson(data: any, init?: ResponseInit) {
+  const response = NextResponse.json(data, init)
+  response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+  return response
 }
 
 export async function POST(req: Request) {
   try {
     const supabase = getSupabase()
     const body = await req.json()
-    const email = String(body?.email || '')
-      .trim()
-      .toLowerCase()
+    const email = String(body?.email || '').trim().toLowerCase()
 
     if (!email) {
-      return NextResponse.json(
-        { error: 'Missing email' },
-        { status: 400 }
-      )
+      return noStoreJson({ error: 'Email is required' }, { status: 400 })
     }
 
     const { data, error } = await supabase
       .from('orders')
       .select(
-        'id, order_no, username, email, product_type, duration, stars_amount, amount, price_usd, payment_network, status, admin_note, created_at'
+        'order_no, status, product_type, duration, stars_amount, amount, price_usd, payment_network, created_at, public_note, tx_hash'
       )
-      .ilike('email', email)
+      .eq('email', email)
       .order('created_at', { ascending: false })
-      .limit(10)
+      .limit(20)
 
     if (error) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: 500 }
-      )
+      throw new Error(error.message)
     }
 
     if (!data || data.length === 0) {
-      return NextResponse.json(
-        { error: 'No orders found for this email' },
-        { status: 404 }
-      )
+      return noStoreJson({ error: 'No orders found for this email.' }, { status: 404 })
     }
 
-    return NextResponse.json({
+    return noStoreJson({
       success: true,
       orders: data,
     })
-  } catch (err) {
-    return NextResponse.json(
+  } catch (error) {
+    return noStoreJson(
       {
-        error: err instanceof Error ? err.message : 'Server error',
+        error: error instanceof Error ? error.message : 'Server error',
       },
       { status: 500 }
     )
