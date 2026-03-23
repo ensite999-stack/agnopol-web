@@ -94,8 +94,10 @@ function buildUi(lang: string) {
       orderCreated: '付款信息已提交成功。',
       orderNo: '订单号',
       successDesc: '您的订单已进入处理流程。预计五分钟内处理完成，请稍后通过首页订单查询功能查看订单详细信息。',
+      lockedHint: '当前支付页已锁定，不能再次修改付款凭证。如需补交，请等待后台提示后，通过首页订单查询页重新上传。',
       invalidOrder: '订单信息无效。',
       createError: '提交付款失败。',
+      goLookup: '返回首页查询订单',
     }
   }
 
@@ -134,8 +136,10 @@ function buildUi(lang: string) {
       orderCreated: '付款資訊已提交成功。',
       orderNo: '訂單號',
       successDesc: '您的訂單已進入處理流程。預計五分鐘內處理完成，請稍後透過首頁訂單查詢功能查看訂單詳細資訊。',
+      lockedHint: '當前支付頁已鎖定，不能再次修改付款憑證。如需補交，請等待後台提示後，透過首頁訂單查詢頁重新上傳。',
       invalidOrder: '訂單資訊無效。',
       createError: '提交付款失敗。',
+      goLookup: '返回首頁查詢訂單',
     }
   }
 
@@ -173,8 +177,11 @@ function buildUi(lang: string) {
     orderCreated: 'Payment information submitted successfully.',
     orderNo: 'Order No',
     successDesc: 'Your order has entered processing. Please check the order details later from the homepage lookup.',
+    lockedHint:
+      'This payment page is locked after submission. If you need to resubmit proof, wait for the admin instruction and use the homepage order lookup page.',
     invalidOrder: 'Invalid order information.',
     createError: 'Failed to submit payment.',
+    goLookup: 'Go to homepage lookup',
   }
 }
 
@@ -209,7 +216,8 @@ export default function PayPage() {
     let active = true
 
     async function boot() {
-      setParams(getQueryParams())
+      const nextParams = getQueryParams()
+      setParams(nextParams)
 
       try {
         const response = await fetch('/api/public/config', {
@@ -251,6 +259,32 @@ export default function PayPage() {
     }
   }, [])
 
+  const pageLockKey = useMemo(() => {
+    if (!ready) return ''
+    return `agnopol-pay-lock:${params.email}:${params.productType}:${params.duration}:${params.starsAmount}:${params.priceUsd}`
+  }, [ready, params.email, params.productType, params.duration, params.starsAmount, params.priceUsd])
+
+  useEffect(() => {
+    if (!pageLockKey) return
+
+    try {
+      const saved = sessionStorage.getItem(pageLockKey)
+      if (!saved) return
+
+      const parsed = JSON.parse(saved)
+      if (parsed?.order_no) {
+        setSuccessOrderNo(parsed.order_no)
+        setProofName(parsed.proof_name || '')
+        setProofPreview(parsed.proof_preview || '')
+        setTxHash(parsed.tx_hash || '')
+      }
+    } catch {
+      // ignore
+    }
+  }, [pageLockKey])
+
+  const isLocked = Boolean(successOrderNo)
+
   const networkAddress =
     selectedNetwork === 'trc20_usdt' ? config.trc20_address : config.base_address
 
@@ -274,10 +308,13 @@ export default function PayPage() {
   }
 
   function handleChooseFile() {
+    if (isLocked) return
     fileRef.current?.click()
   }
 
   function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
+    if (isLocked) return
+
     const file = event.target.files?.[0]
     if (!file) return
 
@@ -293,6 +330,8 @@ export default function PayPage() {
   }
 
   async function handleSubmit() {
+    if (isLocked) return
+
     setSubmitting(true)
     setErrorText('')
     setSuccessOrderNo('')
@@ -303,7 +342,13 @@ export default function PayPage() {
       }
 
       if (!proofBase64 && !txHash.trim()) {
-        throw new Error(lang === 'zh-cn' ? '请先上传付款截图或填写交易哈希。' : lang === 'zh-tw' ? '請先上傳付款截圖或填寫交易哈希。' : 'Please upload payment proof or enter a transaction hash.')
+        throw new Error(
+          lang === 'zh-cn'
+            ? '请先上传付款截图或填写交易哈希。'
+            : lang === 'zh-tw'
+            ? '請先上傳付款截圖或填寫交易哈希。'
+            : 'Please upload payment proof or enter a transaction hash.'
+        )
       }
 
       const payload = {
@@ -333,6 +378,18 @@ export default function PayPage() {
       }
 
       setSuccessOrderNo(data?.order_no || '')
+
+      if (pageLockKey) {
+        sessionStorage.setItem(
+          pageLockKey,
+          JSON.stringify({
+            order_no: data?.order_no || '',
+            proof_name: proofName,
+            proof_preview: proofPreview,
+            tx_hash: txHash.trim(),
+          })
+        )
+      }
     } catch (error) {
       setErrorText(error instanceof Error ? error.message : ui.createError)
     } finally {
@@ -479,6 +536,7 @@ export default function PayPage() {
                 type="button"
                 className={`network-tab ${selectedNetwork === 'trc20_usdt' ? 'active' : ''}`}
                 onClick={() => setSelectedNetwork('trc20_usdt')}
+                disabled={isLocked}
               >
                 {ui.trc20Label}
               </button>
@@ -487,6 +545,7 @@ export default function PayPage() {
                 type="button"
                 className={`network-tab ${selectedNetwork === 'base_usdc' ? 'active' : ''}`}
                 onClick={() => setSelectedNetwork('base_usdc')}
+                disabled={isLocked}
               >
                 {ui.baseLabel}
               </button>
@@ -570,7 +629,13 @@ export default function PayPage() {
                   style={{ display: 'none' }}
                 />
 
-                <button type="button" className="btn-secondary" onClick={handleChooseFile}>
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  onClick={handleChooseFile}
+                  disabled={isLocked}
+                  style={{ opacity: isLocked ? 0.7 : 1 }}
+                >
                   {ui.selectFile}
                 </button>
 
@@ -604,10 +669,18 @@ export default function PayPage() {
 
                 <input
                   value={txHash}
-                  onChange={(e) => setTxHash(e.target.value)}
+                  onChange={(e) => {
+                    if (isLocked) return
+                    setTxHash(e.target.value)
+                  }}
                   placeholder={ui.txHashPlaceholder}
                   className="input"
-                  style={{ padding: 12, fontSize: 14 }}
+                  readOnly={isLocked}
+                  style={{
+                    padding: 12,
+                    fontSize: 14,
+                    opacity: isLocked ? 0.85 : 1,
+                  }}
                 />
 
                 <div style={{ marginTop: 10, fontSize: 12, color: '#6b7280', lineHeight: 1.6 }}>
@@ -616,24 +689,56 @@ export default function PayPage() {
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={handleSubmit}
-              disabled={submitting}
-              className="btn-primary"
-              style={{ marginTop: 16, opacity: submitting ? 0.8 : 1 }}
-            >
-              {submitting ? ui.submitting : ui.submit}
-            </button>
+            {!isLocked ? (
+              <button
+                type="button"
+                onClick={handleSubmit}
+                disabled={submitting}
+                className="btn-primary"
+                style={{ marginTop: 16, opacity: submitting ? 0.8 : 1 }}
+              >
+                {submitting ? ui.submitting : ui.submit}
+              </button>
+            ) : null}
 
             {successOrderNo ? (
-              <div className="status-box-success">
-                <div style={{ fontWeight: 800 }}>{ui.orderCreated}</div>
-                <div style={{ marginTop: 6 }}>
-                  {ui.orderNo}: {successOrderNo}
+              <>
+                <div className="status-box-success">
+                  <div style={{ fontWeight: 800 }}>{ui.orderCreated}</div>
+                  <div style={{ marginTop: 6 }}>
+                    {ui.orderNo}: {successOrderNo}
+                  </div>
+                  <div style={{ marginTop: 8 }}>{ui.successDesc}</div>
                 </div>
-                <div style={{ marginTop: 8 }}>{ui.successDesc}</div>
-              </div>
+
+                <div
+                  style={{
+                    marginTop: 12,
+                    padding: 14,
+                    borderRadius: 16,
+                    background: 'rgba(245, 158, 11, 0.08)',
+                    border: '1px solid rgba(245, 158, 11, 0.2)',
+                    color: '#92400e',
+                    lineHeight: 1.7,
+                  }}
+                >
+                  {ui.lockedHint}
+                </div>
+
+                <a
+                  href={`/?lang=${lang}`}
+                  className="btn-secondary"
+                  style={{
+                    marginTop: 12,
+                    textDecoration: 'none',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  {ui.goLookup}
+                </a>
+              </>
             ) : null}
 
             {errorText ? <div className="status-box-error">{errorText}</div> : null}
