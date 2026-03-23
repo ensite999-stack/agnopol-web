@@ -1,7 +1,6 @@
 'use client'
 
-import { useMemo, useRef, useState } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 type LangType =
   | 'de'
@@ -14,6 +13,16 @@ type LangType =
   | 'zh-tw'
 
 type PaymentNetwork = 'trc20_usdt' | 'base_usdc'
+
+type PayParams = {
+  lang: LangType
+  username: string
+  email: string
+  productType: string
+  duration: string
+  starsAmount: string
+  priceUsd: string
+}
 
 const NETWORKS: Record<PaymentNetwork, { label: string; address: string }> = {
   trc20_usdt: {
@@ -64,6 +73,7 @@ const messages: Record<
     months3: string
     months6: string
     months12: string
+    loading: string
   }
 > = {
   de: {
@@ -103,6 +113,7 @@ const messages: Record<
     months3: '3 Months',
     months6: '6 Months',
     months12: '12 Months',
+    loading: 'Loading payment page...',
   },
   en: {
     title: 'Payment',
@@ -141,6 +152,7 @@ const messages: Record<
     months3: '3 Months',
     months6: '6 Months',
     months12: '12 Months',
+    loading: 'Loading payment page...',
   },
   es: {
     title: 'Payment',
@@ -179,6 +191,7 @@ const messages: Record<
     months3: '3 Months',
     months6: '6 Months',
     months12: '12 Months',
+    loading: 'Loading payment page...',
   },
   fr: {
     title: 'Payment',
@@ -217,6 +230,7 @@ const messages: Record<
     months3: '3 Months',
     months6: '6 Months',
     months12: '12 Months',
+    loading: 'Loading payment page...',
   },
   ja: {
     title: 'Payment',
@@ -255,6 +269,7 @@ const messages: Record<
     months3: '3 Months',
     months6: '6 Months',
     months12: '12 Months',
+    loading: 'Loading payment page...',
   },
   ko: {
     title: 'Payment',
@@ -293,6 +308,7 @@ const messages: Record<
     months3: '3 Months',
     months6: '6 Months',
     months12: '12 Months',
+    loading: 'Loading payment page...',
   },
   'zh-cn': {
     title: '支付页',
@@ -331,6 +347,7 @@ const messages: Record<
     months3: '3个月',
     months6: '6个月',
     months12: '12个月',
+    loading: '正在加载支付页...',
   },
   'zh-tw': {
     title: '支付頁',
@@ -369,6 +386,7 @@ const messages: Record<
     months3: '3個月',
     months6: '6個月',
     months12: '12個月',
+    loading: '正在載入支付頁...',
   },
 }
 
@@ -377,19 +395,44 @@ function normalizeLang(value: string | null): LangType {
   return allowed.includes(value as LangType) ? (value as LangType) : 'en'
 }
 
+function getQueryParams(): PayParams {
+  if (typeof window === 'undefined') {
+    return {
+      lang: 'en',
+      username: '',
+      email: '',
+      productType: 'tg_premium',
+      duration: '12m',
+      starsAmount: '50',
+      priceUsd: '0',
+    }
+  }
+
+  const searchParams = new URLSearchParams(window.location.search)
+
+  return {
+    lang: normalizeLang(searchParams.get('lang')),
+    username: searchParams.get('username') || '',
+    email: searchParams.get('email') || '',
+    productType: searchParams.get('product_type') || 'tg_premium',
+    duration: searchParams.get('duration') || '12m',
+    starsAmount: searchParams.get('stars_amount') || '50',
+    priceUsd: searchParams.get('price_usd') || '0',
+  }
+}
+
 export default function PayPage() {
-  const searchParams = useSearchParams()
+  const [params, setParams] = useState<PayParams>({
+    lang: 'en',
+    username: '',
+    email: '',
+    productType: 'tg_premium',
+    duration: '12m',
+    starsAmount: '50',
+    priceUsd: '0',
+  })
 
-  const lang = normalizeLang(searchParams.get('lang'))
-  const t = messages[lang]
-
-  const username = searchParams.get('username') || ''
-  const email = searchParams.get('email') || ''
-  const productType = searchParams.get('product_type') || 'tg_premium'
-  const duration = searchParams.get('duration') || '12m'
-  const starsAmount = searchParams.get('stars_amount') || '50'
-  const priceUsd = searchParams.get('price_usd') || '0'
-
+  const [ready, setReady] = useState(false)
   const [selectedNetwork, setSelectedNetwork] = useState<PaymentNetwork>('trc20_usdt')
   const [copiedNetwork, setCopiedNetwork] = useState<PaymentNetwork | null>(null)
   const [proofName, setProofName] = useState('')
@@ -400,16 +443,22 @@ export default function PayPage() {
   const [errorText, setErrorText] = useState('')
   const fileRef = useRef<HTMLInputElement | null>(null)
 
+  useEffect(() => {
+    setParams(getQueryParams())
+    setReady(true)
+  }, [])
+
+  const t = messages[params.lang]
   const selectedAddress = NETWORKS[selectedNetwork].address
 
   const productLabel = useMemo(() => {
-    if (productType === 'tg_stars') {
-      return `${t.stars} ${starsAmount}`
+    if (params.productType === 'tg_stars') {
+      return `${t.stars} ${params.starsAmount}`
     }
-    if (duration === '3m') return `${t.premium} ${t.months3}`
-    if (duration === '6m') return `${t.premium} ${t.months6}`
+    if (params.duration === '3m') return `${t.premium} ${t.months3}`
+    if (params.duration === '6m') return `${t.premium} ${t.months6}`
     return `${t.premium} ${t.months12}`
-  }, [productType, duration, starsAmount, t])
+  }, [params.productType, params.duration, params.starsAmount, t])
 
   async function handleCopy(text: string, network: PaymentNetwork) {
     try {
@@ -430,14 +479,13 @@ export default function PayPage() {
     if (!file) return
 
     setProofName(file.name)
-    const reader = new FileReader()
 
+    const reader = new FileReader()
     reader.onload = () => {
       const result = reader.result as string
       setProofBase64(result)
       setProofPreview(result)
     }
-
     reader.readAsDataURL(file)
   }
 
@@ -448,12 +496,12 @@ export default function PayPage() {
 
     try {
       const payload = {
-        username,
-        email,
-        product_type: productType,
-        duration: productType === 'tg_premium' ? duration : null,
-        stars_amount: productType === 'tg_stars' ? Number(starsAmount) : null,
-        price_usd: Number(priceUsd),
+        username: params.username,
+        email: params.email,
+        product_type: params.productType,
+        duration: params.productType === 'tg_premium' ? params.duration : null,
+        stars_amount: params.productType === 'tg_stars' ? Number(params.starsAmount) : null,
+        price_usd: Number(params.priceUsd),
         payment_network: selectedNetwork,
         payment_address: selectedAddress,
         proof_image_base64: proofBase64 || null,
@@ -479,6 +527,35 @@ export default function PayPage() {
     } finally {
       setSubmitting(false)
     }
+  }
+
+  if (!ready) {
+    return (
+      <main
+        style={{
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontFamily: 'system-ui, Arial, sans-serif',
+          background:
+            'radial-gradient(circle at top, rgba(224,231,255,0.45), rgba(247,248,250,0) 38%), linear-gradient(180deg, #f8fafc 0%, #f5f7fb 100%)',
+        }}
+      >
+        <div
+          style={{
+            padding: '14px 18px',
+            borderRadius: 14,
+            background: 'rgba(255,255,255,0.9)',
+            border: '1px solid rgba(15, 23, 42, 0.08)',
+            color: '#475569',
+            fontSize: 14,
+          }}
+        >
+          {messages.en.loading}
+        </div>
+      </main>
+    )
   }
 
   return (
@@ -532,7 +609,7 @@ export default function PayPage() {
       <div className="pay-container">
         <div style={{ marginBottom: 16 }}>
           <a
-            href={`/?lang=${lang}`}
+            href={`/?lang=${params.lang}`}
             style={{
               textDecoration: 'none',
               color: '#475569',
@@ -594,7 +671,7 @@ export default function PayPage() {
                 marginBottom: 14,
               }}
             >
-              ${priceUsd}
+              ${params.priceUsd}
             </div>
 
             <div style={{ display: 'grid', gap: 10 }}>
@@ -605,20 +682,20 @@ export default function PayPage() {
 
               <div>
                 <div style={{ fontSize: 12, color: '#64748b' }}>{t.amount}</div>
-                <div style={{ fontWeight: 700, color: '#0f172a' }}>${priceUsd}</div>
+                <div style={{ fontWeight: 700, color: '#0f172a' }}>${params.priceUsd}</div>
               </div>
 
               <div>
                 <div style={{ fontSize: 12, color: '#64748b' }}>{t.username}</div>
                 <div style={{ fontWeight: 700, color: '#0f172a', wordBreak: 'break-all' }}>
-                  {username || '-'}
+                  {params.username || '-'}
                 </div>
               </div>
 
               <div>
                 <div style={{ fontSize: 12, color: '#64748b' }}>{t.email}</div>
                 <div style={{ fontWeight: 700, color: '#0f172a', wordBreak: 'break-all' }}>
-                  {email || '-'}
+                  {params.email || '-'}
                 </div>
               </div>
             </div>
