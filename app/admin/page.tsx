@@ -70,6 +70,7 @@ const adminTexts = {
     txHash: '交易哈希',
     proofImage: '付款截图',
     openImage: '查看大图',
+    closeImage: '关闭预览',
     publicNote: '用户可见提示',
     adminNote: '后台备注',
     saveChanges: '保存修改',
@@ -131,6 +132,7 @@ const adminTexts = {
     txHash: '交易哈希',
     proofImage: '付款截圖',
     openImage: '查看大圖',
+    closeImage: '關閉預覽',
     publicNote: '用戶可見提示',
     adminNote: '後台備註',
     saveChanges: '保存修改',
@@ -191,7 +193,8 @@ const adminTexts = {
     paymentNetwork: 'Payment Network',
     txHash: 'Transaction Hash',
     proofImage: 'Payment Screenshot',
-    openImage: 'Open Full Image',
+    openImage: 'Preview Image',
+    closeImage: 'Close Preview',
     publicNote: 'User Visible Note',
     adminNote: 'Internal Admin Note',
     saveChanges: 'Save Changes',
@@ -297,6 +300,8 @@ export default function AdminPage() {
   const [settingsMessage, setSettingsMessage] = useState('')
   const [settingsError, setSettingsError] = useState('')
   const [savingSettings, setSavingSettings] = useState(false)
+
+  const [previewImage, setPreviewImage] = useState<string | null>(null)
 
   useEffect(() => {
     const run = async () => {
@@ -907,38 +912,27 @@ export default function AdminPage() {
 
                       {selectedOrder.proof_image_base64 ? (
                         <div style={{ display: 'grid', gap: 10 }}>
-                          <a
-                            href={selectedOrder.proof_image_base64}
-                            target="_blank"
-                            rel="noreferrer"
-                            style={{ display: 'inline-block', maxWidth: '100%' }}
-                          >
-                            <img
-                              src={selectedOrder.proof_image_base64}
-                              alt="payment proof"
-                              style={{
-                                width: '100%',
-                                maxWidth: 280,
-                                borderRadius: 14,
-                                border: '1px solid rgba(15, 23, 42, 0.08)',
-                                display: 'block',
-                              }}
-                            />
-                          </a>
-
-                          <a
-                            href={selectedOrder.proof_image_base64}
-                            target="_blank"
-                            rel="noreferrer"
+                          <img
+                            src={selectedOrder.proof_image_base64}
+                            alt="payment proof"
                             style={{
-                              color: '#0f234f',
-                              fontWeight: 700,
-                              textDecoration: 'none',
-                              fontSize: 14,
+                              width: '100%',
+                              maxWidth: 280,
+                              borderRadius: 14,
+                              border: '1px solid rgba(15, 23, 42, 0.08)',
+                              display: 'block',
+                              cursor: 'pointer',
                             }}
+                            onClick={() => setPreviewImage(selectedOrder.proof_image_base64 || null)}
+                          />
+
+                          <button
+                            type="button"
+                            className="btn-secondary"
+                            onClick={() => setPreviewImage(selectedOrder.proof_image_base64 || null)}
                           >
                             {text.openImage}
-                          </a>
+                          </button>
                         </div>
                       ) : (
                         <div className="small-muted">{text.proofMissing}</div>
@@ -1131,6 +1125,52 @@ export default function AdminPage() {
           </section>
         )}
       </div>
+
+      {previewImage ? (
+        <div
+          onClick={() => setPreviewImage(null)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.82)',
+            zIndex: 9999,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 16,
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              maxWidth: '100%',
+              maxHeight: '100%',
+              display: 'grid',
+              gap: 12,
+              justifyItems: 'center',
+            }}
+          >
+            <img
+              src={previewImage}
+              alt="payment proof preview"
+              style={{
+                maxWidth: '100%',
+                maxHeight: '80vh',
+                borderRadius: 12,
+                display: 'block',
+              }}
+            />
+            <button
+              type="button"
+              className="btn-secondary"
+              onClick={() => setPreviewImage(null)}
+              style={{ width: 'auto', minWidth: 140 }}
+            >
+              {text.closeImage}
+            </button>
+          </div>
+        </div>
+      ) : null}
     </main>
   )
 }
