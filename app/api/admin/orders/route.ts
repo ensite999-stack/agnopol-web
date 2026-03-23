@@ -17,7 +17,7 @@ function getSupabase() {
 
 export async function GET(req: Request) {
   try {
-    requireAdminSession(req)
+    requireAdminSession()
 
     const supabase = getSupabase()
     const { searchParams } = new URL(req.url)
@@ -43,9 +43,7 @@ export async function GET(req: Request) {
     }
 
     if (q) {
-      query = query.or(
-        `order_no.ilike.%${q}%,email.ilike.%${q}%,username.ilike.%${q}%`
-      )
+      query = query.or(`order_no.ilike.%${q}%,email.ilike.%${q}%,username.ilike.%${q}%`)
     }
 
     const { data, error, count } = await query
@@ -64,8 +62,7 @@ export async function GET(req: Request) {
   } catch (error) {
     return NextResponse.json(
       {
-        error:
-          error instanceof Error ? error.message : 'Server error',
+        error: error instanceof Error ? error.message : 'Server error',
       },
       { status: error instanceof Error && error.message === 'Unauthorized' ? 401 : 500 }
     )
