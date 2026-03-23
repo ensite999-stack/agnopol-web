@@ -1,7 +1,7 @@
 'use client'
 
-import { useI18n } from '@/components/language-provider'
-import LanguageSwitcher from '@/components/language-switcher'
+import { useI18n } from '../../components/language-provider'
+import LanguageSwitcher from '../../components/language-switcher'
 
 export default function AdminPage() {
   const { t } = useI18n()
@@ -66,10 +66,7 @@ export default function AdminPage() {
             </div>
 
             <div className="card-soft">
-              <input
-                className="input"
-                placeholder={t.admin.searchPlaceholder}
-              />
+              <input className="input" placeholder={t.admin.searchPlaceholder} />
 
               <div
                 style={{
