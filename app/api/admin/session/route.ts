@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server'
-import { readAdminSessionFromRequest } from '../../../../lib/admin-auth'
+import { readAdminSessionFromCookies } from '../../../../lib/admin-auth'
 
 export const runtime = 'nodejs'
 
-export async function GET(req: Request) {
+export async function GET() {
   try {
-    const session = readAdminSessionFromRequest(req)
+    const session = readAdminSessionFromCookies()
 
     if (!session) {
       return NextResponse.json({
