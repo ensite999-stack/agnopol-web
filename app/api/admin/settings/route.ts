@@ -15,9 +15,9 @@ function getSupabase() {
   return createClient(supabaseUrl, serviceRoleKey)
 }
 
-export async function GET(req: Request) {
+export async function GET() {
   try {
-    requireAdminSession(req)
+    requireAdminSession()
 
     const supabase = getSupabase()
 
@@ -39,8 +39,7 @@ export async function GET(req: Request) {
   } catch (error) {
     return NextResponse.json(
       {
-        error:
-          error instanceof Error ? error.message : 'Server error',
+        error: error instanceof Error ? error.message : 'Server error',
       },
       { status: error instanceof Error && error.message === 'Unauthorized' ? 401 : 500 }
     )
@@ -49,7 +48,7 @@ export async function GET(req: Request) {
 
 export async function PATCH(req: Request) {
   try {
-    requireAdminSession(req)
+    requireAdminSession()
 
     const supabase = getSupabase()
     const body = await req.json()
@@ -93,8 +92,7 @@ export async function PATCH(req: Request) {
   } catch (error) {
     return NextResponse.json(
       {
-        error:
-          error instanceof Error ? error.message : 'Server error',
+        error: error instanceof Error ? error.message : 'Server error',
       },
       { status: error instanceof Error && error.message === 'Unauthorized' ? 401 : 500 }
     )
