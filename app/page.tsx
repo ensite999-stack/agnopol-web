@@ -1,7 +1,6 @@
 'use client'
 
-import { Suspense, useMemo, useRef, useState } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useMemo, useState, type CSSProperties } from 'react'
 
 type LangType =
   | 'de'
@@ -13,471 +12,352 @@ type LangType =
   | 'zh-cn'
   | 'zh-tw'
 
-type PaymentNetwork = 'trc20_usdt' | 'base_usdc'
+type ProductType = 'premium' | 'stars'
+type DurationType = '3m' | '6m' | '12m'
 
-const NETWORKS: Record<PaymentNetwork, { label: string; address: string }> = {
-  trc20_usdt: {
-    label: 'TRC20 USDT',
-    address: 'TD6sQK9NmqxKzP6WHvmUdkHQRZvwX6Cy1e',
-  },
-  base_usdc: {
-    label: 'Base USDC',
-    address: '0x21E43Ddaa992A0B5cfcCeFE98838239b9E91B40E',
-  },
+const languageOptions: { code: LangType; label: string }[] = [
+  { code: 'de', label: 'Deutsch' },
+  { code: 'en', label: 'English' },
+  { code: 'es', label: 'Español' },
+  { code: 'fr', label: 'Français' },
+  { code: 'ja', label: '日本語' },
+  { code: 'ko', label: '한국어' },
+  { code: 'zh-cn', label: '简体中文' },
+  { code: 'zh-tw', label: '繁體中文' },
+]
+
+const prices = {
+  tg_premium_3m: 13.1,
+  tg_premium_6m: 17.1,
+  tg_premium_12m: 31.1,
+  tg_stars_rate: 0.02,
 }
 
 const messages: Record<
   LangType,
   {
-    title: string
-    subtitle: string
-    back: string
-    summary: string
-    product: string
-    amount: string
-    email: string
-    username: string
-    paymentMethod: string
-    trc20Label: string
-    baseLabel: string
-    copy: string
-    copied: string
-    copySuccess: string
-    uploadTitle: string
-    uploadHint: string
-    selectFile: string
-    submit: string
-    submitting: string
-    orderCreated: string
-    orderId: string
-    warningTitle: string
-    warningBody: string
-    brandIntro: string
-    eta: string
-    noFile: string
-    fileReady: string
-    preview: string
-    createError: string
-    network: string
-    stars: string
-    premium: string
-    months3: string
-    months6: string
-    months12: string
+    brand: string
+    slogan: string
+    premiumTitle: string
+    starsTitle: string
+    tabPremium: string
+    tabStars: string
+    plan3m: string
+    plan6m: string
+    plan12m: string
+    currentSelection: string
+    usernamePlaceholder: string
+    emailPlaceholder: string
+    createOrder: string
+    starsInputLabel: string
+    starsInputPlaceholder: string
+    starsMinHint: string
+    starsPriceHint: string
+    selectedPremium: string
+    selectedStars: string
+    rights: string
+    footerTerms: string
+    footerPrivacy: string
+    footerRisk: string
+    officialEmail: string
   }
 > = {
   de: {
-    title: 'Payment',
-    subtitle: 'Complete your order securely.',
-    back: 'Back',
-    summary: 'Order Summary',
-    product: 'Product',
-    amount: 'Amount',
-    email: 'Email',
-    username: 'Telegram Username',
-    paymentMethod: 'Payment Method',
-    trc20Label: 'TRC20 USDT',
-    baseLabel: 'Base USDC',
-    copy: 'Copy',
-    copied: 'Copied',
-    copySuccess: 'Address copied successfully.',
-    uploadTitle: 'Payment Proof',
-    uploadHint: 'Upload a screenshot of your completed payment.',
-    selectFile: 'Select File',
-    submit: 'Submit Payment',
-    submitting: 'Submitting...',
-    orderCreated: 'Order created successfully.',
-    orderId: 'Order ID',
-    warningTitle: 'Important',
-    warningBody:
-      'For transfers, please use the correct TRC20 USDT or Base USDC network and token only. Do not use any other network. The received amount must exactly match the order amount.',
-    brandIntro: 'One world, one breath.',
-    eta: 'For fund security and compliance review, our standard delivery time is 5–15 minutes. During network congestion, it may take up to 2 hours.',
-    noFile: 'No proof uploaded yet.',
-    fileReady: 'Proof file ready.',
-    preview: 'Preview',
-    createError: 'Failed to create order.',
-    network: 'Network',
-    stars: 'TG Stars',
-    premium: 'TG Premium',
-    months3: '3 Months',
-    months6: '6 Months',
-    months12: '12 Months',
+    brand: 'Agnopol',
+    slogan: 'One world, one breath.',
+    premiumTitle: 'TG Premium Pläne',
+    starsTitle: 'TG Stars',
+    tabPremium: 'Premium',
+    tabStars: 'Stars',
+    plan3m: '3 Monate',
+    plan6m: '6 Monate',
+    plan12m: '12 Monate',
+    currentSelection: 'Aktuelle Auswahl',
+    usernamePlaceholder: 'Telegram Username',
+    emailPlaceholder: 'E-Mail',
+    createOrder: 'Create Order',
+    starsInputLabel: 'Stars Menge',
+    starsInputPlaceholder: 'Mindestens 50',
+    starsMinHint: 'Mindestbestellmenge: 50 Stars',
+    starsPriceHint: 'Preis wird automatisch berechnet',
+    selectedPremium: 'TG Premium',
+    selectedStars: 'TG Stars',
+    rights: '© {year} Agnopol. Alle Rechte vorbehalten.',
+    footerTerms: 'Terms of Service',
+    footerPrivacy: 'Privacy Policy',
+    footerRisk: 'Risk Disclosure',
+    officialEmail: 'Official Email',
   },
   en: {
-    title: 'Payment',
-    subtitle: 'Complete your order securely.',
-    back: 'Back',
-    summary: 'Order Summary',
-    product: 'Product',
-    amount: 'Amount',
-    email: 'Email',
-    username: 'Telegram Username',
-    paymentMethod: 'Payment Method',
-    trc20Label: 'TRC20 USDT',
-    baseLabel: 'Base USDC',
-    copy: 'Copy',
-    copied: 'Copied',
-    copySuccess: 'Address copied successfully.',
-    uploadTitle: 'Payment Proof',
-    uploadHint: 'Upload a screenshot of your completed payment.',
-    selectFile: 'Select File',
-    submit: 'Submit Payment',
-    submitting: 'Submitting...',
-    orderCreated: 'Order created successfully.',
-    orderId: 'Order ID',
-    warningTitle: 'Important',
-    warningBody:
-      'For transfers, please use the correct TRC20 USDT or Base USDC network and token only. Do not use any other network. The received amount must exactly match the order amount.',
-    brandIntro: 'One world, one breath.',
-    eta: 'For fund security and compliance review, our standard delivery time is 5–15 minutes. During network congestion, it may take up to 2 hours.',
-    noFile: 'No proof uploaded yet.',
-    fileReady: 'Proof file ready.',
-    preview: 'Preview',
-    createError: 'Failed to create order.',
-    network: 'Network',
-    stars: 'TG Stars',
-    premium: 'TG Premium',
-    months3: '3 Months',
-    months6: '6 Months',
-    months12: '12 Months',
+    brand: 'Agnopol',
+    slogan: 'One world, one breath.',
+    premiumTitle: 'TG Premium Plans',
+    starsTitle: 'TG Stars',
+    tabPremium: 'Premium',
+    tabStars: 'Stars',
+    plan3m: '3 Months',
+    plan6m: '6 Months',
+    plan12m: '12 Months',
+    currentSelection: 'Current Selection',
+    usernamePlaceholder: 'Telegram Username',
+    emailPlaceholder: 'Email',
+    createOrder: 'Create Order',
+    starsInputLabel: 'Stars Amount',
+    starsInputPlaceholder: 'Minimum 50',
+    starsMinHint: 'Minimum order: 50 stars',
+    starsPriceHint: 'Price is calculated automatically',
+    selectedPremium: 'TG Premium',
+    selectedStars: 'TG Stars',
+    rights: '© {year} Agnopol. All rights reserved.',
+    footerTerms: 'Terms of Service',
+    footerPrivacy: 'Privacy Policy',
+    footerRisk: 'Risk Disclosure',
+    officialEmail: 'Official Email',
   },
   es: {
-    title: 'Payment',
-    subtitle: 'Complete your order securely.',
-    back: 'Back',
-    summary: 'Order Summary',
-    product: 'Product',
-    amount: 'Amount',
-    email: 'Email',
-    username: 'Telegram Username',
-    paymentMethod: 'Payment Method',
-    trc20Label: 'TRC20 USDT',
-    baseLabel: 'Base USDC',
-    copy: 'Copy',
-    copied: 'Copied',
-    copySuccess: 'Address copied successfully.',
-    uploadTitle: 'Payment Proof',
-    uploadHint: 'Upload a screenshot of your completed payment.',
-    selectFile: 'Select File',
-    submit: 'Submit Payment',
-    submitting: 'Submitting...',
-    orderCreated: 'Order created successfully.',
-    orderId: 'Order ID',
-    warningTitle: 'Important',
-    warningBody:
-      'For transfers, please use the correct TRC20 USDT or Base USDC network and token only. Do not use any other network. The received amount must exactly match the order amount.',
-    brandIntro: 'One world, one breath.',
-    eta: 'For fund security and compliance review, our standard delivery time is 5–15 minutes. During network congestion, it may take up to 2 hours.',
-    noFile: 'No proof uploaded yet.',
-    fileReady: 'Proof file ready.',
-    preview: 'Preview',
-    createError: 'Failed to create order.',
-    network: 'Network',
-    stars: 'TG Stars',
-    premium: 'TG Premium',
-    months3: '3 Months',
-    months6: '6 Months',
-    months12: '12 Months',
+    brand: 'Agnopol',
+    slogan: 'One world, one breath.',
+    premiumTitle: 'Planes TG Premium',
+    starsTitle: 'TG Stars',
+    tabPremium: 'Premium',
+    tabStars: 'Stars',
+    plan3m: '3 Meses',
+    plan6m: '6 Meses',
+    plan12m: '12 Meses',
+    currentSelection: 'Selección actual',
+    usernamePlaceholder: 'Telegram Username',
+    emailPlaceholder: 'Correo electrónico',
+    createOrder: 'Create Order',
+    starsInputLabel: 'Cantidad de Stars',
+    starsInputPlaceholder: 'Mínimo 50',
+    starsMinHint: 'Pedido mínimo: 50 stars',
+    starsPriceHint: 'El precio se calcula automáticamente',
+    selectedPremium: 'TG Premium',
+    selectedStars: 'TG Stars',
+    rights: '© {year} Agnopol. Todos los derechos reservados.',
+    footerTerms: 'Terms of Service',
+    footerPrivacy: 'Privacy Policy',
+    footerRisk: 'Risk Disclosure',
+    officialEmail: 'Official Email',
   },
   fr: {
-    title: 'Payment',
-    subtitle: 'Complete your order securely.',
-    back: 'Back',
-    summary: 'Order Summary',
-    product: 'Product',
-    amount: 'Amount',
-    email: 'Email',
-    username: 'Telegram Username',
-    paymentMethod: 'Payment Method',
-    trc20Label: 'TRC20 USDT',
-    baseLabel: 'Base USDC',
-    copy: 'Copy',
-    copied: 'Copied',
-    copySuccess: 'Address copied successfully.',
-    uploadTitle: 'Payment Proof',
-    uploadHint: 'Upload a screenshot of your completed payment.',
-    selectFile: 'Select File',
-    submit: 'Submit Payment',
-    submitting: 'Submitting...',
-    orderCreated: 'Order created successfully.',
-    orderId: 'Order ID',
-    warningTitle: 'Important',
-    warningBody:
-      'For transfers, please use the correct TRC20 USDT or Base USDC network and token only. Do not use any other network. The received amount must exactly match the order amount.',
-    brandIntro: 'One world, one breath.',
-    eta: 'For fund security and compliance review, our standard delivery time is 5–15 minutes. During network congestion, it may take up to 2 hours.',
-    noFile: 'No proof uploaded yet.',
-    fileReady: 'Proof file ready.',
-    preview: 'Preview',
-    createError: 'Failed to create order.',
-    network: 'Network',
-    stars: 'TG Stars',
-    premium: 'TG Premium',
-    months3: '3 Months',
-    months6: '6 Months',
-    months12: '12 Months',
+    brand: 'Agnopol',
+    slogan: 'One world, one breath.',
+    premiumTitle: 'Offres TG Premium',
+    starsTitle: 'TG Stars',
+    tabPremium: 'Premium',
+    tabStars: 'Stars',
+    plan3m: '3 Mois',
+    plan6m: '6 Mois',
+    plan12m: '12 Mois',
+    currentSelection: 'Sélection actuelle',
+    usernamePlaceholder: 'Telegram Username',
+    emailPlaceholder: 'E-mail',
+    createOrder: 'Create Order',
+    starsInputLabel: 'Quantité de Stars',
+    starsInputPlaceholder: 'Minimum 50',
+    starsMinHint: 'Commande minimum : 50 stars',
+    starsPriceHint: 'Le prix est calculé automatiquement',
+    selectedPremium: 'TG Premium',
+    selectedStars: 'TG Stars',
+    rights: '© {year} Agnopol. Tous droits réservés.',
+    footerTerms: 'Terms of Service',
+    footerPrivacy: 'Privacy Policy',
+    footerRisk: 'Risk Disclosure',
+    officialEmail: 'Official Email',
   },
   ja: {
-    title: 'Payment',
-    subtitle: 'Complete your order securely.',
-    back: 'Back',
-    summary: 'Order Summary',
-    product: 'Product',
-    amount: 'Amount',
-    email: 'Email',
-    username: 'Telegram ユーザー名',
-    paymentMethod: 'Payment Method',
-    trc20Label: 'TRC20 USDT',
-    baseLabel: 'Base USDC',
-    copy: 'Copy',
-    copied: 'Copied',
-    copySuccess: 'Address copied successfully.',
-    uploadTitle: 'Payment Proof',
-    uploadHint: 'Upload a screenshot of your completed payment.',
-    selectFile: 'Select File',
-    submit: 'Submit Payment',
-    submitting: 'Submitting...',
-    orderCreated: 'Order created successfully.',
-    orderId: 'Order ID',
-    warningTitle: 'Important',
-    warningBody:
-      'For transfers, please use the correct TRC20 USDT or Base USDC network and token only. Do not use any other network. The received amount must exactly match the order amount.',
-    brandIntro: 'One world, one breath.',
-    eta: 'For fund security and compliance review, our standard delivery time is 5–15 minutes. During network congestion, it may take up to 2 hours.',
-    noFile: 'No proof uploaded yet.',
-    fileReady: 'Proof file ready.',
-    preview: 'Preview',
-    createError: 'Failed to create order.',
-    network: 'Network',
-    stars: 'TG Stars',
-    premium: 'TG Premium',
-    months3: '3 Months',
-    months6: '6 Months',
-    months12: '12 Months',
+    brand: 'Agnopol',
+    slogan: 'One world, one breath.',
+    premiumTitle: 'TG Premium プラン',
+    starsTitle: 'TG Stars',
+    tabPremium: 'Premium',
+    tabStars: 'Stars',
+    plan3m: '3か月',
+    plan6m: '6か月',
+    plan12m: '12か月',
+    currentSelection: '現在の選択',
+    usernamePlaceholder: 'Telegram ユーザー名',
+    emailPlaceholder: 'メールアドレス',
+    createOrder: 'Create Order',
+    starsInputLabel: 'Stars 数量',
+    starsInputPlaceholder: '最低 50',
+    starsMinHint: '最低注文数：50 Stars',
+    starsPriceHint: '価格は自動計算されます',
+    selectedPremium: 'TG Premium',
+    selectedStars: 'TG Stars',
+    rights: '© {year} Agnopol. All rights reserved.',
+    footerTerms: 'Terms of Service',
+    footerPrivacy: 'Privacy Policy',
+    footerRisk: 'Risk Disclosure',
+    officialEmail: 'Official Email',
   },
   ko: {
-    title: 'Payment',
-    subtitle: 'Complete your order securely.',
-    back: 'Back',
-    summary: 'Order Summary',
-    product: 'Product',
-    amount: 'Amount',
-    email: 'Email',
-    username: 'Telegram 사용자 이름',
-    paymentMethod: 'Payment Method',
-    trc20Label: 'TRC20 USDT',
-    baseLabel: 'Base USDC',
-    copy: 'Copy',
-    copied: 'Copied',
-    copySuccess: 'Address copied successfully.',
-    uploadTitle: 'Payment Proof',
-    uploadHint: 'Upload a screenshot of your completed payment.',
-    selectFile: 'Select File',
-    submit: 'Submit Payment',
-    submitting: 'Submitting...',
-    orderCreated: 'Order created successfully.',
-    orderId: 'Order ID',
-    warningTitle: 'Important',
-    warningBody:
-      'For transfers, please use the correct TRC20 USDT or Base USDC network and token only. Do not use any other network. The received amount must exactly match the order amount.',
-    brandIntro: 'One world, one breath.',
-    eta: 'For fund security and compliance review, our standard delivery time is 5–15 minutes. During network congestion, it may take up to 2 hours.',
-    noFile: 'No proof uploaded yet.',
-    fileReady: 'Proof file ready.',
-    preview: 'Preview',
-    createError: 'Failed to create order.',
-    network: 'Network',
-    stars: 'TG Stars',
-    premium: 'TG Premium',
-    months3: '3 Months',
-    months6: '6 Months',
-    months12: '12 Months',
+    brand: 'Agnopol',
+    slogan: 'One world, one breath.',
+    premiumTitle: 'TG Premium 플랜',
+    starsTitle: 'TG Stars',
+    tabPremium: 'Premium',
+    tabStars: 'Stars',
+    plan3m: '3개월',
+    plan6m: '6개월',
+    plan12m: '12개월',
+    currentSelection: '현재 선택',
+    usernamePlaceholder: 'Telegram 사용자 이름',
+    emailPlaceholder: '이메일',
+    createOrder: 'Create Order',
+    starsInputLabel: 'Stars 수량',
+    starsInputPlaceholder: '최소 50',
+    starsMinHint: '최소 주문: 50 stars',
+    starsPriceHint: '가격은 자동으로 계산됩니다',
+    selectedPremium: 'TG Premium',
+    selectedStars: 'TG Stars',
+    rights: '© {year} Agnopol. All rights reserved.',
+    footerTerms: 'Terms of Service',
+    footerPrivacy: 'Privacy Policy',
+    footerRisk: 'Risk Disclosure',
+    officialEmail: 'Official Email',
   },
   'zh-cn': {
-    title: '支付页',
-    subtitle: '安全完成您的订单。',
-    back: '返回',
-    summary: '订单摘要',
-    product: '产品',
-    amount: '金额',
-    email: '邮箱',
-    username: 'TG 用户名',
-    paymentMethod: '支付方式',
-    trc20Label: 'TRC20 USDT',
-    baseLabel: 'Base USDC',
-    copy: '复制',
-    copied: '已复制',
-    copySuccess: '收款地址已成功复制。',
-    uploadTitle: '支付凭证',
-    uploadHint: '上传您已完成支付的截图凭证。',
-    selectFile: '选择文件',
-    submit: '提交付款',
-    submitting: '提交中...',
-    orderCreated: '订单创建成功。',
-    orderId: '订单号',
-    warningTitle: '重要提示',
-    warningBody:
-      '转账请仅使用正确的 TRC20 USDT 或 Base USDC 链与币种。不要使用任何其他网络。到账金额必须与订单金额完全一致。',
-    brandIntro: 'One world, one breath.',
-    eta: '为了确保资金安全与合规审查，我们的标准交付时间为 5–15 分钟。在网络拥堵时，最长可能达到 2 小时。',
-    noFile: '暂未上传凭证。',
-    fileReady: '凭证文件已就绪。',
-    preview: '预览',
-    createError: '创建订单失败。',
-    network: '网络',
-    stars: 'TG Stars',
-    premium: 'TG Premium',
-    months3: '3个月',
-    months6: '6个月',
-    months12: '12个月',
+    brand: 'Agnopol',
+    slogan: 'One world, one breath.',
+    premiumTitle: 'TG Premium 套餐',
+    starsTitle: 'TG Stars',
+    tabPremium: 'Premium',
+    tabStars: 'Stars',
+    plan3m: '3个月',
+    plan6m: '6个月',
+    plan12m: '12个月',
+    currentSelection: '当前选择',
+    usernamePlaceholder: 'TG 用户名（如 @username）',
+    emailPlaceholder: '电子邮件',
+    createOrder: '创建订单',
+    starsInputLabel: 'Stars 数量',
+    starsInputPlaceholder: '最少 50',
+    starsMinHint: '最低下单数量：50 Stars',
+    starsPriceHint: '价格将自动计算',
+    selectedPremium: 'TG Premium',
+    selectedStars: 'TG Stars',
+    rights: '© {year} Agnopol。保留所有权利。',
+    footerTerms: '服务条款',
+    footerPrivacy: '隐私政策',
+    footerRisk: '风险披露',
+    officialEmail: '官方邮箱',
   },
   'zh-tw': {
-    title: '支付頁',
-    subtitle: '安全完成您的訂單。',
-    back: '返回',
-    summary: '訂單摘要',
-    product: '產品',
-    amount: '金額',
-    email: '電子郵件',
-    username: 'TG 用戶名',
-    paymentMethod: '支付方式',
-    trc20Label: 'TRC20 USDT',
-    baseLabel: 'Base USDC',
-    copy: '複製',
-    copied: '已複製',
-    copySuccess: '收款地址已成功複製。',
-    uploadTitle: '支付憑證',
-    uploadHint: '上傳您已完成支付的截圖憑證。',
-    selectFile: '選擇檔案',
-    submit: '提交付款',
-    submitting: '提交中...',
-    orderCreated: '訂單建立成功。',
-    orderId: '訂單號',
-    warningTitle: '重要提示',
-    warningBody:
-      '轉帳請僅使用正確的 TRC20 USDT 或 Base USDC 鏈與幣種。不要使用任何其他網路。到帳金額必須與訂單金額完全一致。',
-    brandIntro: 'One world, one breath.',
-    eta: '為了確保資金安全與合規審查，我們的標準交付時間為 5–15 分鐘。在網路擁堵時，最長可能達到 2 小時。',
-    noFile: '尚未上傳憑證。',
-    fileReady: '憑證檔案已就緒。',
-    preview: '預覽',
-    createError: '建立訂單失敗。',
-    network: '網路',
-    stars: 'TG Stars',
-    premium: 'TG Premium',
-    months3: '3個月',
-    months6: '6個月',
-    months12: '12個月',
+    brand: 'Agnopol',
+    slogan: 'One world, one breath.',
+    premiumTitle: 'TG Premium 方案',
+    starsTitle: 'TG Stars',
+    tabPremium: 'Premium',
+    tabStars: 'Stars',
+    plan3m: '3個月',
+    plan6m: '6個月',
+    plan12m: '12個月',
+    currentSelection: '目前選擇',
+    usernamePlaceholder: 'TG 用戶名（如 @username）',
+    emailPlaceholder: '電子郵件',
+    createOrder: '建立訂單',
+    starsInputLabel: 'Stars 數量',
+    starsInputPlaceholder: '最少 50',
+    starsMinHint: '最低下單數量：50 Stars',
+    starsPriceHint: '價格將自動計算',
+    selectedPremium: 'TG Premium',
+    selectedStars: 'TG Stars',
+    rights: '© {year} Agnopol。保留所有權利。',
+    footerTerms: '服務條款',
+    footerPrivacy: '隱私政策',
+    footerRisk: '風險披露',
+    officialEmail: '官方郵箱',
   },
 }
 
-function normalizeLang(value: string | null): LangType {
-  const allowed: LangType[] = ['de', 'en', 'es', 'fr', 'ja', 'ko', 'zh-cn', 'zh-tw']
-  return allowed.includes(value as LangType) ? (value as LangType) : 'en'
-}
+export default function Page() {
+  const [lang, setLang] = useState<LangType>('en')
+  const [tab, setTab] = useState<ProductType>('premium')
+  const [duration, setDuration] = useState<DurationType>('12m')
+  const [stars, setStars] = useState(50)
+  const [username, setUsername] = useState('')
+  const [email, setEmail] = useState('')
 
-function PayPageContent() {
-  const searchParams = useSearchParams()
-
-  const lang = normalizeLang(searchParams.get('lang'))
   const t = messages[lang]
+  const currentYear = new Date().getFullYear()
 
-  const username = searchParams.get('username') || ''
-  const email = searchParams.get('email') || ''
-  const productType = searchParams.get('product_type') || 'tg_premium'
-  const duration = searchParams.get('duration') || '12m'
-  const starsAmount = searchParams.get('stars_amount') || '50'
-  const priceUsd = searchParams.get('price_usd') || '0'
+  const safeStars = useMemo(() => {
+    if (!Number.isFinite(stars)) return 50
+    if (stars < 50) return 50
+    return Math.floor(stars)
+  }, [stars])
 
-  const [selectedNetwork, setSelectedNetwork] = useState<PaymentNetwork>('trc20_usdt')
-  const [copiedNetwork, setCopiedNetwork] = useState<PaymentNetwork | null>(null)
-  const [proofName, setProofName] = useState('')
-  const [proofBase64, setProofBase64] = useState('')
-  const [proofPreview, setProofPreview] = useState('')
-  const [submitting, setSubmitting] = useState(false)
-  const [successOrderId, setSuccessOrderId] = useState('')
-  const [errorText, setErrorText] = useState('')
-  const fileRef = useRef<HTMLInputElement | null>(null)
-
-  const selectedAddress = NETWORKS[selectedNetwork].address
-
-  const productLabel = useMemo(() => {
-    if (productType === 'tg_stars') {
-      return `${t.stars} ${starsAmount}`
+  const selectedPrice = useMemo(() => {
+    if (tab === 'premium') {
+      if (duration === '3m') return prices.tg_premium_3m
+      if (duration === '6m') return prices.tg_premium_6m
+      return prices.tg_premium_12m
     }
-    if (duration === '3m') return `${t.premium} ${t.months3}`
-    if (duration === '6m') return `${t.premium} ${t.months6}`
-    return `${t.premium} ${t.months12}`
-  }, [productType, duration, starsAmount, t])
+    return Number((safeStars * prices.tg_stars_rate).toFixed(2))
+  }, [tab, duration, safeStars])
 
-  async function handleCopy(text: string, network: PaymentNetwork) {
-    try {
-      await navigator.clipboard.writeText(text)
-      setCopiedNetwork(network)
-      setTimeout(() => setCopiedNetwork(null), 1800)
-    } catch {
-      setCopiedNetwork(null)
+  const selectedTitle = useMemo(() => {
+    if (tab === 'premium') {
+      const durationText =
+        duration === '3m' ? t.plan3m : duration === '6m' ? t.plan6m : t.plan12m
+      return `${t.selectedPremium} ${durationText}`
+    }
+    return `${t.selectedStars} ${safeStars}`
+  }, [tab, duration, safeStars, t])
+
+  function goPay() {
+    const params = new URLSearchParams()
+    params.set('lang', lang)
+    params.set('username', username)
+    params.set('email', email)
+    params.set('price_usd', String(selectedPrice))
+
+    if (tab === 'premium') {
+      params.set('product_type', 'tg_premium')
+      params.set('duration', duration)
+    } else {
+      params.set('product_type', 'tg_stars')
+      params.set('stars_amount', String(safeStars))
+    }
+
+    window.location.href = `/pay?${params.toString()}`
+  }
+
+  function topTabStyle(active: boolean): CSSProperties {
+    return {
+      flex: 1,
+      minWidth: 0,
+      padding: '12px 14px',
+      borderRadius: 14,
+      border: active ? '1px solid #0f234f' : '1px solid rgba(15, 23, 42, 0.08)',
+      background: active ? '#0b1733' : 'rgba(255,255,255,0.72)',
+      color: active ? '#ffffff' : '#0f172a',
+      fontWeight: 800,
+      fontSize: 15,
+      cursor: 'pointer',
+      boxShadow: active ? '0 8px 24px rgba(11, 23, 51, 0.16)' : '0 4px 18px rgba(15, 23, 42, 0.04)',
+      backdropFilter: 'blur(10px)',
     }
   }
 
-  function handleChooseFile() {
-    fileRef.current?.click()
-  }
-
-  function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0]
-    if (!file) return
-
-    setProofName(file.name)
-    const reader = new FileReader()
-
-    reader.onload = () => {
-      const result = reader.result as string
-      setProofBase64(result)
-      setProofPreview(result)
-    }
-
-    reader.readAsDataURL(file)
-  }
-
-  async function handleSubmit() {
-    setSubmitting(true)
-    setErrorText('')
-    setSuccessOrderId('')
-
-    try {
-      const payload = {
-        username,
-        email,
-        product_type: productType,
-        duration: productType === 'tg_premium' ? duration : null,
-        stars_amount: productType === 'tg_stars' ? Number(starsAmount) : null,
-        price_usd: Number(priceUsd),
-        payment_network: selectedNetwork,
-        payment_address: selectedAddress,
-        proof_image_base64: proofBase64 || null,
-      }
-
-      const response = await fetch('/api/createOrder', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data?.error || t.createError)
-      }
-
-      setSuccessOrderId(data?.order_id || data?.id || '')
-    } catch (error) {
-      setErrorText(error instanceof Error ? error.message : t.createError)
-    } finally {
-      setSubmitting(false)
+  function planCardStyle(active: boolean): CSSProperties {
+    return {
+      padding: 18,
+      borderRadius: 18,
+      border: active ? '1px solid #0f234f' : '1px solid rgba(15, 23, 42, 0.08)',
+      background: active ? '#0b1733' : 'rgba(255,255,255,0.82)',
+      color: active ? '#ffffff' : '#111827',
+      cursor: 'pointer',
+      minHeight: 106,
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'space-between',
+      boxSizing: 'border-box',
+      boxShadow: active ? '0 10px 28px rgba(11, 23, 51, 0.18)' : '0 8px 24px rgba(15, 23, 42, 0.04)',
+      backdropFilter: 'blur(10px)',
+      transition: 'all 0.2s ease',
     }
   }
 
@@ -485,76 +365,103 @@ function PayPageContent() {
     <main
       style={{
         width: '100%',
-        minHeight: '100vh',
         boxSizing: 'border-box',
-        padding: '24px 14px 40px',
+        padding: '22px 14px 36px',
         fontFamily: 'system-ui, Arial, sans-serif',
         background:
           'radial-gradient(circle at top, rgba(224,231,255,0.45), rgba(247,248,250,0) 38%), linear-gradient(180deg, #f8fafc 0%, #f5f7fb 100%)',
+        minHeight: '100vh',
       }}
     >
       <style>{`
-        .pay-container {
+        .agnopol-container {
           width: 100%;
-          max-width: 980px;
+          max-width: 1120px;
           margin: 0 auto;
         }
 
-        .pay-grid {
-          display: grid;
-          grid-template-columns: 1fr;
-          gap: 16px;
+        .agnopol-hero {
+          text-align: center;
+          margin-bottom: 22px;
         }
 
-        @media (min-width: 960px) {
-          .pay-grid {
-            grid-template-columns: 1.05fr 0.95fr;
+        .agnopol-lang-wrap {
+          display: flex;
+          justify-content: center;
+          margin-top: 12px;
+        }
+
+        .agnopol-lang {
+          width: 104px;
+        }
+
+        .agnopol-tabs {
+          display: flex;
+          gap: 10px;
+          margin: 0 auto 14px;
+          max-width: 420px;
+        }
+
+        .agnopol-plan-grid {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 12px;
+        }
+
+        .agnopol-footer-links {
+          display: flex;
+          gap: 14px;
+          flex-wrap: wrap;
+          justify-content: center;
+          margin-top: 8px;
+        }
+
+        .agnopol-footer-links a {
+          color: #475569;
+          text-decoration: none;
+        }
+
+        .agnopol-footer-links a:hover {
+          color: #0f172a;
+          text-decoration: underline;
+        }
+
+        .agnopol-email-link {
+          color: #64748b;
+          text-decoration: none;
+        }
+
+        .agnopol-email-link:hover {
+          color: #0f172a;
+          text-decoration: underline;
+        }
+
+        @media (min-width: 900px) {
+          .agnopol-plan-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
           }
         }
 
-        .pay-card {
-          border: 1px solid rgba(15, 23, 42, 0.08);
-          background: rgba(255,255,255,0.82);
-          box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
-          backdrop-filter: blur(10px);
-          border-radius: 20px;
-          padding: 18px;
-        }
-
-        .network-tabs {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 10px;
-          margin-top: 10px;
+        @media (max-width: 640px) {
+          .agnopol-lang {
+            width: 98px;
+          }
         }
       `}</style>
 
-      <div className="pay-container">
-        <div style={{ marginBottom: 16 }}>
-          <a
-            href={`/?lang=${lang}`}
-            style={{
-              textDecoration: 'none',
-              color: '#475569',
-              fontSize: 14,
-            }}
-          >
-            ← {t.back}
-          </a>
-        </div>
-
-        <header style={{ textAlign: 'center', marginBottom: 18 }}>
+      <div className="agnopol-container">
+        <section className="agnopol-hero">
           <h1
             style={{
-              margin: 0,
-              fontSize: 'clamp(42px, 8vw, 76px)',
+              fontSize: 'clamp(58px, 12vw, 108px)',
               fontWeight: 900,
+              margin: 0,
               color: '#0f172a',
-              lineHeight: 0.95,
-              letterSpacing: '-0.04em',
+              lineHeight: 0.92,
+              letterSpacing: '-0.06em',
             }}
           >
-            Agnopol
+            {t.brand}
           </h1>
 
           <p
@@ -562,401 +469,270 @@ function PayPageContent() {
               marginTop: 10,
               marginBottom: 0,
               color: '#64748b',
-              fontSize: 'clamp(20px, 3vw, 26px)',
-              fontWeight: 700,
+              fontSize: 'clamp(14px, 2vw, 18px)',
+              fontWeight: 500,
             }}
           >
-            {t.title}
+            {t.slogan}
           </p>
 
-          <p
+          <div className="agnopol-lang-wrap">
+            <div className="agnopol-lang">
+              <select
+                value={lang}
+                onChange={(e) => setLang(e.target.value as LangType)}
+                style={{
+                  width: '100%',
+                  height: 36,
+                  padding: '0 10px',
+                  borderRadius: 999,
+                  border: '1px solid rgba(15, 23, 42, 0.08)',
+                  background: 'rgba(255,255,255,0.72)',
+                  fontSize: 11,
+                  color: '#475569',
+                }}
+              >
+                {languageOptions.map((item) => (
+                  <option key={item.code} value={item.code}>
+                    {item.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </section>
+
+        <div className="agnopol-tabs">
+          <button type="button" onClick={() => setTab('premium')} style={topTabStyle(tab === 'premium')}>
+            {t.tabPremium}
+          </button>
+          <button type="button" onClick={() => setTab('stars')} style={topTabStyle(tab === 'stars')}>
+            {t.tabStars}
+          </button>
+        </div>
+
+        {tab === 'premium' ? (
+          <>
+            <p
+              style={{
+                fontSize: 'clamp(18px, 2.2vw, 22px)',
+                marginTop: 0,
+                marginBottom: 12,
+                color: '#475569',
+                textAlign: 'center',
+              }}
+            >
+              {t.premiumTitle}
+            </p>
+
+            <div className="agnopol-plan-grid">
+              <div onClick={() => setDuration('3m')} style={planCardStyle(duration === '3m')}>
+                <div style={{ fontSize: 18, fontWeight: 800 }}>{t.plan3m}</div>
+                <div style={{ marginTop: 10, fontSize: 22, fontWeight: 900 }}>
+                  ${prices.tg_premium_3m}
+                </div>
+              </div>
+
+              <div onClick={() => setDuration('6m')} style={planCardStyle(duration === '6m')}>
+                <div style={{ fontSize: 18, fontWeight: 800 }}>{t.plan6m}</div>
+                <div style={{ marginTop: 10, fontSize: 22, fontWeight: 900 }}>
+                  ${prices.tg_premium_6m}
+                </div>
+              </div>
+
+              <div onClick={() => setDuration('12m')} style={planCardStyle(duration === '12m')}>
+                <div style={{ fontSize: 18, fontWeight: 800 }}>{t.plan12m}</div>
+                <div style={{ marginTop: 10, fontSize: 22, fontWeight: 900 }}>
+                  ${prices.tg_premium_12m}
+                </div>
+              </div>
+            </div>
+          </>
+        ) : (
+          <>
+            <p
+              style={{
+                fontSize: 'clamp(18px, 2.2vw, 22px)',
+                marginTop: 0,
+                marginBottom: 12,
+                color: '#475569',
+                textAlign: 'center',
+              }}
+            >
+              {t.starsTitle}
+            </p>
+
+            <div
+              style={{
+                padding: 16,
+                borderRadius: 18,
+                border: '1px solid rgba(15, 23, 42, 0.08)',
+                background: 'rgba(255,255,255,0.82)',
+                maxWidth: 720,
+                margin: '0 auto',
+                boxShadow: '0 8px 24px rgba(15, 23, 42, 0.04)',
+                backdropFilter: 'blur(10px)',
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 17,
+                  fontWeight: 800,
+                  marginBottom: 10,
+                  color: '#111827',
+                }}
+              >
+                {t.starsInputLabel}
+              </div>
+
+              <input
+                type="number"
+                min={50}
+                step={1}
+                value={stars}
+                onChange={(e) => setStars(Number(e.target.value))}
+                placeholder={t.starsInputPlaceholder}
+                style={{
+                  width: '100%',
+                  boxSizing: 'border-box',
+                  padding: 13,
+                  borderRadius: 12,
+                  border: '1px solid #d1d5db',
+                  fontSize: 16,
+                  background: '#fff',
+                }}
+              />
+
+              <div style={{ marginTop: 10, fontSize: 13, color: '#6b7280' }}>{t.starsMinHint}</div>
+              <div style={{ marginTop: 4, fontSize: 13, color: '#6b7280' }}>{t.starsPriceHint}</div>
+            </div>
+          </>
+        )}
+
+        <div
+          style={{
+            marginTop: 18,
+            padding: 18,
+            borderRadius: 18,
+            border: '1px solid rgba(15, 23, 42, 0.07)',
+            background: 'rgba(255,255,255,0.78)',
+            maxWidth: 760,
+            marginLeft: 'auto',
+            marginRight: 'auto',
+            boxShadow: '0 8px 24px rgba(15, 23, 42, 0.035)',
+            backdropFilter: 'blur(10px)',
+          }}
+        >
+          <div style={{ fontSize: 14, color: '#6b7280', marginBottom: 8 }}>
+            {t.currentSelection}
+          </div>
+
+          <div
+            style={{
+              fontSize: 'clamp(19px, 3vw, 26px)',
+              fontWeight: 800,
+              color: '#111827',
+            }}
+          >
+            {selectedTitle}
+          </div>
+
+          <div
             style={{
               marginTop: 8,
-              color: '#64748b',
-              fontSize: 15,
+              fontSize: 'clamp(32px, 5vw, 44px)',
+              fontWeight: 900,
+              color: '#111827',
+              lineHeight: 1,
             }}
           >
-            {t.subtitle}
-          </p>
-        </header>
-
-        <div className="pay-grid">
-          <section className="pay-card">
-            <div style={{ fontSize: 14, color: '#64748b', marginBottom: 8 }}>
-              {t.summary}
-            </div>
-
-            <div
-              style={{
-                fontSize: 26,
-                fontWeight: 900,
-                color: '#0f172a',
-                marginBottom: 14,
-              }}
-            >
-              ${priceUsd}
-            </div>
-
-            <div style={{ display: 'grid', gap: 10 }}>
-              <div>
-                <div style={{ fontSize: 12, color: '#64748b' }}>{t.product}</div>
-                <div style={{ fontWeight: 700, color: '#0f172a' }}>{productLabel}</div>
-              </div>
-
-              <div>
-                <div style={{ fontSize: 12, color: '#64748b' }}>{t.amount}</div>
-                <div style={{ fontWeight: 700, color: '#0f172a' }}>${priceUsd}</div>
-              </div>
-
-              <div>
-                <div style={{ fontSize: 12, color: '#64748b' }}>{t.username}</div>
-                <div style={{ fontWeight: 700, color: '#0f172a', wordBreak: 'break-all' }}>
-                  {username || '-'}
-                </div>
-              </div>
-
-              <div>
-                <div style={{ fontSize: 12, color: '#64748b' }}>{t.email}</div>
-                <div style={{ fontWeight: 700, color: '#0f172a', wordBreak: 'break-all' }}>
-                  {email || '-'}
-                </div>
-              </div>
-            </div>
-
-            <div
-              style={{
-                marginTop: 16,
-                borderRadius: 16,
-                padding: 14,
-                background: 'rgba(15, 23, 42, 0.035)',
-                border: '1px solid rgba(15, 23, 42, 0.06)',
-              }}
-            >
-              <div
-                style={{
-                  fontSize: 13,
-                  fontWeight: 800,
-                  color: '#0f172a',
-                  marginBottom: 8,
-                }}
-              >
-                {t.warningTitle}
-              </div>
-              <div
-                style={{
-                  fontSize: 13,
-                  color: '#475569',
-                  lineHeight: 1.7,
-                }}
-              >
-                {t.warningBody}
-              </div>
-            </div>
-
-            <div
-              style={{
-                marginTop: 16,
-                fontSize: 13,
-                color: '#475569',
-                lineHeight: 1.7,
-              }}
-            >
-              <p style={{ margin: '0 0 8px 0' }}>{t.brandIntro}</p>
-              <p style={{ margin: 0 }}>{t.eta}</p>
-            </div>
-          </section>
-
-          <section className="pay-card">
-            <div style={{ fontSize: 14, color: '#64748b' }}>{t.paymentMethod}</div>
-
-            <div className="network-tabs">
-              <button
-                type="button"
-                onClick={() => setSelectedNetwork('trc20_usdt')}
-                style={{
-                  padding: '12px 10px',
-                  borderRadius: 14,
-                  border:
-                    selectedNetwork === 'trc20_usdt'
-                      ? '1px solid #0f234f'
-                      : '1px solid rgba(15, 23, 42, 0.08)',
-                  background:
-                    selectedNetwork === 'trc20_usdt' ? '#0b1733' : 'rgba(255,255,255,0.8)',
-                  color: selectedNetwork === 'trc20_usdt' ? '#fff' : '#0f172a',
-                  fontWeight: 800,
-                  cursor: 'pointer',
-                }}
-              >
-                {t.trc20Label}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setSelectedNetwork('base_usdc')}
-                style={{
-                  padding: '12px 10px',
-                  borderRadius: 14,
-                  border:
-                    selectedNetwork === 'base_usdc'
-                      ? '1px solid #0f234f'
-                      : '1px solid rgba(15, 23, 42, 0.08)',
-                  background:
-                    selectedNetwork === 'base_usdc' ? '#0b1733' : 'rgba(255,255,255,0.8)',
-                  color: selectedNetwork === 'base_usdc' ? '#fff' : '#0f172a',
-                  fontWeight: 800,
-                  cursor: 'pointer',
-                }}
-              >
-                {t.baseLabel}
-              </button>
-            </div>
-
-            <div
-              style={{
-                marginTop: 14,
-                padding: 14,
-                borderRadius: 16,
-                background: 'rgba(15, 23, 42, 0.035)',
-                border: '1px solid rgba(15, 23, 42, 0.06)',
-              }}
-            >
-              <div style={{ fontSize: 12, color: '#64748b', marginBottom: 6 }}>
-                {t.network}
-              </div>
-
-              <div style={{ fontWeight: 800, color: '#0f172a', marginBottom: 10 }}>
-                {selectedNetwork === 'trc20_usdt' ? t.trc20Label : t.baseLabel}
-              </div>
-
-              <div
-                style={{
-                  fontSize: 13,
-                  color: '#0f172a',
-                  wordBreak: 'break-all',
-                  lineHeight: 1.7,
-                  padding: 12,
-                  borderRadius: 12,
-                  background: '#fff',
-                  border:
-                    copiedNetwork === selectedNetwork
-                      ? '1px solid rgba(34, 197, 94, 0.45)'
-                      : '1px solid rgba(15, 23, 42, 0.08)',
-                  boxShadow:
-                    copiedNetwork === selectedNetwork
-                      ? '0 0 0 3px rgba(34, 197, 94, 0.10)'
-                      : 'none',
-                  transition: 'all 0.2s ease',
-                }}
-              >
-                {selectedAddress}
-              </div>
-
-              <button
-                type="button"
-                onClick={() => handleCopy(selectedAddress, selectedNetwork)}
-                style={{
-                  marginTop: 10,
-                  width: '100%',
-                  padding: 12,
-                  borderRadius: 12,
-                  border:
-                    copiedNetwork === selectedNetwork
-                      ? '1px solid rgba(34, 197, 94, 0.28)'
-                      : '1px solid rgba(15, 23, 42, 0.08)',
-                  background:
-                    copiedNetwork === selectedNetwork
-                      ? 'rgba(34, 197, 94, 0.10)'
-                      : '#fff',
-                  color:
-                    copiedNetwork === selectedNetwork
-                      ? '#166534'
-                      : '#0f172a',
-                  fontWeight: 800,
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                }}
-              >
-                {copiedNetwork === selectedNetwork ? `${t.copied} ✓` : t.copy}
-              </button>
-
-              {copiedNetwork === selectedNetwork ? (
-                <div
-                  style={{
-                    marginTop: 10,
-                    padding: '10px 12px',
-                    borderRadius: 12,
-                    background: 'rgba(34, 197, 94, 0.10)',
-                    border: '1px solid rgba(34, 197, 94, 0.18)',
-                    color: '#166534',
-                    fontSize: 13,
-                    fontWeight: 700,
-                    textAlign: 'center',
-                  }}
-                >
-                  {t.copySuccess}
-                </div>
-              ) : null}
-            </div>
-
-            <div style={{ marginTop: 16 }}>
-              <div style={{ fontSize: 14, color: '#64748b', marginBottom: 8 }}>
-                {t.uploadTitle}
-              </div>
-
-              <div
-                style={{
-                  padding: 14,
-                  borderRadius: 16,
-                  border: '1px dashed rgba(15, 23, 42, 0.18)',
-                  background: 'rgba(255,255,255,0.62)',
-                }}
-              >
-                <div style={{ fontSize: 13, color: '#475569', marginBottom: 10 }}>
-                  {t.uploadHint}
-                </div>
-
-                <input
-                  ref={fileRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                  style={{ display: 'none' }}
-                />
-
-                <button
-                  type="button"
-                  onClick={handleChooseFile}
-                  style={{
-                    width: '100%',
-                    padding: 12,
-                    borderRadius: 12,
-                    border: '1px solid rgba(15, 23, 42, 0.08)',
-                    background: '#fff',
-                    fontWeight: 800,
-                    cursor: 'pointer',
-                  }}
-                >
-                  {t.selectFile}
-                </button>
-
-                <div style={{ marginTop: 10, fontSize: 13, color: '#475569' }}>
-                  {proofName ? `${t.fileReady} ${proofName}` : t.noFile}
-                </div>
-
-                {proofPreview ? (
-                  <div style={{ marginTop: 12 }}>
-                    <div style={{ fontSize: 12, color: '#64748b', marginBottom: 6 }}>
-                      {t.preview}
-                    </div>
-                    <img
-                      src={proofPreview}
-                      alt="proof preview"
-                      style={{
-                        width: '100%',
-                        borderRadius: 14,
-                        border: '1px solid rgba(15, 23, 42, 0.08)',
-                        objectFit: 'cover',
-                      }}
-                    />
-                  </div>
-                ) : null}
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={handleSubmit}
-              disabled={submitting}
-              style={{
-                marginTop: 16,
-                width: '100%',
-                padding: 15,
-                background: '#07163f',
-                color: '#ffffff',
-                borderRadius: 14,
-                border: 'none',
-                fontWeight: 900,
-                fontSize: 16,
-                cursor: 'pointer',
-                boxShadow: '0 10px 26px rgba(7, 22, 63, 0.18)',
-                opacity: submitting ? 0.8 : 1,
-              }}
-            >
-              {submitting ? t.submitting : t.submit}
-            </button>
-
-            {successOrderId ? (
-              <div
-                style={{
-                  marginTop: 14,
-                  padding: 14,
-                  borderRadius: 14,
-                  background: 'rgba(34, 197, 94, 0.08)',
-                  border: '1px solid rgba(34, 197, 94, 0.18)',
-                  color: '#166534',
-                }}
-              >
-                <div style={{ fontWeight: 800 }}>{t.orderCreated}</div>
-                <div style={{ marginTop: 6 }}>
-                  {t.orderId}: {successOrderId}
-                </div>
-              </div>
-            ) : null}
-
-            {errorText ? (
-              <div
-                style={{
-                  marginTop: 14,
-                  padding: 14,
-                  borderRadius: 14,
-                  background: 'rgba(239, 68, 68, 0.08)',
-                  border: '1px solid rgba(239, 68, 68, 0.18)',
-                  color: '#991b1b',
-                }}
-              >
-                {errorText}
-              </div>
-            ) : null}
-          </section>
+            ${selectedPrice}
+          </div>
         </div>
+
+        <div style={{ maxWidth: 760, margin: '0 auto' }}>
+          <input
+            placeholder={t.usernamePlaceholder}
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            style={{
+              marginTop: 18,
+              width: '100%',
+              boxSizing: 'border-box',
+              padding: 14,
+              borderRadius: 12,
+              border: '1px solid #d1d5db',
+              fontSize: 16,
+              background: '#fff',
+            }}
+          />
+
+          <input
+            placeholder={t.emailPlaceholder}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            style={{
+              marginTop: 14,
+              width: '100%',
+              boxSizing: 'border-box',
+              padding: 14,
+              borderRadius: 12,
+              border: '1px solid #d1d5db',
+              fontSize: 16,
+              background: '#fff',
+            }}
+          />
+
+          <button
+            onClick={goPay}
+            style={{
+              marginTop: 16,
+              width: '100%',
+              padding: 15,
+              background: '#07163f',
+              color: '#ffffff',
+              borderRadius: 14,
+              border: 'none',
+              fontWeight: 900,
+              fontSize: 16,
+              cursor: 'pointer',
+              boxShadow: '0 10px 26px rgba(7, 22, 63, 0.18)',
+            }}
+          >
+            {t.createOrder}
+          </button>
+        </div>
+
+        <footer
+          style={{
+            marginTop: 30,
+            paddingTop: 16,
+            borderTop: '1px solid #e5e7eb',
+            fontSize: 12,
+            color: '#6b7280',
+            lineHeight: 1.75,
+            maxWidth: 900,
+            marginLeft: 'auto',
+            marginRight: 'auto',
+            textAlign: 'center',
+          }}
+        >
+          <p>{t.rights.replace('{year}', String(currentYear))}</p>
+
+          <p style={{ marginTop: 4 }}>
+            <span style={{ marginRight: 6 }}>{t.officialEmail}:</span>
+            <a href="mailto:hello@agnopol.com" className="agnopol-email-link">
+              hello@agnopol.com
+            </a>
+          </p>
+
+          <div className="agnopol-footer-links">
+            <a href={`/legal?lang=${lang}#terms`}>{t.footerTerms}</a>
+            <a href={`/legal?lang=${lang}#privacy`}>{t.footerPrivacy}</a>
+            <a href={`/legal?lang=${lang}#risk`}>{t.footerRisk}</a>
+          </div>
+        </footer>
       </div>
     </main>
-  )
-}
-
-function PayPageFallback() {
-  return (
-    <main
-      style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontFamily: 'system-ui, Arial, sans-serif',
-        background:
-          'radial-gradient(circle at top, rgba(224,231,255,0.45), rgba(247,248,250,0) 38%), linear-gradient(180deg, #f8fafc 0%, #f5f7fb 100%)',
-      }}
-    >
-      <div
-        style={{
-          padding: '14px 18px',
-          borderRadius: 14,
-          background: 'rgba(255,255,255,0.9)',
-          border: '1px solid rgba(15, 23, 42, 0.08)',
-          color: '#475569',
-          fontSize: 14,
-        }}
-      >
-        Loading payment page...
-      </div>
-    </main>
-  )
-}
-
-export default function PayPage() {
-  return (
-    <Suspense fallback={<PayPageFallback />}>
-      <PayPageContent />
-    </Suspense>
   )
 }
