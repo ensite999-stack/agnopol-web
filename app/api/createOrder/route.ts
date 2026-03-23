@@ -11,6 +11,7 @@ export async function POST(req: Request) {
     const body = await req.json()
 
     const {
+      username,
       email,
       product_type,
       duration,
@@ -21,7 +22,6 @@ export async function POST(req: Request) {
       proof_image_base64,
     } = body
 
-    // 基础校验
     if (!email || !price_usd || !payment_network) {
       return NextResponse.json(
         { error: 'Missing required fields' },
@@ -29,11 +29,11 @@ export async function POST(req: Request) {
       )
     }
 
-    // 写入数据库
     const { data, error } = await supabase
       .from('orders')
       .insert([
         {
+          username,
           email,
           product_type,
           duration,
