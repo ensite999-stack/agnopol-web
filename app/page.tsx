@@ -1,10 +1,9 @@
 'use client'
 
-import { useEffect, useMemo, useState, type ChangeEvent, type CSSProperties } from 'react'
+import { useEffect, useMemo, useState, type ChangeEvent } from 'react'
 import { useI18n } from '../components/language-provider'
 import LanguageSwitcher from '../components/language-switcher'
 import { withLang } from '../lib/i18n'
-import { formatBostonTime } from '../lib/time'
 
 type ProductType = 'premium' | 'stars'
 type DurationType = '3m' | '6m' | '12m'
@@ -42,23 +41,30 @@ const defaultConfig: PublicConfig = {
   base_address: '0x21E43Ddaa992A0B5cfcCeFE98838239b9E91B40E',
 }
 
-function getOrCreateDeviceId() {
-  if (typeof window === 'undefined') return ''
+function formatBostonTime(value: string | null) {
+  if (!value) return '-'
 
-  const key = 'agnopol_device_id'
-  const existing = window.localStorage.getItem(key)
-  if (existing) return existing
-
-  const created = `dev_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`
-  window.localStorage.setItem(key, created)
-  return created
+  try {
+    return new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/New_York',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false,
+    }).format(new Date(value))
+  } catch {
+    return value
+  }
 }
 
 function buildLookupUi(lang: string) {
   if (lang === 'zh-cn') {
     return {
       title: '订单查询',
-      subtitle: '输入下单邮箱查询订单状态、系统提示，并可按提示重新补交付款凭证。',
+      subtitle: '输入下单邮箱查询订单状态、系统提示，并可按后台提示重新补交付款凭证。',
       placeholder: '输入下单邮箱',
       button: '查询订单',
       loading: '查询中...',
@@ -89,7 +95,7 @@ function buildLookupUi(lang: string) {
   if (lang === 'zh-tw') {
     return {
       title: '訂單查詢',
-      subtitle: '輸入下單電子郵件查詢訂單狀態、系統提示，並可按提示重新補交付款憑證。',
+      subtitle: '輸入下單電子郵件查詢訂單狀態、系統提示，並可按後台提示重新補交付款憑證。',
       placeholder: '輸入下單電子郵件',
       button: '查詢訂單',
       loading: '查詢中...',
@@ -119,7 +125,8 @@ function buildLookupUi(lang: string) {
 
   return {
     title: 'Order Lookup',
-    subtitle: 'Enter your order email to check status, system notices, and resubmit payment proof if requested.',
+    subtitle:
+      'Enter your order email to check status, system notices, and resubmit payment proof only when instructed by admin.',
     placeholder: 'Enter your order email',
     button: 'Check Orders',
     loading: 'Loading...',
@@ -145,17 +152,6 @@ function buildLookupUi(lang: string) {
     resubmitSuccess: 'Updated payment proof submitted successfully. Please check the order again later.',
     resubmitError: 'Failed to resubmit payment proof.',
   }
-}
-
-function getStatusLabel(status: string | null | undefined, ui: ReturnType<typeof buildLookupUi>) {
-  const value = String(status || '').toLowerCase()
-
-  if (value === 'pending' || value === 'pending_payment') return ui.pending
-  if (value === 'paid') return ui.paid
-  if (value === 'completed') return ui.completed
-  if (value === 'failed' || value === 'cancelled') return ui.cancelled
-
-  return status || '-'
 }
 
 function OrderLookupSection() {
@@ -184,6 +180,17 @@ function OrderLookupSection() {
     return `${t.home.tgPremium} ${t.home.months12}`
   }
 
+  function getStatusLabel(status: string | null | undefined) {
+    const value = String(status || '').toLowerCase()
+
+    if (value === 'pending' || value === 'pending_payment') return ui.pending
+    if (value === 'paid') return ui.paid
+    if (value === 'completed') return ui.completed
+    if (value === 'failed' || value === 'cancelled') return ui.cancelled
+
+    return status || '-'
+  }
+
   async function handleLookup() {
     setLoading(true)
     setErrorText('')
@@ -197,7 +204,6 @@ function OrderLookupSection() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email: email.trim(),
-          device_id: getOrCreateDeviceId(),
         }),
         cache: 'no-store',
       })
@@ -323,10 +329,8 @@ function OrderLookupSection() {
       {results.length > 0 ? (
         <div style={{ marginTop: 14, display: 'grid', gap: 12 }}>
           {results.map((item) => {
-            const statusLabel = getStatusLabel(item.status, ui)
-            const canResubmit =
-              String(item.status).toLowerCase() !== 'completed' &&
-              String(item.status).toLowerCase() !== 'cancelled'
+            const allowResubmit =
+              Boolean(item.public_note) && String(item.status || '').toLowerCase() !== 'completed'
 
             return (
               <div
@@ -351,7 +355,7 @@ function OrderLookupSection() {
                   <strong>{ui.email}:</strong> {email}
                 </div>
                 <div>
-                  <strong>{ui.status}:</strong> {statusLabel}
+                  <strong>{ui.status}:</strong> {getStatusLabel(item.status)}
                 </div>
                 <div style={{ wordBreak: 'break-word' }}>
                   <strong>{ui.product}:</strong> {getProductLabel(item)}
@@ -399,7 +403,7 @@ function OrderLookupSection() {
                   </div>
                 ) : null}
 
-                {canResubmit ? (
+                {allowResubmit ? (
                   <>
                     <button
                       type="button"
@@ -567,16 +571,11 @@ export default function HomePage() {
     return `${t.home.tgStars} ${safeStars}`
   }, [tab, duration, safeStars, t])
 
-  function topTabStyle(_active: boolean): CSSProperties {
-    return {}
-  }
-
   function goPay() {
     const params = new URLSearchParams()
     params.set('lang', lang)
     params.set('username', username.trim())
     params.set('email', email.trim())
-    params.set('device_id', getOrCreateDeviceId())
     params.set('price_usd', String(selectedPrice))
 
     if (tab === 'premium') {
@@ -604,7 +603,6 @@ export default function HomePage() {
             type="button"
             onClick={() => setTab('premium')}
             className={`segment-btn ${tab === 'premium' ? 'active' : ''}`}
-            style={topTabStyle(tab === 'premium')}
           >
             {t.home.premiumTab}
           </button>
@@ -612,7 +610,6 @@ export default function HomePage() {
             type="button"
             onClick={() => setTab('stars')}
             className={`segment-btn ${tab === 'stars' ? 'active' : ''}`}
-            style={topTabStyle(tab === 'stars')}
           >
             {t.home.starsTab}
           </button>
