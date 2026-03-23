@@ -1,7 +1,7 @@
 'use client'
 
-import { languageOptions, type LangCode } from '@/lib/i18n'
-import { useI18n } from '@/components/language-provider'
+import { languageOptions, type LangCode } from '../lib/i18n'
+import { useI18n } from './language-provider'
 
 export default function LanguageSwitcher() {
   const { lang, setLang, t } = useI18n()
