@@ -58,8 +58,129 @@ function getQueryParams(): PayParams {
   }
 }
 
+function buildUi(lang: string) {
+  if (lang === 'zh-cn') {
+    return {
+      title: '付款',
+      subtitle: '安全完成您的订单付款。',
+      back: '返回',
+      summary: '订单摘要',
+      product: '产品',
+      amount: '金额',
+      username: 'Telegram 用户名',
+      email: '邮箱',
+      warningTitle: '重要提示',
+      warningBody:
+        '转账请使用正确的 TRC20 USDT 或 Base USDC 网络与币种，不要使用其他网络。实际到账金额必须与订单金额完全一致。',
+      eta: '为了确保资金安全与合规审查，我们的标准处理时间为 5 - 15 分钟。在网络拥堵时，最迟不超过 2 小时。',
+      paymentMethod: '支付方式',
+      trc20Label: 'TRC20 USDT',
+      baseLabel: 'Base USDC',
+      network: '网络',
+      copy: '复制',
+      copied: '已复制',
+      copySuccess: '收款地址已复制。',
+      uploadTitle: '支付凭证',
+      uploadHint: '上传您已完成支付的截图凭证。',
+      selectFile: '选择文件',
+      proofReady: '凭证文件已就绪。',
+      noProof: '暂未上传凭证。',
+      preview: '预览',
+      txHashTitle: '交易哈希',
+      txHashPlaceholder: '可选填写交易哈希',
+      proofOrHashHint: '您可以上传截图，和/或填写交易哈希。',
+      submit: '确认付款',
+      submitting: '确认中...',
+      orderCreated: '付款信息已提交成功。',
+      orderNo: '订单号',
+      successDesc: '您的订单已进入处理流程。预计五分钟内处理完成，请稍后通过首页订单查询功能查看订单详细信息。',
+      invalidOrder: '订单信息无效。',
+      createError: '提交付款失败。',
+    }
+  }
+
+  if (lang === 'zh-tw') {
+    return {
+      title: '付款',
+      subtitle: '安全完成您的訂單付款。',
+      back: '返回',
+      summary: '訂單摘要',
+      product: '產品',
+      amount: '金額',
+      username: 'Telegram 用戶名',
+      email: '電子郵件',
+      warningTitle: '重要提示',
+      warningBody:
+        '轉帳請使用正確的 TRC20 USDT 或 Base USDC 網路與幣種，不要使用其他網路。實際到帳金額必須與訂單金額完全一致。',
+      eta: '為了確保資金安全與合規審查，我們的標準處理時間為 5 - 15 分鐘。在網路擁堵時，最遲不超過 2 小時。',
+      paymentMethod: '支付方式',
+      trc20Label: 'TRC20 USDT',
+      baseLabel: 'Base USDC',
+      network: '網路',
+      copy: '複製',
+      copied: '已複製',
+      copySuccess: '收款地址已複製。',
+      uploadTitle: '支付憑證',
+      uploadHint: '上傳您已完成支付的截圖憑證。',
+      selectFile: '選擇文件',
+      proofReady: '憑證文件已就緒。',
+      noProof: '暫未上傳憑證。',
+      preview: '預覽',
+      txHashTitle: '交易哈希',
+      txHashPlaceholder: '可選填寫交易哈希',
+      proofOrHashHint: '您可以上傳截圖，和/或填寫交易哈希。',
+      submit: '確認付款',
+      submitting: '確認中...',
+      orderCreated: '付款資訊已提交成功。',
+      orderNo: '訂單號',
+      successDesc: '您的訂單已進入處理流程。預計五分鐘內處理完成，請稍後透過首頁訂單查詢功能查看訂單詳細資訊。',
+      invalidOrder: '訂單資訊無效。',
+      createError: '提交付款失敗。',
+    }
+  }
+
+  return {
+    title: 'Payment',
+    subtitle: 'Complete your order securely.',
+    back: 'Back',
+    summary: 'Order Summary',
+    product: 'Product',
+    amount: 'Amount',
+    username: 'Telegram Username',
+    email: 'Email',
+    warningTitle: 'Important',
+    warningBody:
+      'For transfers, please use the correct TRC20 USDT or Base USDC network and token only. The received amount must exactly match the order amount.',
+    eta: 'For fund security and compliance review, our standard processing time is 5 - 15 minutes. During network congestion, it may take up to 2 hours.',
+    paymentMethod: 'Payment Method',
+    trc20Label: 'TRC20 USDT',
+    baseLabel: 'Base USDC',
+    network: 'Network',
+    copy: 'Copy',
+    copied: 'Copied',
+    copySuccess: 'Address copied successfully.',
+    uploadTitle: 'Payment Proof',
+    uploadHint: 'Upload a screenshot of your completed payment.',
+    selectFile: 'Select File',
+    proofReady: 'Proof file ready.',
+    noProof: 'No proof uploaded yet.',
+    preview: 'Preview',
+    txHashTitle: 'Transaction Hash',
+    txHashPlaceholder: 'Optional transaction hash',
+    proofOrHashHint: 'You may upload a screenshot and/or enter a transaction hash.',
+    submit: 'Confirm Payment',
+    submitting: 'Submitting...',
+    orderCreated: 'Payment information submitted successfully.',
+    orderNo: 'Order No',
+    successDesc: 'Your order has entered processing. Please check the order details later from the homepage lookup.',
+    invalidOrder: 'Invalid order information.',
+    createError: 'Failed to submit payment.',
+  }
+}
+
 export default function PayPage() {
   const { lang, t } = useI18n()
+  const ui = useMemo(() => buildUi(lang), [lang])
 
   const [params, setParams] = useState<PayParams>({
     username: '',
@@ -178,7 +299,11 @@ export default function PayPage() {
 
     try {
       if (!params.email || !params.priceUsd || Number(params.priceUsd) <= 0) {
-        throw new Error(t.pay.invalidOrder)
+        throw new Error(ui.invalidOrder)
+      }
+
+      if (!proofBase64 && !txHash.trim()) {
+        throw new Error(lang === 'zh-cn' ? '请先上传付款截图或填写交易哈希。' : lang === 'zh-tw' ? '請先上傳付款截圖或填寫交易哈希。' : 'Please upload payment proof or enter a transaction hash.')
       }
 
       const payload = {
@@ -204,12 +329,12 @@ export default function PayPage() {
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data?.error || t.pay.createError)
+        throw new Error(data?.error || ui.createError)
       }
 
       setSuccessOrderNo(data?.order_no || '')
     } catch (error) {
-      setErrorText(error instanceof Error ? error.message : t.pay.createError)
+      setErrorText(error instanceof Error ? error.message : ui.createError)
     } finally {
       setSubmitting(false)
     }
@@ -227,7 +352,7 @@ export default function PayPage() {
 
   return (
     <main className="site-shell">
-      <div className="site-container">
+      <div className="site-container" style={{ minWidth: 0 }}>
         <div
           style={{
             marginBottom: 16,
@@ -239,7 +364,7 @@ export default function PayPage() {
           }}
         >
           <a href={`/?lang=${lang}`} style={{ textDecoration: 'none', color: '#475569', fontSize: 14 }}>
-            ← {t.common.back}
+            ← {ui.back}
           </a>
           <LanguageSwitcher />
         </div>
@@ -258,11 +383,11 @@ export default function PayPage() {
               fontWeight: 700,
             }}
           >
-            {t.pay.title}
+            {ui.title}
           </p>
 
           <p style={{ marginTop: 8, color: '#64748b', fontSize: 15 }}>
-            {t.pay.subtitle}
+            {ui.subtitle}
           </p>
         </header>
 
@@ -273,9 +398,9 @@ export default function PayPage() {
         ) : null}
 
         <div className="two-col">
-          <section className="card">
+          <section className="card" style={{ minWidth: 0, overflow: 'hidden' }}>
             <div style={{ fontSize: 14, color: '#64748b', marginBottom: 8 }}>
-              {t.pay.summary}
+              {ui.summary}
             </div>
 
             <div
@@ -291,24 +416,24 @@ export default function PayPage() {
 
             <div style={{ display: 'grid', gap: 10 }}>
               <div>
-                <div className="small-muted">{t.pay.product}</div>
+                <div className="small-muted">{ui.product}</div>
                 <div style={{ fontWeight: 700, color: '#0f172a' }}>{productLabel}</div>
               </div>
 
               <div>
-                <div className="small-muted">{t.pay.amount}</div>
+                <div className="small-muted">{ui.amount}</div>
                 <div style={{ fontWeight: 700, color: '#0f172a' }}>${params.priceUsd}</div>
               </div>
 
               <div>
-                <div className="small-muted">{t.common.username}</div>
+                <div className="small-muted">{ui.username}</div>
                 <div style={{ fontWeight: 700, color: '#0f172a', wordBreak: 'break-all' }}>
                   {params.username || '-'}
                 </div>
               </div>
 
               <div>
-                <div className="small-muted">{t.common.email}</div>
+                <div className="small-muted">{ui.email}</div>
                 <div style={{ fontWeight: 700, color: '#0f172a', wordBreak: 'break-all' }}>
                   {params.email || '-'}
                 </div>
@@ -332,22 +457,22 @@ export default function PayPage() {
                   marginBottom: 8,
                 }}
               >
-                {t.pay.warningTitle}
+                {ui.warningTitle}
               </div>
 
               <div style={{ fontSize: 13, color: '#475569', lineHeight: 1.7 }}>
-                {t.pay.warningBody}
+                {ui.warningBody}
               </div>
             </div>
 
             <div style={{ marginTop: 16, fontSize: 13, color: '#475569', lineHeight: 1.7 }}>
               <p style={{ margin: '0 0 8px 0' }}>{t.common.slogan}</p>
-              <p style={{ margin: 0 }}>{t.pay.eta}</p>
+              <p style={{ margin: 0 }}>{ui.eta}</p>
             </div>
           </section>
 
-          <section className="card">
-            <div style={{ fontSize: 14, color: '#64748b' }}>{t.pay.paymentMethod}</div>
+          <section className="card" style={{ minWidth: 0, overflow: 'hidden' }}>
+            <div style={{ fontSize: 14, color: '#64748b' }}>{ui.paymentMethod}</div>
 
             <div className="network-tabs">
               <button
@@ -355,7 +480,7 @@ export default function PayPage() {
                 className={`network-tab ${selectedNetwork === 'trc20_usdt' ? 'active' : ''}`}
                 onClick={() => setSelectedNetwork('trc20_usdt')}
               >
-                {t.pay.trc20Label}
+                {ui.trc20Label}
               </button>
 
               <button
@@ -363,7 +488,7 @@ export default function PayPage() {
                 className={`network-tab ${selectedNetwork === 'base_usdc' ? 'active' : ''}`}
                 onClick={() => setSelectedNetwork('base_usdc')}
               >
-                {t.pay.baseLabel}
+                {ui.baseLabel}
               </button>
             </div>
 
@@ -377,11 +502,11 @@ export default function PayPage() {
               }}
             >
               <div className="small-muted" style={{ marginBottom: 6 }}>
-                {t.pay.network}
+                {ui.network}
               </div>
 
               <div style={{ fontWeight: 800, color: '#0f172a', marginBottom: 10 }}>
-                {selectedNetwork === 'trc20_usdt' ? t.pay.trc20Label : t.pay.baseLabel}
+                {selectedNetwork === 'trc20_usdt' ? ui.trc20Label : ui.baseLabel}
               </div>
 
               <div
@@ -408,19 +533,19 @@ export default function PayPage() {
                 onClick={() => handleCopy(networkAddress, selectedNetwork)}
                 style={{ marginTop: 10 }}
               >
-                {copiedNetwork === selectedNetwork ? `${t.common.copied} ✓` : t.common.copy}
+                {copiedNetwork === selectedNetwork ? `${ui.copied} ✓` : ui.copy}
               </button>
 
               {copiedNetwork === selectedNetwork ? (
                 <div className="status-box-success" style={{ textAlign: 'center' }}>
-                  {t.pay.copySuccess}
+                  {ui.copySuccess}
                 </div>
               ) : null}
             </div>
 
             <div style={{ marginTop: 16 }}>
               <div style={{ fontSize: 14, color: '#64748b', marginBottom: 8 }}>
-                {t.pay.uploadTitle}
+                {ui.uploadTitle}
               </div>
 
               <div
@@ -429,10 +554,12 @@ export default function PayPage() {
                   borderRadius: 16,
                   border: '1px dashed rgba(15, 23, 42, 0.18)',
                   background: 'rgba(255,255,255,0.62)',
+                  minWidth: 0,
+                  overflow: 'hidden',
                 }}
               >
                 <div style={{ fontSize: 13, color: '#475569', marginBottom: 10 }}>
-                  {t.pay.uploadHint}
+                  {ui.uploadHint}
                 </div>
 
                 <input
@@ -444,17 +571,17 @@ export default function PayPage() {
                 />
 
                 <button type="button" className="btn-secondary" onClick={handleChooseFile}>
-                  {t.pay.selectFile}
+                  {ui.selectFile}
                 </button>
 
-                <div style={{ marginTop: 10, fontSize: 13, color: '#475569' }}>
-                  {proofName ? `${t.pay.proofReady} ${proofName}` : t.pay.noProof}
+                <div style={{ marginTop: 10, fontSize: 13, color: '#475569', wordBreak: 'break-all' }}>
+                  {proofName ? `${ui.proofReady} ${proofName}` : ui.noProof}
                 </div>
 
                 {proofPreview ? (
                   <div style={{ marginTop: 12 }}>
                     <div className="small-muted" style={{ marginBottom: 6 }}>
-                      {t.pay.preview}
+                      {ui.preview}
                     </div>
 
                     <img
@@ -465,25 +592,26 @@ export default function PayPage() {
                         borderRadius: 14,
                         border: '1px solid rgba(15, 23, 42, 0.08)',
                         objectFit: 'cover',
+                        display: 'block',
                       }}
                     />
                   </div>
                 ) : null}
 
                 <div style={{ marginTop: 14, fontSize: 13, color: '#475569', marginBottom: 8 }}>
-                  {t.pay.txHashTitle}
+                  {ui.txHashTitle}
                 </div>
 
                 <input
                   value={txHash}
                   onChange={(e) => setTxHash(e.target.value)}
-                  placeholder={t.pay.txHashPlaceholder}
+                  placeholder={ui.txHashPlaceholder}
                   className="input"
                   style={{ padding: 12, fontSize: 14 }}
                 />
 
                 <div style={{ marginTop: 10, fontSize: 12, color: '#6b7280', lineHeight: 1.6 }}>
-                  {t.pay.proofOrHashHint}
+                  {ui.proofOrHashHint}
                 </div>
               </div>
             </div>
@@ -495,16 +623,16 @@ export default function PayPage() {
               className="btn-primary"
               style={{ marginTop: 16, opacity: submitting ? 0.8 : 1 }}
             >
-              {submitting ? t.pay.submitting : t.pay.submit}
+              {submitting ? ui.submitting : ui.submit}
             </button>
 
             {successOrderNo ? (
               <div className="status-box-success">
-                <div style={{ fontWeight: 800 }}>{t.pay.orderCreated}</div>
+                <div style={{ fontWeight: 800 }}>{ui.orderCreated}</div>
                 <div style={{ marginTop: 6 }}>
-                  {t.pay.orderNo}: {successOrderNo}
+                  {ui.orderNo}: {successOrderNo}
                 </div>
-                <div style={{ marginTop: 8 }}>{t.pay.successDesc}</div>
+                <div style={{ marginTop: 8 }}>{ui.successDesc}</div>
               </div>
             ) : null}
 
