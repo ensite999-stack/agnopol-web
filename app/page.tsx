@@ -15,6 +15,63 @@ type LangType =
 type ProductType = 'premium' | 'stars'
 type DurationType = '3m' | '6m' | '12m'
 
+type OrderResult = {
+  order_no: string
+  status: string
+  product_type: string | null
+  duration: string | null
+  stars_amount: number | null
+  amount: number | null
+  price_usd: number | null
+  payment_network: string | null
+  created_at: string | null
+  admin_note: string | null
+}
+
+type HomeText = {
+  brand: string
+  slogan: string
+  premiumTitle: string
+  starsTitle: string
+  tabPremium: string
+  tabStars: string
+  plan3m: string
+  plan6m: string
+  plan12m: string
+  currentSelection: string
+  usernamePlaceholder: string
+  emailPlaceholder: string
+  createOrder: string
+  starsInputLabel: string
+  starsInputPlaceholder: string
+  starsMinHint: string
+  starsPriceHint: string
+  selectedPremium: string
+  selectedStars: string
+  rights: string
+  footerTerms: string
+  footerPrivacy: string
+  footerRisk: string
+  officialEmail: string
+  lookupTitle: string
+  lookupSubtitle: string
+  lookupPlaceholder: string
+  lookupButton: string
+  lookupLoading: string
+  lookupNotFound: string
+  lookupOrderNo: string
+  lookupStatus: string
+  lookupProduct: string
+  lookupAmount: string
+  lookupNetwork: string
+  lookupCreatedAt: string
+  lookupNote: string
+  statusPending: string
+  statusProcessing: string
+  statusCompleted: string
+  statusFailed: string
+}
+
 const languageOptions: { code: LangType; label: string }[] = [
   { code: 'de', label: 'Deutsch' },
   { code: 'en', label: 'English' },
@@ -33,243 +90,312 @@ const prices = {
   tg_stars_rate: 0.02,
 }
 
-const messages: Record<
-  LangType,
-  {
-    brand: string
-    slogan: string
-    premiumTitle: string
-    starsTitle: string
-    tabPremium: string
-    tabStars: string
-    plan3m: string
-    plan6m: string
-    plan12m: string
-    currentSelection: string
-    usernamePlaceholder: string
-    emailPlaceholder: string
-    createOrder: string
-    starsInputLabel: string
-    starsInputPlaceholder: string
-    starsMinHint: string
-    starsPriceHint: string
-    selectedPremium: string
-    selectedStars: string
-    rights: string
-    footerTerms: string
-    footerPrivacy: string
-    footerRisk: string
-    officialEmail: string
+const homeEn: HomeText = {
+  brand: 'Agnopol',
+  slogan: 'One world, one breath.',
+  premiumTitle: 'TG Premium Plans',
+  starsTitle: 'TG Stars',
+  tabPremium: 'Premium',
+  tabStars: 'Stars',
+  plan3m: '3 Months',
+  plan6m: '6 Months',
+  plan12m: '12 Months',
+  currentSelection: 'Current Selection',
+  usernamePlaceholder: 'Telegram Username',
+  emailPlaceholder: 'Email',
+  createOrder: 'Create Order',
+  starsInputLabel: 'Stars Amount',
+  starsInputPlaceholder: 'Minimum 50',
+  starsMinHint: 'Minimum order: 50 stars',
+  starsPriceHint: 'Price is calculated automatically',
+  selectedPremium: 'TG Premium',
+  selectedStars: 'TG Stars',
+  rights: '© {year} Agnopol. All rights reserved.',
+  footerTerms: 'Terms of Service',
+  footerPrivacy: 'Privacy Policy',
+  footerRisk: 'Risk Disclosure',
+  officialEmail: 'Official Email',
+  lookupTitle: 'Order Lookup',
+  lookupSubtitle: 'Enter your order number to check the latest status.',
+  lookupPlaceholder: 'Enter order number, e.g. APXXXXXX',
+  lookupButton: 'Check Order',
+  lookupLoading: 'Checking...',
+  lookupNotFound: 'Order not found.',
+  lookupOrderNo: 'Order No',
+  lookupStatus: 'Status',
+  lookupProduct: 'Product',
+  lookupAmount: 'Amount',
+  lookupNetwork: 'Payment Network',
+  lookupCreatedAt: 'Created At',
+  lookupNote: 'Note',
+  statusPending: 'Pending',
+  statusProcessing: 'Processing',
+  statusCompleted: 'Completed',
+  statusFailed: 'Failed',
+}
+
+const homeZhCn: HomeText = {
+  brand: 'Agnopol',
+  slogan: 'One world, one breath.',
+  premiumTitle: 'TG Premium 套餐',
+  starsTitle: 'TG Stars',
+  tabPremium: 'Premium',
+  tabStars: 'Stars',
+  plan3m: '3个月',
+  plan6m: '6个月',
+  plan12m: '12个月',
+  currentSelection: '当前选择',
+  usernamePlaceholder: 'TG 用户名（如 @username）',
+  emailPlaceholder: '电子邮件',
+  createOrder: '创建订单',
+  starsInputLabel: 'Stars 数量',
+  starsInputPlaceholder: '最少 50',
+  starsMinHint: '最低下单数量：50 Stars',
+  starsPriceHint: '价格将自动计算',
+  selectedPremium: 'TG Premium',
+  selectedStars: 'TG Stars',
+  rights: '© {year} Agnopol。保留所有权利。',
+  footerTerms: '服务条款',
+  footerPrivacy: '隐私政策',
+  footerRisk: '风险披露',
+  officialEmail: '官方邮箱',
+  lookupTitle: '订单查询',
+  lookupSubtitle: '输入订单号，查看最新处理状态。',
+  lookupPlaceholder: '输入订单号，例如 APXXXXXX',
+  lookupButton: '查询订单',
+  lookupLoading: '查询中...',
+  lookupNotFound: '未找到该订单。',
+  lookupOrderNo: '订单号',
+  lookupStatus: '状态',
+  lookupProduct: '产品',
+  lookupAmount: '金额',
+  lookupNetwork: '支付网络',
+  lookupCreatedAt: '创建时间',
+  lookupNote: '备注',
+  statusPending: '待处理',
+  statusProcessing: '处理中',
+  statusCompleted: '已完成',
+  statusFailed: '失败',
+}
+
+const homeZhTw: HomeText = {
+  brand: 'Agnopol',
+  slogan: 'One world, one breath.',
+  premiumTitle: 'TG Premium 方案',
+  starsTitle: 'TG Stars',
+  tabPremium: 'Premium',
+  tabStars: 'Stars',
+  plan3m: '3個月',
+  plan6m: '6個月',
+  plan12m: '12個月',
+  currentSelection: '目前選擇',
+  usernamePlaceholder: 'TG 用戶名（如 @username）',
+  emailPlaceholder: '電子郵件',
+  createOrder: '建立訂單',
+  starsInputLabel: 'Stars 數量',
+  starsInputPlaceholder: '最少 50',
+  starsMinHint: '最低下單數量：50 Stars',
+  starsPriceHint: '價格將自動計算',
+  selectedPremium: 'TG Premium',
+  selectedStars: 'TG Stars',
+  rights: '© {year} Agnopol。保留所有權利。',
+  footerTerms: '服務條款',
+  footerPrivacy: '隱私政策',
+  footerRisk: '風險披露',
+  officialEmail: '官方郵箱',
+  lookupTitle: '訂單查詢',
+  lookupSubtitle: '輸入訂單號，查看最新處理狀態。',
+  lookupPlaceholder: '輸入訂單號，例如 APXXXXXX',
+  lookupButton: '查詢訂單',
+  lookupLoading: '查詢中...',
+  lookupNotFound: '未找到該訂單。',
+  lookupOrderNo: '訂單號',
+  lookupStatus: '狀態',
+  lookupProduct: '產品',
+  lookupAmount: '金額',
+  lookupNetwork: '支付網路',
+  lookupCreatedAt: '建立時間',
+  lookupNote: '備註',
+  statusPending: '待處理',
+  statusProcessing: '處理中',
+  statusCompleted: '已完成',
+  statusFailed: '失敗',
+}
+
+const messages: Record<LangType, HomeText> = {
+  de: homeEn,
+  en: homeEn,
+  es: homeEn,
+  fr: homeEn,
+  ja: homeEn,
+  ko: homeEn,
+  'zh-cn': homeZhCn,
+  'zh-tw': homeZhTw,
+}
+
+function getStatusLabel(status: string | null | undefined, t: HomeText) {
+  const value = String(status || '').toLowerCase()
+  if (value === 'pending') return t.statusPending
+  if (value === 'processing') return t.statusProcessing
+  if (value === 'completed') return t.statusCompleted
+  if (value === 'failed') return t.statusFailed
+  return status || '-'
+}
+
+function OrderLookupSection({ lang, t }: { lang: LangType; t: HomeText }) {
+  const [orderNo, setOrderNo] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [errorText, setErrorText] = useState('')
+  const [result, setResult] = useState<OrderResult | null>(null)
+
+  const productLabel = useMemo(() => {
+    if (!result) return '-'
+    if (result.product_type === 'tg_stars') {
+      return `${t.selectedStars} ${result.stars_amount ?? 0}`
+    }
+    if (result.duration === '3m') return `${t.selectedPremium} ${t.plan3m}`
+    if (result.duration === '6m') return `${t.selectedPremium} ${t.plan6m}`
+    return `${t.selectedPremium} ${t.plan12m}`
+  }, [result, t])
+
+  async function handleLookup() {
+    setLoading(true)
+    setErrorText('')
+    setResult(null)
+
+    try {
+      const response = await fetch('/api/queryOrder', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          order_no: orderNo.trim().toUpperCase(),
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data?.error || t.lookupNotFound)
+      }
+
+      setResult(data.order)
+    } catch (error) {
+      setErrorText(error instanceof Error ? error.message : t.lookupNotFound)
+    } finally {
+      setLoading(false)
+    }
   }
-> = {
-  de: {
-    brand: 'Agnopol',
-    slogan: 'One world, one breath.',
-    premiumTitle: 'TG Premium Pläne',
-    starsTitle: 'TG Stars',
-    tabPremium: 'Premium',
-    tabStars: 'Stars',
-    plan3m: '3 Monate',
-    plan6m: '6 Monate',
-    plan12m: '12 Monate',
-    currentSelection: 'Aktuelle Auswahl',
-    usernamePlaceholder: 'Telegram Username',
-    emailPlaceholder: 'E-Mail',
-    createOrder: 'Create Order',
-    starsInputLabel: 'Stars Menge',
-    starsInputPlaceholder: 'Mindestens 50',
-    starsMinHint: 'Mindestbestellmenge: 50 Stars',
-    starsPriceHint: 'Preis wird automatisch berechnet',
-    selectedPremium: 'TG Premium',
-    selectedStars: 'TG Stars',
-    rights: '© {year} Agnopol. Alle Rechte vorbehalten.',
-    footerTerms: 'Terms of Service',
-    footerPrivacy: 'Privacy Policy',
-    footerRisk: 'Risk Disclosure',
-    officialEmail: 'Official Email',
-  },
-  en: {
-    brand: 'Agnopol',
-    slogan: 'One world, one breath.',
-    premiumTitle: 'TG Premium Plans',
-    starsTitle: 'TG Stars',
-    tabPremium: 'Premium',
-    tabStars: 'Stars',
-    plan3m: '3 Months',
-    plan6m: '6 Months',
-    plan12m: '12 Months',
-    currentSelection: 'Current Selection',
-    usernamePlaceholder: 'Telegram Username',
-    emailPlaceholder: 'Email',
-    createOrder: 'Create Order',
-    starsInputLabel: 'Stars Amount',
-    starsInputPlaceholder: 'Minimum 50',
-    starsMinHint: 'Minimum order: 50 stars',
-    starsPriceHint: 'Price is calculated automatically',
-    selectedPremium: 'TG Premium',
-    selectedStars: 'TG Stars',
-    rights: '© {year} Agnopol. All rights reserved.',
-    footerTerms: 'Terms of Service',
-    footerPrivacy: 'Privacy Policy',
-    footerRisk: 'Risk Disclosure',
-    officialEmail: 'Official Email',
-  },
-  es: {
-    brand: 'Agnopol',
-    slogan: 'One world, one breath.',
-    premiumTitle: 'Planes TG Premium',
-    starsTitle: 'TG Stars',
-    tabPremium: 'Premium',
-    tabStars: 'Stars',
-    plan3m: '3 Meses',
-    plan6m: '6 Meses',
-    plan12m: '12 Meses',
-    currentSelection: 'Selección actual',
-    usernamePlaceholder: 'Telegram Username',
-    emailPlaceholder: 'Correo electrónico',
-    createOrder: 'Create Order',
-    starsInputLabel: 'Cantidad de Stars',
-    starsInputPlaceholder: 'Mínimo 50',
-    starsMinHint: 'Pedido mínimo: 50 stars',
-    starsPriceHint: 'El precio se calcula automáticamente',
-    selectedPremium: 'TG Premium',
-    selectedStars: 'TG Stars',
-    rights: '© {year} Agnopol. Todos los derechos reservados.',
-    footerTerms: 'Terms of Service',
-    footerPrivacy: 'Privacy Policy',
-    footerRisk: 'Risk Disclosure',
-    officialEmail: 'Official Email',
-  },
-  fr: {
-    brand: 'Agnopol',
-    slogan: 'One world, one breath.',
-    premiumTitle: 'Offres TG Premium',
-    starsTitle: 'TG Stars',
-    tabPremium: 'Premium',
-    tabStars: 'Stars',
-    plan3m: '3 Mois',
-    plan6m: '6 Mois',
-    plan12m: '12 Mois',
-    currentSelection: 'Sélection actuelle',
-    usernamePlaceholder: 'Telegram Username',
-    emailPlaceholder: 'E-mail',
-    createOrder: 'Create Order',
-    starsInputLabel: 'Quantité de Stars',
-    starsInputPlaceholder: 'Minimum 50',
-    starsMinHint: 'Commande minimum : 50 stars',
-    starsPriceHint: 'Le prix est calculé automatiquement',
-    selectedPremium: 'TG Premium',
-    selectedStars: 'TG Stars',
-    rights: '© {year} Agnopol. Tous droits réservés.',
-    footerTerms: 'Terms of Service',
-    footerPrivacy: 'Privacy Policy',
-    footerRisk: 'Risk Disclosure',
-    officialEmail: 'Official Email',
-  },
-  ja: {
-    brand: 'Agnopol',
-    slogan: 'One world, one breath.',
-    premiumTitle: 'TG Premium プラン',
-    starsTitle: 'TG Stars',
-    tabPremium: 'Premium',
-    tabStars: 'Stars',
-    plan3m: '3か月',
-    plan6m: '6か月',
-    plan12m: '12か月',
-    currentSelection: '現在の選択',
-    usernamePlaceholder: 'Telegram ユーザー名',
-    emailPlaceholder: 'メールアドレス',
-    createOrder: 'Create Order',
-    starsInputLabel: 'Stars 数量',
-    starsInputPlaceholder: '最低 50',
-    starsMinHint: '最低注文数：50 Stars',
-    starsPriceHint: '価格は自動計算されます',
-    selectedPremium: 'TG Premium',
-    selectedStars: 'TG Stars',
-    rights: '© {year} Agnopol. All rights reserved.',
-    footerTerms: 'Terms of Service',
-    footerPrivacy: 'Privacy Policy',
-    footerRisk: 'Risk Disclosure',
-    officialEmail: 'Official Email',
-  },
-  ko: {
-    brand: 'Agnopol',
-    slogan: 'One world, one breath.',
-    premiumTitle: 'TG Premium 플랜',
-    starsTitle: 'TG Stars',
-    tabPremium: 'Premium',
-    tabStars: 'Stars',
-    plan3m: '3개월',
-    plan6m: '6개월',
-    plan12m: '12개월',
-    currentSelection: '현재 선택',
-    usernamePlaceholder: 'Telegram 사용자 이름',
-    emailPlaceholder: '이메일',
-    createOrder: 'Create Order',
-    starsInputLabel: 'Stars 수량',
-    starsInputPlaceholder: '최소 50',
-    starsMinHint: '최소 주문: 50 stars',
-    starsPriceHint: '가격은 자동으로 계산됩니다',
-    selectedPremium: 'TG Premium',
-    selectedStars: 'TG Stars',
-    rights: '© {year} Agnopol. All rights reserved.',
-    footerTerms: 'Terms of Service',
-    footerPrivacy: 'Privacy Policy',
-    footerRisk: 'Risk Disclosure',
-    officialEmail: 'Official Email',
-  },
-  'zh-cn': {
-    brand: 'Agnopol',
-    slogan: 'One world, one breath.',
-    premiumTitle: 'TG Premium 套餐',
-    starsTitle: 'TG Stars',
-    tabPremium: 'Premium',
-    tabStars: 'Stars',
-    plan3m: '3个月',
-    plan6m: '6个月',
-    plan12m: '12个月',
-    currentSelection: '当前选择',
-    usernamePlaceholder: 'TG 用户名（如 @username）',
-    emailPlaceholder: '电子邮件',
-    createOrder: '创建订单',
-    starsInputLabel: 'Stars 数量',
-    starsInputPlaceholder: '最少 50',
-    starsMinHint: '最低下单数量：50 Stars',
-    starsPriceHint: '价格将自动计算',
-    selectedPremium: 'TG Premium',
-    selectedStars: 'TG Stars',
-    rights: '© {year} Agnopol。保留所有权利。',
-    footerTerms: '服务条款',
-    footerPrivacy: '隐私政策',
-    footerRisk: '风险披露',
-    officialEmail: '官方邮箱',
-  },
-  'zh-tw': {
-    brand: 'Agnopol',
-    slogan: 'One world, one breath.',
-    premiumTitle: 'TG Premium 方案',
-    starsTitle: 'TG Stars',
-    tabPremium: 'Premium',
-    tabStars: 'Stars',
-    plan3m: '3個月',
-    plan6m: '6個月',
-    plan12m: '12個月',
-    currentSelection: '目前選擇',
-    usernamePlaceholder: 'TG 用戶名（如 @username）',
-    emailPlaceholder: '電子郵件',
-    createOrder: '建立訂單',
-    starsInputLabel: 'Stars 數量',
-    starsInputPlaceholder: '最少 50',
-    starsMinHint: '最低下單數量：50 Stars',
-    starsPriceHint: '價格將自動計算',
-    selectedPremium: 'TG Premium',
-    selectedStars: 'TG Stars',
-    rights: '© {year} Agnopol。保留所有權利。',
-    footerTerms: '服務條款',
-    footerPrivacy: '隱私政策',
-    footerRisk: '風險披露',
-    officialEmail: '官方郵箱',
-  },
+
+  return (
+    <section
+      style={{
+        maxWidth: 760,
+        margin: '0 auto',
+        padding: 18,
+        borderRadius: 18,
+        border: '1px solid rgba(15, 23, 42, 0.07)',
+        background: 'rgba(255,255,255,0.78)',
+        boxShadow: '0 8px 24px rgba(15, 23, 42, 0.035)',
+        backdropFilter: 'blur(10px)',
+      }}
+    >
+      <div
+        style={{
+          fontSize: 'clamp(18px, 2.2vw, 22px)',
+          fontWeight: 800,
+          color: '#111827',
+          marginBottom: 6,
+        }}
+      >
+        {t.lookupTitle}
+      </div>
+
+      <div
+        style={{
+          fontSize: 13,
+          color: '#6b7280',
+          marginBottom: 12,
+        }}
+      >
+        {t.lookupSubtitle}
+      </div>
+
+      <input
+        value={orderNo}
+        onChange={(e) => setOrderNo(e.target.value)}
+        placeholder={t.lookupPlaceholder}
+        style={{
+          width: '100%',
+          boxSizing: 'border-box',
+          padding: 14,
+          borderRadius: 12,
+          border: '1px solid #d1d5db',
+          fontSize: 16,
+          background: '#fff',
+        }}
+      />
+
+      <button
+        onClick={handleLookup}
+        style={{
+          marginTop: 12,
+          width: '100%',
+          padding: 14,
+          borderRadius: 14,
+          border: 'none',
+          background: '#07163f',
+          color: '#fff',
+          fontWeight: 900,
+          fontSize: 15,
+          cursor: 'pointer',
+        }}
+      >
+        {loading ? t.lookupLoading : t.lookupButton}
+      </button>
+
+      {errorText ? (
+        <div
+          style={{
+            marginTop: 14,
+            padding: 14,
+            borderRadius: 14,
+            background: 'rgba(239, 68, 68, 0.08)',
+            border: '1px solid rgba(239, 68, 68, 0.18)',
+            color: '#991b1b',
+          }}
+        >
+          {errorText}
+        </div>
+      ) : null}
+
+      {result ? (
+        <div
+          style={{
+            marginTop: 14,
+            padding: 16,
+            borderRadius: 16,
+            background: 'rgba(15, 23, 42, 0.035)',
+            border: '1px solid rgba(15, 23, 42, 0.06)',
+            display: 'grid',
+            gap: 10,
+          }}
+        >
+          <div><strong>{t.lookupOrderNo}:</strong> {result.order_no}</div>
+          <div><strong>{t.lookupStatus}:</strong> {getStatusLabel(result.status, t)}</div>
+          <div><strong>{t.lookupProduct}:</strong> {productLabel}</div>
+          <div><strong>{t.lookupAmount}:</strong> ${result.price_usd ?? result.amount ?? 0}</div>
+          <div><strong>{t.lookupNetwork}:</strong> {result.payment_network || '-'}</div>
+          <div>
+            <strong>{t.lookupCreatedAt}:</strong>{' '}
+            {result.created_at ? new Date(result.created_at).toLocaleString() : '-'}
+          </div>
+          {result.admin_note ? (
+            <div><strong>{t.lookupNote}:</strong> {result.admin_note}</div>
+          ) : null}
+        </div>
+      ) : null}
+    </section>
+  )
 }
 
 export default function Page() {
@@ -701,6 +827,10 @@ export default function Page() {
           >
             {t.createOrder}
           </button>
+        </div>
+
+        <div style={{ marginTop: 28 }}>
+          <OrderLookupSection lang={lang} t={t} />
         </div>
 
         <footer
