@@ -2,6 +2,8 @@ import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 
 export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
 
 function getSupabase() {
   const supabaseUrl = process.env.SUPABASE_URL
@@ -18,6 +20,12 @@ function generateOrderNo() {
   const random = Math.random().toString(36).slice(2, 8).toUpperCase()
   const time = Date.now().toString(36).toUpperCase()
   return `AP${time}${random}`
+}
+
+function noStoreJson(data: any, init?: ResponseInit) {
+  const response = NextResponse.json(data, init)
+  response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+  return response
 }
 
 export async function POST(req: Request) {
@@ -41,15 +49,22 @@ export async function POST(req: Request) {
       : null
 
     if (!email) {
-      return NextResponse.json({ error: 'Email is required' }, { status: 400 })
+      return noStoreJson({ error: 'Email is required' }, { status: 400 })
     }
 
     if (!productType) {
-      return NextResponse.json({ error: 'Product type is required' }, { status: 400 })
+      return noStoreJson({ error: 'Product type is required' }, { status: 400 })
     }
 
     if (!priceUsd || Number.isNaN(priceUsd) || priceUsd <= 0) {
-      return NextResponse.json({ error: 'Invalid price' }, { status: 400 })
+      return noStoreJson({ error: 'Invalid price' }, { status: 400 })
+    }
+
+    if (!proofImageBase64 && !txHash) {
+      return noStoreJson(
+        { error: '请上传付款截图或填写交易哈希。' },
+        { status: 400 }
+      )
     }
 
     const orderNo = generateOrderNo()
@@ -65,14 +80,12 @@ export async function POST(req: Request) {
       price_usd: priceUsd,
       payment_network: paymentNetwork || null,
       tx_hash: txHash,
-      status: 'pending_payment',
-      public_note: null,
+      proof_image_base64: proofImageBase64,
+      status: 'paid',
+      public_note:
+        '已收到您的付款凭证，订单正在处理中。预计五分钟内完成，请稍后查询订单详情。',
       admin_note: null,
       updated_at: new Date().toISOString(),
-    }
-
-    if (proofImageBase64) {
-      insertData.proof_image_base64 = proofImageBase64
     }
 
     const { data, error } = await supabase
@@ -82,17 +95,17 @@ export async function POST(req: Request) {
       .single()
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      return noStoreJson({ error: error.message }, { status: 500 })
     }
 
-    return NextResponse.json({
+    return noStoreJson({
       success: true,
       id: data.id,
       order_no: data.order_no,
       status: data.status,
     })
   } catch (error) {
-    return NextResponse.json(
+    return noStoreJson(
       {
         error: error instanceof Error ? error.message : 'Server error',
       },
