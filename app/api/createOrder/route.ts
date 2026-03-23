@@ -12,6 +12,19 @@ function getSupabase() {
   return createClient(supabaseUrl, serviceRoleKey)
 }
 
+function generateOrderNo() {
+  const now = new Date()
+  const yyyy = now.getFullYear()
+  const mm = String(now.getMonth() + 1).padStart(2, '0')
+  const dd = String(now.getDate()).padStart(2, '0')
+  const hh = String(now.getHours()).padStart(2, '0')
+  const mi = String(now.getMinutes()).padStart(2, '0')
+  const ss = String(now.getSeconds()).padStart(2, '0')
+  const rand = Math.floor(1000 + Math.random() * 9000)
+
+  return `AGN-${yyyy}${mm}${dd}-${hh}${mi}${ss}-${rand}`
+}
+
 export async function POST(req: Request) {
   try {
     const supabase = getSupabase()
@@ -27,6 +40,7 @@ export async function POST(req: Request) {
       payment_network,
       payment_address,
       proof_image_base64,
+      tx_hash,
     } = body
 
     if (!email || !price_usd || !payment_network) {
@@ -36,10 +50,13 @@ export async function POST(req: Request) {
       )
     }
 
+    const order_no = generateOrderNo()
+
     const { data, error } = await supabase
       .from('orders')
       .insert([
         {
+          order_no,
           username,
           email,
           product_type,
@@ -49,6 +66,7 @@ export async function POST(req: Request) {
           payment_network,
           payment_address,
           proof_image_base64,
+          tx_hash,
           status: 'pending',
         },
       ])
@@ -65,6 +83,7 @@ export async function POST(req: Request) {
     return NextResponse.json({
       success: true,
       order_id: data.id,
+      order_no: data.order_no,
     })
   } catch (err) {
     return NextResponse.json(
