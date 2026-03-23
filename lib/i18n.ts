@@ -328,7 +328,8 @@ const de: Messages = {
     preview: 'Vorschau',
     txHashTitle: 'Transaktions-Hash',
     txHashPlaceholder: 'Transaktions-Hash hier einfügen (optional)',
-    proofOrHashHint: 'Sie können einen Screenshot hochladen und/oder einen Transaktions-Hash eingeben.',
+    proofOrHashHint:
+      'Sie können einen Screenshot hochladen und/oder einen Transaktions-Hash eingeben.',
     submit: 'Zahlung absenden',
     submitting: 'Wird gesendet...',
     orderCreated: 'Bestellung erfolgreich erstellt.',
@@ -509,7 +510,8 @@ const fr: Messages = {
     preview: 'Aperçu',
     txHashTitle: 'Hash de transaction',
     txHashPlaceholder: 'Collez votre hash de transaction ici (optionnel)',
-    proofOrHashHint: 'Vous pouvez télécharger une capture d’écran et/ou saisir un hash de transaction.',
+    proofOrHashHint:
+      'Vous pouvez télécharger une capture d’écran et/ou saisir un hash de transaction.',
     submit: 'Soumettre le paiement',
     submitting: 'Envoi...',
     orderCreated: 'Commande créée avec succès.',
@@ -599,7 +601,8 @@ const ja: Messages = {
     preview: 'プレビュー',
     txHashTitle: '取引ハッシュ',
     txHashPlaceholder: '取引ハッシュを入力（任意）',
-    proofOrHashHint: 'スクリーンショットのアップロード、または取引ハッシュの入力ができます。',
+    proofOrHashHint:
+      'スクリーンショットのアップロード、または取引ハッシュの入力ができます。',
     submit: '支払いを送信',
     submitting: '送信中...',
     orderCreated: '注文が正常に作成されました。',
@@ -689,7 +692,8 @@ const ko: Messages = {
     preview: '미리보기',
     txHashTitle: '거래 해시',
     txHashPlaceholder: '거래 해시 입력(선택)',
-    proofOrHashHint: '스크린샷 업로드와/또는 거래 해시 입력이 가능합니다.',
+    proofOrHashHint:
+      '스크린샷 업로드와/또는 거래 해시 입력이 가능합니다.',
     submit: '결제 제출',
     submitting: '제출 중...',
     orderCreated: '주문이 성공적으로 생성되었습니다.',
