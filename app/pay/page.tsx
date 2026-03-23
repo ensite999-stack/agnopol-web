@@ -65,6 +65,7 @@ type PaymentText = {
   months6: string
   months12: string
   loading: string
+  invalidOrder: string
 }
 
 const NETWORKS: Record<PaymentNetwork, { label: string; address: string }> = {
@@ -104,7 +105,7 @@ const payEn: PaymentText = {
   orderCreated: 'Order created successfully.',
   orderNo: 'Order No',
   successDesc:
-    'Your order has entered the processing queue. Estimated completion time is within 5 minutes. Please return to the homepage and use Order Lookup to check detailed order information.',
+    'Your order has entered the processing queue. Estimated completion time is within 5 minutes. Please return to the homepage and use Order Lookup with your email to check detailed order information.',
   warningTitle: 'Important',
   warningBody:
     'For transfers, please use the correct TRC20 USDT or Base USDC network and token only. Do not use any other network. The received amount must exactly match the order amount.',
@@ -121,6 +122,7 @@ const payEn: PaymentText = {
   months6: '6 Months',
   months12: '12 Months',
   loading: 'Loading payment page...',
+  invalidOrder: 'Invalid order information. Please return to the homepage and create the order again.',
 }
 
 const payZhCn: PaymentText = {
@@ -149,7 +151,7 @@ const payZhCn: PaymentText = {
   orderCreated: '订单创建成功。',
   orderNo: '订单号',
   successDesc:
-    '您的订单已进入处理流程，预计五分钟内处理完成。请稍后通过首页订单查询功能查看订单详细信息。',
+    '您的订单已进入处理流程，预计五分钟内处理完成。请稍后通过首页订单查询功能并使用下单邮箱查看订单详细信息。',
   warningTitle: '重要提示',
   warningBody:
     '转账请仅使用正确的 TRC20 USDT 或 Base USDC 链与币种。不要使用任何其他网络。到账金额必须与订单金额完全一致。',
@@ -166,6 +168,7 @@ const payZhCn: PaymentText = {
   months6: '6个月',
   months12: '12个月',
   loading: '正在加载支付页...',
+  invalidOrder: '订单信息无效，请返回首页重新创建订单。',
 }
 
 const payZhTw: PaymentText = {
@@ -194,7 +197,7 @@ const payZhTw: PaymentText = {
   orderCreated: '訂單建立成功。',
   orderNo: '訂單號',
   successDesc:
-    '您的訂單已進入處理流程，預計五分鐘內處理完成。請稍後透過首頁訂單查詢功能查看訂單詳細資訊。',
+    '您的訂單已進入處理流程，預計五分鐘內處理完成。請稍後透過首頁訂單查詢功能並使用下單電子郵件查看訂單詳細資訊。',
   warningTitle: '重要提示',
   warningBody:
     '轉帳請僅使用正確的 TRC20 USDT 或 Base USDC 鏈與幣種。不要使用任何其他網路。到帳金額必須與訂單金額完全一致。',
@@ -211,6 +214,7 @@ const payZhTw: PaymentText = {
   months6: '6個月',
   months12: '12個月',
   loading: '正在載入支付頁...',
+  invalidOrder: '訂單資訊無效，請返回首頁重新建立訂單。',
 }
 
 const messages: Record<LangType, PaymentText> = {
@@ -330,6 +334,10 @@ export default function PayPage() {
     setSuccessOrderNo('')
 
     try {
+      if (!params.email || !params.priceUsd || Number(params.priceUsd) <= 0) {
+        throw new Error(t.invalidOrder)
+      }
+
       const payload = {
         username: params.username,
         email: params.email,
@@ -343,10 +351,11 @@ export default function PayPage() {
         tx_hash: txHash.trim() || null,
       }
 
-      const response = await fetch('/api/createOrder', {
+      const response = await fetch(`${window.location.origin}/api/createOrder`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
+        cache: 'no-store',
       })
 
       const data = await response.json()
