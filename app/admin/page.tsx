@@ -80,6 +80,7 @@ const adminTexts = {
     settingsSaved: 'Settings saved successfully.',
     ordersUpdated: 'Order updated successfully.',
     orderDeleted: 'Order deleted successfully.',
+    noSettings: 'No settings data.',
   },
   en: {
     checking: 'Checking session...',
@@ -126,6 +127,7 @@ const adminTexts = {
     settingsSaved: 'Settings saved successfully.',
     ordersUpdated: 'Order updated successfully.',
     orderDeleted: 'Order deleted successfully.',
+    noSettings: 'No settings data.',
   },
   es: {
     checking: 'Comprobando sesión...',
@@ -172,6 +174,7 @@ const adminTexts = {
     settingsSaved: 'Configuración guardada.',
     ordersUpdated: 'Pedido actualizado.',
     orderDeleted: 'Pedido eliminado.',
+    noSettings: 'No hay datos de configuración.',
   },
   fr: {
     checking: 'Vérification de la session...',
@@ -218,6 +221,7 @@ const adminTexts = {
     settingsSaved: 'Paramètres enregistrés.',
     ordersUpdated: 'Commande mise à jour.',
     orderDeleted: 'Commande supprimée.',
+    noSettings: 'Aucune donnée de configuration.',
   },
   ja: {
     checking: 'セッションを確認中...',
@@ -264,6 +268,7 @@ const adminTexts = {
     settingsSaved: '設定を保存しました。',
     ordersUpdated: '注文を更新しました。',
     orderDeleted: '注文を削除しました。',
+    noSettings: '設定データがありません。',
   },
   ko: {
     checking: '세션 확인 중...',
@@ -310,6 +315,7 @@ const adminTexts = {
     settingsSaved: '설정이 저장되었습니다.',
     ordersUpdated: '주문이 수정되었습니다.',
     orderDeleted: '주문이 삭제되었습니다.',
+    noSettings: '설정 데이터가 없습니다.',
   },
   'zh-cn': {
     checking: '正在检查登录状态...',
@@ -356,6 +362,7 @@ const adminTexts = {
     settingsSaved: '配置保存成功。',
     ordersUpdated: '订单更新成功。',
     orderDeleted: '订单删除成功。',
+    noSettings: '暂无配置数据。',
   },
   'zh-tw': {
     checking: '正在檢查登入狀態...',
@@ -402,6 +409,7 @@ const adminTexts = {
     settingsSaved: '配置保存成功。',
     ordersUpdated: '訂單更新成功。',
     orderDeleted: '訂單刪除成功。',
+    noSettings: '暫無配置資料。',
   },
 } as const
 
@@ -409,7 +417,6 @@ function getProductLabel(item: AdminOrder) {
   if (item.product_type === 'tg_stars') {
     return `TG Stars ${item.stars_amount ?? 0}`
   }
-
   if (item.duration === '3m') return 'TG Premium 3M'
   if (item.duration === '6m') return 'TG Premium 6M'
   if (item.duration === '12m') return 'TG Premium 12M'
@@ -444,6 +451,7 @@ export default function AdminPage() {
       try {
         const response = await fetch('/api/admin/session', {
           cache: 'no-store',
+          credentials: 'include',
         })
         const data = await response.json()
 
@@ -480,6 +488,7 @@ export default function AdminPage() {
 
       const response = await fetch(`/api/admin/orders?${params.toString()}`, {
         cache: 'no-store',
+        credentials: 'include',
       })
       const data = await response.json()
 
@@ -508,6 +517,7 @@ export default function AdminPage() {
     try {
       const response = await fetch('/api/admin/settings', {
         cache: 'no-store',
+        credentials: 'include',
       })
       const data = await response.json()
 
@@ -535,8 +545,7 @@ export default function AdminPage() {
   }, [statusFilter])
 
   useEffect(() => {
-    if (authStatus !== 'ok') return
-    if (!autoRefresh) return
+    if (authStatus !== 'ok' || !autoRefresh) return
 
     const timer = setInterval(() => {
       fetchOrders()
@@ -551,6 +560,7 @@ export default function AdminPage() {
     try {
       await fetch('/api/admin/logout', {
         method: 'POST',
+        credentials: 'include',
       })
     } finally {
       window.location.href = `/admin/login?lang=${lang}`
@@ -576,6 +586,7 @@ export default function AdminPage() {
           tx_hash: selectedOrder.tx_hash || '',
           payment_network: selectedOrder.payment_network || '',
         }),
+        credentials: 'include',
       })
 
       const data = await response.json()
@@ -603,6 +614,7 @@ export default function AdminPage() {
     try {
       const response = await fetch(`/api/admin/orders/${selectedOrder.id}`, {
         method: 'DELETE',
+        credentials: 'include',
       })
 
       const data = await response.json()
@@ -629,9 +641,8 @@ export default function AdminPage() {
       const response = await fetch(`/api/admin/orders/${selectedOrder.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          status,
-        }),
+        body: JSON.stringify({ status }),
+        credentials: 'include',
       })
 
       const data = await response.json()
@@ -667,6 +678,7 @@ export default function AdminPage() {
           trc20_address: settings.trc20_address,
           base_address: settings.base_address,
         }),
+        credentials: 'include',
       })
 
       const data = await response.json()
@@ -853,13 +865,7 @@ export default function AdminPage() {
                       <div className="small-muted" style={{ marginTop: 4 }}>
                         {getProductLabel(item)}
                       </div>
-                      <div
-                        style={{
-                          marginTop: 6,
-                          fontSize: 12,
-                          color: '#475569',
-                        }}
-                      >
+                      <div style={{ marginTop: 6, fontSize: 12, color: '#475569' }}>
                         {item.status}
                       </div>
                     </button>
@@ -970,31 +976,19 @@ export default function AdminPage() {
                         {text.saveChanges}
                       </button>
 
-                      <button
-                        className="btn-secondary"
-                        onClick={() => updateStatus('paid')}
-                      >
+                      <button className="btn-secondary" onClick={() => updateStatus('paid')}>
                         {text.confirmPaid}
                       </button>
 
-                      <button
-                        className="btn-secondary"
-                        onClick={() => updateStatus('pending_payment')}
-                      >
+                      <button className="btn-secondary" onClick={() => updateStatus('pending_payment')}>
                         {text.restorePayment}
                       </button>
 
-                      <button
-                        className="btn-secondary"
-                        onClick={() => updateStatus('cancelled')}
-                      >
+                      <button className="btn-secondary" onClick={() => updateStatus('cancelled')}>
                         {text.cancelOrder}
                       </button>
 
-                      <button
-                        className="btn-secondary"
-                        onClick={handleDeleteOrder}
-                      >
+                      <button className="btn-secondary" onClick={handleDeleteOrder}>
                         {text.deleteOrder}
                       </button>
                     </div>
@@ -1022,7 +1016,7 @@ export default function AdminPage() {
             {settingsLoading ? (
               <div className="small-muted">{text.saving}</div>
             ) : !settings ? (
-              <div className="small-muted">No settings data.</div>
+              <div className="small-muted">{text.noSettings}</div>
             ) : (
               <div style={{ display: 'grid', gap: 12, maxWidth: 860 }}>
                 <input
