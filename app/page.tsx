@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState, type ChangeEvent, type CSSProperties } from 'react'
 import { useI18n } from '../components/language-provider'
 import LanguageSwitcher from '../components/language-switcher'
-import { withLang, type Messages } from '../lib/i18n'
+import { withLang } from '../lib/i18n'
 
 type ProductType = 'premium' | 'stars'
 type DurationType = '3m' | '6m' | '12m'
@@ -59,7 +59,6 @@ function buildLookupUi(lang: string) {
       note: '系统提示',
       txHash: '交易哈希',
       resubmit: '重新上传凭证',
-      chooseFile: '选择文件',
       proofReady: '新凭证已就绪：',
       hashPlaceholder: '重新填写交易哈希（可选）',
       resubmitButton: '提交新的凭证',
@@ -67,6 +66,7 @@ function buildLookupUi(lang: string) {
       noOrders: '未找到相关订单。',
       pending: '待支付',
       paid: '已支付',
+      completed: '已完成',
       cancelled: '已取消',
       resubmitSuccess: '新的付款凭证已提交成功，请稍后重新查询订单状态。',
       resubmitError: '重新提交付款凭证失败。',
@@ -90,7 +90,6 @@ function buildLookupUi(lang: string) {
       note: '系統提示',
       txHash: '交易哈希',
       resubmit: '重新上傳憑證',
-      chooseFile: '選擇文件',
       proofReady: '新憑證已就緒：',
       hashPlaceholder: '重新填寫交易哈希（可選）',
       resubmitButton: '提交新的憑證',
@@ -98,6 +97,7 @@ function buildLookupUi(lang: string) {
       noOrders: '未找到相關訂單。',
       pending: '待支付',
       paid: '已支付',
+      completed: '已完成',
       cancelled: '已取消',
       resubmitSuccess: '新的付款憑證已提交成功，請稍後重新查詢訂單狀態。',
       resubmitError: '重新提交付款憑證失敗。',
@@ -120,7 +120,6 @@ function buildLookupUi(lang: string) {
     note: 'System Notice',
     txHash: 'Transaction Hash',
     resubmit: 'Resubmit Proof',
-    chooseFile: 'Choose File',
     proofReady: 'New proof ready:',
     hashPlaceholder: 'Resubmit transaction hash (optional)',
     resubmitButton: 'Submit New Proof',
@@ -128,6 +127,7 @@ function buildLookupUi(lang: string) {
     noOrders: 'No matching orders found.',
     pending: 'Pending Payment',
     paid: 'Paid',
+    completed: 'Completed',
     cancelled: 'Cancelled',
     resubmitSuccess: 'Updated payment proof submitted successfully. Please check the order again later.',
     resubmitError: 'Failed to resubmit payment proof.',
@@ -138,8 +138,8 @@ function getStatusLabel(status: string | null | undefined, ui: ReturnType<typeof
   const value = String(status || '').toLowerCase()
 
   if (value === 'pending' || value === 'pending_payment') return ui.pending
-  if (value === 'processing') return ui.pending
-  if (value === 'completed' || value === 'paid') return ui.paid
+  if (value === 'paid') return ui.paid
+  if (value === 'completed') return ui.completed
   if (value === 'failed' || value === 'cancelled') return ui.cancelled
 
   return status || '-'
@@ -264,7 +264,17 @@ function OrderLookupSection() {
   }
 
   return (
-    <section className="card-soft" style={{ maxWidth: 760, margin: '0 auto' }}>
+    <section
+      className="card-soft"
+      style={{
+        maxWidth: 760,
+        margin: '0 auto',
+        width: '100%',
+        minWidth: 0,
+        boxSizing: 'border-box',
+        overflow: 'hidden',
+      }}
+    >
       <div
         style={{
           fontSize: 'clamp(18px, 2.2vw, 22px)',
@@ -285,9 +295,10 @@ function OrderLookupSection() {
         onChange={(e) => setEmail(e.target.value)}
         placeholder={ui.placeholder}
         className="input"
+        style={{ width: '100%', minWidth: 0, boxSizing: 'border-box' }}
       />
 
-      <button onClick={handleLookup} className="btn-primary" style={{ marginTop: 12 }}>
+      <button onClick={handleLookup} className="btn-primary" style={{ marginTop: 12, width: '100%' }}>
         {loading ? ui.loading : ui.button}
       </button>
 
@@ -307,27 +318,31 @@ function OrderLookupSection() {
                 border: '1px solid rgba(15, 23, 42, 0.06)',
                 display: 'grid',
                 gap: 8,
+                width: '100%',
+                minWidth: 0,
+                boxSizing: 'border-box',
+                overflow: 'hidden',
               }}
             >
-              <div>
+              <div style={{ wordBreak: 'break-word' }}>
                 <strong>{ui.orderNo}:</strong> {item.order_no}
               </div>
-              <div>
+              <div style={{ wordBreak: 'break-word' }}>
                 <strong>{ui.email}:</strong> {email}
               </div>
               <div>
                 <strong>{ui.status}:</strong> {getStatusLabel(item.status, ui)}
               </div>
-              <div>
+              <div style={{ wordBreak: 'break-word' }}>
                 <strong>{ui.product}:</strong> {getProductLabel(item)}
               </div>
               <div>
                 <strong>{ui.amount}:</strong> ${item.price_usd ?? item.amount ?? 0}
               </div>
-              <div>
+              <div style={{ wordBreak: 'break-word' }}>
                 <strong>{ui.network}:</strong> {item.payment_network || '-'}
               </div>
-              <div>
+              <div style={{ wordBreak: 'break-word' }}>
                 <strong>{ui.createdAt}:</strong>{' '}
                 {item.created_at ? new Date(item.created_at).toLocaleString() : '-'}
               </div>
@@ -338,6 +353,8 @@ function OrderLookupSection() {
                     wordBreak: 'break-all',
                     overflowWrap: 'anywhere',
                     whiteSpace: 'pre-wrap',
+                    width: '100%',
+                    minWidth: 0,
                   }}
                 >
                   <strong>{ui.txHash}:</strong> {item.tx_hash}
@@ -353,6 +370,10 @@ function OrderLookupSection() {
                     border: '1px solid rgba(245, 158, 11, 0.25)',
                     color: '#7c2d12',
                     lineHeight: 1.7,
+                    width: '100%',
+                    minWidth: 0,
+                    boxSizing: 'border-box',
+                    wordBreak: 'break-word',
                   }}
                 >
                   <strong>{ui.note}:</strong> {item.public_note}
@@ -363,6 +384,7 @@ function OrderLookupSection() {
                 type="button"
                 className="btn-secondary"
                 onClick={() => handleOpenResubmit(item.order_no)}
+                style={{ width: '100%' }}
               >
                 {ui.resubmit}
               </button>
@@ -377,12 +399,34 @@ function OrderLookupSection() {
                     background: 'rgba(255,255,255,0.75)',
                     display: 'grid',
                     gap: 10,
+                    width: '100%',
+                    minWidth: 0,
+                    boxSizing: 'border-box',
+                    overflow: 'hidden',
                   }}
                 >
-                  <input type="file" accept="image/*" onChange={handleResubmitFileChange} />
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleResubmitFileChange}
+                    style={{
+                      width: '100%',
+                      minWidth: 0,
+                      boxSizing: 'border-box',
+                      maxWidth: '100%',
+                    }}
+                  />
 
                   {resubmitProofName ? (
-                    <div className="small-muted">
+                    <div
+                      className="small-muted"
+                      style={{
+                        width: '100%',
+                        minWidth: 0,
+                        wordBreak: 'break-all',
+                        overflowWrap: 'anywhere',
+                      }}
+                    >
                       {ui.proofReady} {resubmitProofName}
                     </div>
                   ) : null}
@@ -392,12 +436,14 @@ function OrderLookupSection() {
                     onChange={(e) => setResubmitHash(e.target.value)}
                     placeholder={ui.hashPlaceholder}
                     className="input"
+                    style={{ width: '100%', minWidth: 0, boxSizing: 'border-box' }}
                   />
 
                   <button
                     type="button"
                     className="btn-primary"
                     onClick={() => handleResubmit(item.order_no)}
+                    style={{ width: '100%' }}
                   >
                     {resubmitLoading ? ui.resubmitting : ui.resubmitButton}
                   </button>
