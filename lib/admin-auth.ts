@@ -1,4 +1,5 @@
 import crypto from 'crypto'
+import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 
 export const ADMIN_SESSION_COOKIE_NAME = 'agnopol_admin_session'
@@ -83,34 +84,15 @@ export function verifyAdminSessionToken(token: string) {
   return payload
 }
 
-function readCookie(cookieHeader: string, name: string) {
-  const parts = cookieHeader.split(';')
-
-  for (const part of parts) {
-    const trimmed = part.trim()
-    if (!trimmed) continue
-
-    const index = trimmed.indexOf('=')
-    if (index === -1) continue
-
-    const key = trimmed.slice(0, index)
-    const value = trimmed.slice(index + 1)
-
-    if (key === name) return value
-  }
-
-  return null
-}
-
-export function readAdminSessionFromRequest(req: Request) {
-  const cookieHeader = req.headers.get('cookie') || ''
-  const token = readCookie(cookieHeader, ADMIN_SESSION_COOKIE_NAME)
+export function readAdminSessionFromCookies() {
+  const cookieStore = cookies()
+  const token = cookieStore.get(ADMIN_SESSION_COOKIE_NAME)?.value
   if (!token) return null
   return verifyAdminSessionToken(token)
 }
 
-export function requireAdminSession(req: Request) {
-  const session = readAdminSessionFromRequest(req)
+export function requireAdminSession() {
+  const session = readAdminSessionFromCookies()
   if (!session) {
     throw new Error('Unauthorized')
   }
@@ -125,7 +107,7 @@ export function attachAdminSessionCookie(response: NextResponse) {
     value: token,
     httpOnly: true,
     sameSite: 'lax',
-    secure: process.env.NODE_ENV === 'production',
+    secure: true,
     path: '/',
     maxAge: ADMIN_SESSION_MAX_AGE,
   })
@@ -137,7 +119,7 @@ export function clearAdminSessionCookie(response: NextResponse) {
     value: '',
     httpOnly: true,
     sameSite: 'lax',
-    secure: process.env.NODE_ENV === 'production',
+    secure: true,
     path: '/',
     maxAge: 0,
   })
