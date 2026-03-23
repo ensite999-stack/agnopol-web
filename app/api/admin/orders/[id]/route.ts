@@ -23,6 +23,26 @@ function noStoreJson(data: any, init?: ResponseInit) {
   return response
 }
 
+function getAutoPublicNote(status: string) {
+  if (status === 'completed') {
+    return '订单已完成。感谢您的购买，请查收您的服务结果。'
+  }
+
+  if (status === 'pending_payment') {
+    return '订单已恢复为待支付状态。请根据系统提示重新完成付款并补交凭证。'
+  }
+
+  if (status === 'cancelled') {
+    return '订单已取消。如有疑问请联系官方邮箱 hello@agnopol.com。'
+  }
+
+  if (status === 'paid') {
+    return '已收到您的付款凭证，订单正在处理中。预计五分钟内完成，请稍后查询订单详情。'
+  }
+
+  return ''
+}
+
 export async function PATCH(
   req: Request,
   { params }: { params: { id: string } }
@@ -52,11 +72,21 @@ export async function PATCH(
 
     if (typeof body?.username === 'string') patch.username = body.username.trim()
     if (typeof body?.email === 'string') patch.email = body.email.trim().toLowerCase()
-    if (typeof body?.public_note === 'string') patch.public_note = body.public_note
     if (typeof body?.admin_note === 'string') patch.admin_note = body.admin_note
     if (typeof body?.tx_hash === 'string') patch.tx_hash = body.tx_hash.trim()
     if (typeof body?.payment_network === 'string') patch.payment_network = body.payment_network
-    if (typeof body?.status === 'string') patch.status = nextStatus
+
+    if (typeof body?.status === 'string') {
+      patch.status = nextStatus
+
+      if (typeof body?.public_note !== 'string') {
+        patch.public_note = getAutoPublicNote(nextStatus!)
+      }
+    }
+
+    if (typeof body?.public_note === 'string') {
+      patch.public_note = body.public_note
+    }
 
     const { data, error } = await supabase
       .from('orders')
@@ -77,7 +107,9 @@ export async function PATCH(
     })
   } catch (error) {
     return noStoreJson(
-      { error: error instanceof Error ? error.message : 'Server error' },
+      {
+        error: error instanceof Error ? error.message : 'Server error',
+      },
       { status: error instanceof Error && error.message === 'Unauthorized' ? 401 : 500 }
     )
   }
@@ -109,7 +141,9 @@ export async function DELETE(
     })
   } catch (error) {
     return noStoreJson(
-      { error: error instanceof Error ? error.message : 'Server error' },
+      {
+        error: error instanceof Error ? error.message : 'Server error',
+      },
       { status: error instanceof Error && error.message === 'Unauthorized' ? 401 : 500 }
     )
   }
