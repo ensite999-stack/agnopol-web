@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState, type ChangeEvent, type CSSProperties } fr
 import { useI18n } from '../components/language-provider'
 import LanguageSwitcher from '../components/language-switcher'
 import { withLang } from '../lib/i18n'
+import { formatBostonTime } from '../lib/time'
 
 type ProductType = 'premium' | 'stars'
 type DurationType = '3m' | '6m' | '12m'
@@ -39,6 +40,18 @@ const defaultConfig: PublicConfig = {
   stars_rate: 0.02,
   trc20_address: 'TD6sQK9NmqxKzP6WHvmUdkHQRZvwX6Cy1e',
   base_address: '0x21E43Ddaa992A0B5cfcCeFE98838239b9E91B40E',
+}
+
+function getOrCreateDeviceId() {
+  if (typeof window === 'undefined') return ''
+
+  const key = 'agnopol_device_id'
+  const existing = window.localStorage.getItem(key)
+  if (existing) return existing
+
+  const created = `dev_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`
+  window.localStorage.setItem(key, created)
+  return created
 }
 
 function buildLookupUi(lang: string) {
@@ -184,6 +197,7 @@ function OrderLookupSection() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email: email.trim(),
+          device_id: getOrCreateDeviceId(),
         }),
         cache: 'no-store',
       })
@@ -308,149 +322,159 @@ function OrderLookupSection() {
 
       {results.length > 0 ? (
         <div style={{ marginTop: 14, display: 'grid', gap: 12 }}>
-          {results.map((item) => (
-            <div
-              key={item.order_no}
-              style={{
-                padding: 16,
-                borderRadius: 16,
-                background: 'rgba(15, 23, 42, 0.035)',
-                border: '1px solid rgba(15, 23, 42, 0.06)',
-                display: 'grid',
-                gap: 8,
-                width: '100%',
-                minWidth: 0,
-                boxSizing: 'border-box',
-                overflow: 'hidden',
-              }}
-            >
-              <div style={{ wordBreak: 'break-word' }}>
-                <strong>{ui.orderNo}:</strong> {item.order_no}
-              </div>
-              <div style={{ wordBreak: 'break-word' }}>
-                <strong>{ui.email}:</strong> {email}
-              </div>
-              <div>
-                <strong>{ui.status}:</strong> {getStatusLabel(item.status, ui)}
-              </div>
-              <div style={{ wordBreak: 'break-word' }}>
-                <strong>{ui.product}:</strong> {getProductLabel(item)}
-              </div>
-              <div>
-                <strong>{ui.amount}:</strong> ${item.price_usd ?? item.amount ?? 0}
-              </div>
-              <div style={{ wordBreak: 'break-word' }}>
-                <strong>{ui.network}:</strong> {item.payment_network || '-'}
-              </div>
-              <div style={{ wordBreak: 'break-word' }}>
-                <strong>{ui.createdAt}:</strong>{' '}
-                {item.created_at ? new Date(item.created_at).toLocaleString() : '-'}
-              </div>
+          {results.map((item) => {
+            const statusLabel = getStatusLabel(item.status, ui)
+            const canResubmit =
+              String(item.status).toLowerCase() !== 'completed' &&
+              String(item.status).toLowerCase() !== 'cancelled'
 
-              {item.tx_hash ? (
-                <div
-                  style={{
-                    wordBreak: 'break-all',
-                    overflowWrap: 'anywhere',
-                    whiteSpace: 'pre-wrap',
-                    width: '100%',
-                    minWidth: 0,
-                  }}
-                >
-                  <strong>{ui.txHash}:</strong> {item.tx_hash}
-                </div>
-              ) : null}
-
-              {item.public_note ? (
-                <div
-                  style={{
-                    padding: 12,
-                    borderRadius: 12,
-                    background: 'rgba(255, 236, 179, 0.45)',
-                    border: '1px solid rgba(245, 158, 11, 0.25)',
-                    color: '#7c2d12',
-                    lineHeight: 1.7,
-                    width: '100%',
-                    minWidth: 0,
-                    boxSizing: 'border-box',
-                    wordBreak: 'break-word',
-                  }}
-                >
-                  <strong>{ui.note}:</strong> {item.public_note}
-                </div>
-              ) : null}
-
-              <button
-                type="button"
-                className="btn-secondary"
-                onClick={() => handleOpenResubmit(item.order_no)}
-                style={{ width: '100%' }}
+            return (
+              <div
+                key={item.order_no}
+                style={{
+                  padding: 16,
+                  borderRadius: 16,
+                  background: 'rgba(15, 23, 42, 0.035)',
+                  border: '1px solid rgba(15, 23, 42, 0.06)',
+                  display: 'grid',
+                  gap: 8,
+                  width: '100%',
+                  minWidth: 0,
+                  boxSizing: 'border-box',
+                  overflow: 'hidden',
+                }}
               >
-                {ui.resubmit}
-              </button>
+                <div style={{ wordBreak: 'break-word' }}>
+                  <strong>{ui.orderNo}:</strong> {item.order_no}
+                </div>
+                <div style={{ wordBreak: 'break-word' }}>
+                  <strong>{ui.email}:</strong> {email}
+                </div>
+                <div>
+                  <strong>{ui.status}:</strong> {statusLabel}
+                </div>
+                <div style={{ wordBreak: 'break-word' }}>
+                  <strong>{ui.product}:</strong> {getProductLabel(item)}
+                </div>
+                <div>
+                  <strong>{ui.amount}:</strong> ${item.price_usd ?? item.amount ?? 0}
+                </div>
+                <div style={{ wordBreak: 'break-word' }}>
+                  <strong>{ui.network}:</strong> {item.payment_network || '-'}
+                </div>
+                <div style={{ wordBreak: 'break-word' }}>
+                  <strong>{ui.createdAt}:</strong> {formatBostonTime(item.created_at)}
+                </div>
 
-              {activeOrderNo === item.order_no ? (
-                <div
-                  style={{
-                    marginTop: 6,
-                    padding: 12,
-                    borderRadius: 14,
-                    border: '1px dashed rgba(15, 23, 42, 0.18)',
-                    background: 'rgba(255,255,255,0.75)',
-                    display: 'grid',
-                    gap: 10,
-                    width: '100%',
-                    minWidth: 0,
-                    boxSizing: 'border-box',
-                    overflow: 'hidden',
-                  }}
-                >
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleResubmitFileChange}
+                {item.tx_hash ? (
+                  <div
                     style={{
+                      wordBreak: 'break-all',
+                      overflowWrap: 'anywhere',
+                      whiteSpace: 'pre-wrap',
+                      width: '100%',
+                      minWidth: 0,
+                    }}
+                  >
+                    <strong>{ui.txHash}:</strong> {item.tx_hash}
+                  </div>
+                ) : null}
+
+                {item.public_note ? (
+                  <div
+                    style={{
+                      padding: 12,
+                      borderRadius: 12,
+                      background: 'rgba(255, 236, 179, 0.45)',
+                      border: '1px solid rgba(245, 158, 11, 0.25)',
+                      color: '#7c2d12',
+                      lineHeight: 1.7,
                       width: '100%',
                       minWidth: 0,
                       boxSizing: 'border-box',
-                      maxWidth: '100%',
+                      wordBreak: 'break-word',
                     }}
-                  />
-
-                  {resubmitProofName ? (
-                    <div
-                      className="small-muted"
-                      style={{
-                        width: '100%',
-                        minWidth: 0,
-                        wordBreak: 'break-all',
-                        overflowWrap: 'anywhere',
-                      }}
-                    >
-                      {ui.proofReady} {resubmitProofName}
-                    </div>
-                  ) : null}
-
-                  <input
-                    value={resubmitHash}
-                    onChange={(e) => setResubmitHash(e.target.value)}
-                    placeholder={ui.hashPlaceholder}
-                    className="input"
-                    style={{ width: '100%', minWidth: 0, boxSizing: 'border-box' }}
-                  />
-
-                  <button
-                    type="button"
-                    className="btn-primary"
-                    onClick={() => handleResubmit(item.order_no)}
-                    style={{ width: '100%' }}
                   >
-                    {resubmitLoading ? ui.resubmitting : ui.resubmitButton}
-                  </button>
-                </div>
-              ) : null}
-            </div>
-          ))}
+                    <strong>{ui.note}:</strong> {item.public_note}
+                  </div>
+                ) : null}
+
+                {canResubmit ? (
+                  <>
+                    <button
+                      type="button"
+                      className="btn-secondary"
+                      onClick={() => handleOpenResubmit(item.order_no)}
+                      style={{ width: '100%' }}
+                    >
+                      {ui.resubmit}
+                    </button>
+
+                    {activeOrderNo === item.order_no ? (
+                      <div
+                        style={{
+                          marginTop: 6,
+                          padding: 12,
+                          borderRadius: 14,
+                          border: '1px dashed rgba(15, 23, 42, 0.18)',
+                          background: 'rgba(255,255,255,0.75)',
+                          display: 'grid',
+                          gap: 10,
+                          width: '100%',
+                          minWidth: 0,
+                          boxSizing: 'border-box',
+                          overflow: 'hidden',
+                        }}
+                      >
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleResubmitFileChange}
+                          style={{
+                            width: '100%',
+                            minWidth: 0,
+                            boxSizing: 'border-box',
+                            maxWidth: '100%',
+                          }}
+                        />
+
+                        {resubmitProofName ? (
+                          <div
+                            className="small-muted"
+                            style={{
+                              width: '100%',
+                              minWidth: 0,
+                              wordBreak: 'break-all',
+                              overflowWrap: 'anywhere',
+                            }}
+                          >
+                            {ui.proofReady} {resubmitProofName}
+                          </div>
+                        ) : null}
+
+                        <input
+                          value={resubmitHash}
+                          onChange={(e) => setResubmitHash(e.target.value)}
+                          placeholder={ui.hashPlaceholder}
+                          className="input"
+                          style={{ width: '100%', minWidth: 0, boxSizing: 'border-box' }}
+                        />
+
+                        <button
+                          type="button"
+                          className="btn-primary"
+                          onClick={() => handleResubmit(item.order_no)}
+                          style={{ width: '100%' }}
+                        >
+                          {resubmitLoading ? ui.resubmitting : ui.resubmitButton}
+                        </button>
+                      </div>
+                    ) : null}
+                  </>
+                ) : null}
+              </div>
+            )
+          })}
         </div>
       ) : null}
     </section>
@@ -552,6 +576,7 @@ export default function HomePage() {
     params.set('lang', lang)
     params.set('username', username.trim())
     params.set('email', email.trim())
+    params.set('device_id', getOrCreateDeviceId())
     params.set('price_usd', String(selectedPrice))
 
     if (tab === 'premium') {
