@@ -12,15 +12,25 @@ function getSupabase() {
   return createClient(supabaseUrl, serviceRoleKey)
 }
 
+export async function GET() {
+  return NextResponse.json({
+    ok: true,
+    route: 'queryOrder',
+    message: 'Use POST with email to query orders.',
+  })
+}
+
 export async function POST(req: Request) {
   try {
     const supabase = getSupabase()
     const body = await req.json()
-    const order_no = String(body?.order_no || '').trim().toUpperCase()
+    const email = String(body?.email || '')
+      .trim()
+      .toLowerCase()
 
-    if (!order_no) {
+    if (!email) {
       return NextResponse.json(
-        { error: 'Missing order number' },
+        { error: 'Missing email' },
         { status: 400 }
       )
     }
@@ -30,19 +40,27 @@ export async function POST(req: Request) {
       .select(
         'id, order_no, username, email, product_type, duration, stars_amount, amount, price_usd, payment_network, status, admin_note, created_at'
       )
-      .eq('order_no', order_no)
-      .single()
+      .ilike('email', email)
+      .order('created_at', { ascending: false })
+      .limit(10)
 
-    if (error || !data) {
+    if (error) {
       return NextResponse.json(
-        { error: 'Order not found' },
+        { error: error.message },
+        { status: 500 }
+      )
+    }
+
+    if (!data || data.length === 0) {
+      return NextResponse.json(
+        { error: 'No orders found for this email' },
         { status: 404 }
       )
     }
 
     return NextResponse.json({
       success: true,
-      order: data,
+      orders: data,
     })
   } catch (err) {
     return NextResponse.json(
