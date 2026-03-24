@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { Suspense, useEffect, useMemo, useState } from 'react'
 import { useI18n } from '../../../components/language-provider'
 import LanguageSwitcher from '../../../components/language-switcher'
 
@@ -87,9 +87,9 @@ const loginTexts = {
   },
 } as const
 
-export default function AdminLoginPage() {
+function AdminLoginPageInner() {
   const { lang } = useI18n()
-  const text = useMemo(() => loginTexts[lang] || loginTexts.en, [lang])
+  const text = useMemo(() => loginTexts[lang as keyof typeof loginTexts] || loginTexts.en, [lang])
 
   const [password, setPassword] = useState('')
   const [submitting, setSubmitting] = useState(false)
@@ -108,6 +108,7 @@ export default function AdminLoginPage() {
           window.location.href = `/admin?lang=${lang}`
         }
       } catch {
+        // ignore
       }
     }
 
@@ -217,5 +218,29 @@ export default function AdminLoginPage() {
         </section>
       </div>
     </main>
+  )
+}
+
+function PageFallback() {
+  return (
+    <main className="site-shell">
+      <div className="site-container" style={{ maxWidth: 520 }}>
+        <section className="card-soft">
+          <div className="hero-center">
+            <p className="small-muted" style={{ margin: 0 }}>
+              Loading...
+            </p>
+          </div>
+        </section>
+      </div>
+    </main>
+  )
+}
+
+export default function AdminLoginPage() {
+  return (
+    <Suspense fallback={<PageFallback />}>
+      <AdminLoginPageInner />
+    </Suspense>
   )
 }
