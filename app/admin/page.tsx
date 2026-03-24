@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useI18n } from '../../components/language-provider'
 import LanguageSwitcher from '../../components/language-switcher'
+
 const API = {
   session: '/api/admin/session',
   orders: '/api/admin/orders',
@@ -14,7 +15,7 @@ const API = {
   logout: '/api/admin/logout',
 }
 
-type AdminTab = 'orders' | 'pricing' | 'payment'
+type AdminTab = 'orders' | 'pricing'
 
 type OrderStatus = 'pending_payment' | 'paid' | 'completed' | 'cancelled'
 
@@ -56,72 +57,280 @@ type FormState = {
   admin_note: string
 }
 
+async function readJsonSafe(res: Response) {
+  const raw = await res.text()
+
+  try {
+    return JSON.parse(raw)
+  } catch {
+    throw new Error(
+      `接口没有返回 JSON（状态 ${res.status}），通常是 API 路径写错、接口不存在，或被重定向到了 HTML 页面。`
+    )
+  }
+}
+
 function buildText(lang: string) {
-  if (lang === 'zh-tw') {
+  if (lang === 'de') {
     return {
-      title: '後台管理',
-      subtitle: '訂單管理、價格配置與收款地址管理',
-      checking: '檢查登入狀態中...',
-      redirecting: '尚未登入，正在跳轉...',
+      title: 'Admin-Konsole',
+      subtitle: 'Bestellverwaltung, Preiseinstellungen und Zahlungsadressverwaltung',
+      checking: 'Anmeldestatus wird geprüft...',
+      redirecting: 'Nicht eingeloggt. Weiterleitung...',
       tabs: {
-        orders: '訂單管理',
-        pricing: '價格與地址',
-        payment: '收款地址',
+        orders: 'Bestellungen',
+        pricing: 'Preise & Adressen',
       },
-      logout: '退出登入',
-      refreshing: '刷新中...',
-      refreshNow: '立即刷新',
-      autoRefresh: '自動刷新',
-      searchPlaceholder: '按郵箱 / 訂單號 / 用戶名搜索',
-      all: '全部',
-      pending: '待支付',
-      paid: '已支付',
-      completed: '已完成',
-      cancelled: '已取消',
-      noOrders: '暫無訂單。',
-      selectHint: '暫無訂單。',
-      orderNo: '訂單號',
-      product: '產品',
+      logout: 'Abmelden',
+      refreshing: 'Wird aktualisiert...',
+      refreshNow: 'Jetzt aktualisieren',
+      autoRefresh: 'Automatisch aktualisieren',
+      searchPlaceholder: 'Nach E-Mail / Bestellnr. / Benutzername suchen',
+      all: 'Alle',
+      pending: 'Ausstehende Zahlung',
+      paid: 'Bezahlt',
+      completed: 'Abgeschlossen',
+      cancelled: 'Storniert',
+      noOrders: 'Keine Bestellungen.',
+      selectHint: 'Keine Bestellungen.',
+      orderNo: 'Bestellnummer',
+      product: 'Produkt',
+      amount: 'Betrag',
+      createdAt: 'Erstellt am',
+      username: 'Telegram-Benutzername',
+      email: 'E-Mail',
+      network: 'Zahlungsnetzwerk',
+      txHash: 'Transaktions-Hash',
+      currentStatus: 'Aktueller Status',
+      userNote: 'Sichtbarer Hinweis für Nutzer',
+      adminNote: 'Admin-Notiz',
+      saveHint: 'Bestellinformationen, Nutzerhinweis und Admin-Notiz speichern',
+      saveChanges: 'Änderungen speichern',
+      saving: 'Wird gespeichert...',
+      completedBtn: 'Abgeschlossen',
+      restoreBtn: 'Zahlung wiederherstellen',
+      cancelBtn: 'Bestellung stornieren',
+      deleteBtn: 'Bestellung löschen',
+      restoring: 'Wird wiederhergestellt...',
+      completing: 'Wird verarbeitet...',
+      cancelling: 'Wird storniert...',
+      deleting: 'Wird gelöscht...',
+      viewLarge: 'Groß anzeigen',
+      noImage: 'Kein Zahlungsbild',
+      noHash: 'Bitte Transaktions-Hash hochladen',
+      pricesTitle: 'Preise & Adressen',
+      price3m: 'TG Premium 3 Monate',
+      price6m: 'TG Premium 6 Monate',
+      price12m: 'TG Premium 12 Monate',
+      starsRate: 'Stars Stückpreis (USD)',
+      trc20: 'TRC20 USDT Adresse',
+      base: 'Base USDC Adresse',
+      saveConfig: 'Einstellungen speichern',
+      configSaving: 'Wird gespeichert...',
+      actionSuccess: 'Aktion erfolgreich',
+      saveSuccess: 'Erfolgreich gespeichert',
+      configSaveSuccess: 'Seiteneinstellungen gespeichert',
+      loadFailed: 'Laden fehlgeschlagen',
+      actionFailed: 'Aktion fehlgeschlagen',
+      allTimeBoston: 'Alle Zeiten werden in der Zeitzone Boston, USA angezeigt.',
+      editOrder: 'Bestellung bearbeiten',
+    }
+  }
+
+  if (lang === 'es') {
+    return {
+      title: 'Consola de administración',
+      subtitle: 'Gestión de pedidos, precios y direcciones de cobro',
+      checking: 'Comprobando sesión...',
+      redirecting: 'Sin iniciar sesión. Redirigiendo...',
+      tabs: {
+        orders: 'Pedidos',
+        pricing: 'Precios y direcciones',
+      },
+      logout: 'Cerrar sesión',
+      refreshing: 'Actualizando...',
+      refreshNow: 'Actualizar ahora',
+      autoRefresh: 'Actualización automática',
+      searchPlaceholder: 'Buscar por correo / pedido / usuario',
+      all: 'Todos',
+      pending: 'Pago pendiente',
+      paid: 'Pagado',
+      completed: 'Completado',
+      cancelled: 'Cancelado',
+      noOrders: 'No hay pedidos.',
+      selectHint: 'No hay pedidos.',
+      orderNo: 'Número de pedido',
+      product: 'Producto',
+      amount: 'Importe',
+      createdAt: 'Fecha de creación',
+      username: 'Usuario de Telegram',
+      email: 'Correo electrónico',
+      network: 'Red de pago',
+      txHash: 'Hash de transacción',
+      currentStatus: 'Estado actual',
+      userNote: 'Aviso visible para el usuario',
+      adminNote: 'Nota interna',
+      saveHint: 'Guardar información del pedido, aviso visible y nota interna',
+      saveChanges: 'Guardar cambios',
+      saving: 'Guardando...',
+      completedBtn: 'Completado',
+      restoreBtn: 'Restaurar pago',
+      cancelBtn: 'Cancelar pedido',
+      deleteBtn: 'Eliminar pedido',
+      restoring: 'Restaurando...',
+      completing: 'Procesando...',
+      cancelling: 'Cancelando...',
+      deleting: 'Eliminando...',
+      viewLarge: 'Ver imagen grande',
+      noImage: 'Sin imagen de comprobante',
+      noHash: 'Sube el hash de transacción',
+      pricesTitle: 'Precios y direcciones',
+      price3m: 'TG Premium 3 meses',
+      price6m: 'TG Premium 6 meses',
+      price12m: 'TG Premium 12 meses',
+      starsRate: 'Precio unitario de Stars (USD)',
+      trc20: 'Dirección TRC20 USDT',
+      base: 'Dirección Base USDC',
+      saveConfig: 'Guardar configuración',
+      configSaving: 'Guardando...',
+      actionSuccess: 'Acción completada',
+      saveSuccess: 'Guardado correctamente',
+      configSaveSuccess: 'Configuración del sitio guardada',
+      loadFailed: 'Error al cargar',
+      actionFailed: 'Error en la acción',
+      allTimeBoston: 'Todas las horas se muestran en la zona horaria de Boston, EE. UU.',
+      editOrder: 'Editar pedido',
+    }
+  }
+
+  if (lang === 'fr') {
+    return {
+      title: 'Console d’administration',
+      subtitle: 'Gestion des commandes, des prix et des adresses de paiement',
+      checking: 'Vérification de la session...',
+      redirecting: 'Non connecté. Redirection...',
+      tabs: {
+        orders: 'Commandes',
+        pricing: 'Tarifs et adresses',
+      },
+      logout: 'Se déconnecter',
+      refreshing: 'Actualisation...',
+      refreshNow: 'Actualiser',
+      autoRefresh: 'Actualisation automatique',
+      searchPlaceholder: 'Rechercher par e-mail / commande / utilisateur',
+      all: 'Tous',
+      pending: 'Paiement en attente',
+      paid: 'Payé',
+      completed: 'Terminé',
+      cancelled: 'Annulé',
+      noOrders: 'Aucune commande.',
+      selectHint: 'Aucune commande.',
+      orderNo: 'N° de commande',
+      product: 'Produit',
+      amount: 'Montant',
+      createdAt: 'Créé le',
+      username: 'Nom Telegram',
+      email: 'E-mail',
+      network: 'Réseau de paiement',
+      txHash: 'Hash de transaction',
+      currentStatus: 'Statut actuel',
+      userNote: 'Message visible par l’utilisateur',
+      adminNote: 'Note admin',
+      saveHint: 'Enregistrer les infos de commande, le message utilisateur et la note admin',
+      saveChanges: 'Enregistrer les modifications',
+      saving: 'Enregistrement...',
+      completedBtn: 'Terminé',
+      restoreBtn: 'Restaurer le paiement',
+      cancelBtn: 'Annuler la commande',
+      deleteBtn: 'Supprimer la commande',
+      restoring: 'Restauration...',
+      completing: 'Traitement...',
+      cancelling: 'Annulation...',
+      deleting: 'Suppression...',
+      viewLarge: 'Voir en grand',
+      noImage: 'Aucune image de preuve',
+      noHash: 'Veuillez téléverser le hash de transaction',
+      pricesTitle: 'Tarifs et adresses',
+      price3m: 'TG Premium 3 mois',
+      price6m: 'TG Premium 6 mois',
+      price12m: 'TG Premium 12 mois',
+      starsRate: 'Prix unitaire Stars (USD)',
+      trc20: 'Adresse TRC20 USDT',
+      base: 'Adresse Base USDC',
+      saveConfig: 'Enregistrer les réglages',
+      configSaving: 'Enregistrement...',
+      actionSuccess: 'Action réussie',
+      saveSuccess: 'Enregistré avec succès',
+      configSaveSuccess: 'Réglages du site enregistrés',
+      loadFailed: 'Échec du chargement',
+      actionFailed: 'Échec de l’action',
+      allTimeBoston: 'Toutes les heures sont affichées selon le fuseau horaire de Boston, États-Unis.',
+      editOrder: 'Modifier la commande',
+    }
+  }
+
+  if (lang === 'ja') {
+    return {
+      title: '管理コンソール',
+      subtitle: '注文管理、価格設定、入金先アドレス管理',
+      checking: 'ログイン状態を確認中...',
+      redirecting: '未ログインのため移動中...',
+      tabs: {
+        orders: '注文管理',
+        pricing: '価格とアドレス',
+      },
+      logout: 'ログアウト',
+      refreshing: '更新中...',
+      refreshNow: '今すぐ更新',
+      autoRefresh: '自動更新',
+      searchPlaceholder: 'メール / 注文番号 / ユーザー名で検索',
+      all: 'すべて',
+      pending: '未払い',
+      paid: '支払い済み',
+      completed: '完了',
+      cancelled: 'キャンセル済み',
+      noOrders: '注文はありません。',
+      selectHint: '注文はありません。',
+      orderNo: '注文番号',
+      product: '商品',
       amount: '金額',
-      createdAt: '建立時間',
-      username: 'Telegram 用戶名',
-      email: '電子郵箱',
-      network: '支付網路',
-      txHash: '交易哈希',
-      currentStatus: '當前狀態',
-      userNote: '用戶可見提示',
-      adminNote: '後台備註',
-      saveHint: '保存訂單資訊、用戶可見提示與後台備註',
-      saveChanges: '保存修改',
+      createdAt: '作成時間',
+      username: 'Telegram ユーザー名',
+      email: 'メール',
+      network: '支払いネットワーク',
+      txHash: 'トランザクションハッシュ',
+      currentStatus: '現在の状態',
+      userNote: 'ユーザー向け案内',
+      adminNote: '管理メモ',
+      saveHint: '注文情報、ユーザー案内、管理メモを保存',
+      saveChanges: '変更を保存',
       saving: '保存中...',
-      completedBtn: '已完成',
-      restoreBtn: '恢復支付',
-      cancelBtn: '取消訂單',
-      deleteBtn: '刪除訂單',
-      restoring: '恢復支付中...',
-      completing: '處理中...',
-      cancelling: '取消中...',
-      deleting: '刪除中...',
-      viewLarge: '查看大圖',
-      noImage: '暫無圖片憑證',
-      noHash: '請上傳交易哈希',
-      pricesTitle: '價格與地址',
-      price3m: 'TG Premium 3個月',
-      price6m: 'TG Premium 6個月',
-      price12m: 'TG Premium 12個月',
-      starsRate: 'Stars 單價（每顆美元）',
-      paymentTitle: '收款地址',
-      trc20: 'TRC20 USDT 地址',
-      base: 'Base USDC 地址',
-      saveConfig: '保存設定',
+      completedBtn: '完了にする',
+      restoreBtn: '支払いを復元',
+      cancelBtn: '注文をキャンセル',
+      deleteBtn: '注文を削除',
+      restoring: '復元中...',
+      completing: '処理中...',
+      cancelling: 'キャンセル中...',
+      deleting: '削除中...',
+      viewLarge: '画像を拡大',
+      noImage: '画像なし',
+      noHash: '取引ハッシュを入力してください',
+      pricesTitle: '価格とアドレス',
+      price3m: 'TG Premium 3か月',
+      price6m: 'TG Premium 6か月',
+      price12m: 'TG Premium 12か月',
+      starsRate: 'Stars 単価(USD)',
+      trc20: 'TRC20 USDT アドレス',
+      base: 'Base USDC アドレス',
+      saveConfig: '設定を保存',
       configSaving: '保存中...',
       actionSuccess: '操作成功',
       saveSuccess: '保存成功',
-      configSaveSuccess: '站點設定已保存',
-      loadFailed: '讀取失敗',
+      configSaveSuccess: 'サイト設定を保存しました',
+      loadFailed: '読み込み失敗',
       actionFailed: '操作失敗',
-      statusLabel: '狀態',
-      allTimeBoston: '所有時間均按美國波士頓時區顯示。',
+      allTimeBoston: 'すべての時間は米国ボストン時間で表示されます。',
+      editOrder: '注文を編集',
     }
   }
 
@@ -134,7 +343,6 @@ function buildText(lang: string) {
       tabs: {
         orders: '订单管理',
         pricing: '价格与地址',
-        payment: '收款地址',
       },
       logout: '退出登录',
       refreshing: '刷新中...',
@@ -178,7 +386,6 @@ function buildText(lang: string) {
       price6m: 'TG Premium 6个月',
       price12m: 'TG Premium 12个月',
       starsRate: 'Stars 单价（每颗美元）',
-      paymentTitle: '收款地址',
       trc20: 'TRC20 USDT 地址',
       base: 'Base USDC 地址',
       saveConfig: '保存设置',
@@ -188,8 +395,74 @@ function buildText(lang: string) {
       configSaveSuccess: '站点设置已保存',
       loadFailed: '读取失败',
       actionFailed: '操作失败',
-      statusLabel: '状态',
       allTimeBoston: '所有时间均按美国波士顿时区显示。',
+      editOrder: '编辑订单',
+    }
+  }
+
+  if (lang === 'zh-tw') {
+    return {
+      title: '後台管理',
+      subtitle: '訂單管理、價格配置與收款地址管理',
+      checking: '檢查登入狀態中...',
+      redirecting: '尚未登入，正在跳轉...',
+      tabs: {
+        orders: '訂單管理',
+        pricing: '價格與地址',
+      },
+      logout: '退出登入',
+      refreshing: '刷新中...',
+      refreshNow: '立即刷新',
+      autoRefresh: '自動刷新',
+      searchPlaceholder: '按郵箱 / 訂單號 / 用戶名搜索',
+      all: '全部',
+      pending: '待支付',
+      paid: '已支付',
+      completed: '已完成',
+      cancelled: '已取消',
+      noOrders: '暫無訂單。',
+      selectHint: '暫無訂單。',
+      orderNo: '訂單號',
+      product: '產品',
+      amount: '金額',
+      createdAt: '建立時間',
+      username: 'Telegram 用戶名',
+      email: '電子郵箱',
+      network: '支付網路',
+      txHash: '交易哈希',
+      currentStatus: '當前狀態',
+      userNote: '用戶可見提示',
+      adminNote: '後台備註',
+      saveHint: '保存訂單資訊、用戶可見提示與後台備註',
+      saveChanges: '保存修改',
+      saving: '保存中...',
+      completedBtn: '已完成',
+      restoreBtn: '恢復支付',
+      cancelBtn: '取消訂單',
+      deleteBtn: '刪除訂單',
+      restoring: '恢復支付中...',
+      completing: '處理中...',
+      cancelling: '取消中...',
+      deleting: '刪除中...',
+      viewLarge: '查看大圖',
+      noImage: '暫無圖片憑證',
+      noHash: '請上傳交易哈希',
+      pricesTitle: '價格與地址',
+      price3m: 'TG Premium 3個月',
+      price6m: 'TG Premium 6個月',
+      price12m: 'TG Premium 12個月',
+      starsRate: 'Stars 單價（每顆美元）',
+      trc20: 'TRC20 USDT 地址',
+      base: 'Base USDC 地址',
+      saveConfig: '保存設定',
+      configSaving: '保存中...',
+      actionSuccess: '操作成功',
+      saveSuccess: '保存成功',
+      configSaveSuccess: '站點設定已保存',
+      loadFailed: '讀取失敗',
+      actionFailed: '操作失敗',
+      allTimeBoston: '所有時間均按美國波士頓時區顯示。',
+      editOrder: '編輯訂單',
     }
   }
 
@@ -201,7 +474,6 @@ function buildText(lang: string) {
     tabs: {
       orders: 'Orders',
       pricing: 'Pricing & Address',
-      payment: 'Payment Address',
     },
     logout: 'Log Out',
     refreshing: 'Refreshing...',
@@ -245,7 +517,6 @@ function buildText(lang: string) {
     price6m: 'TG Premium 6 Months',
     price12m: 'TG Premium 12 Months',
     starsRate: 'Stars unit price (USD each)',
-    paymentTitle: 'Payment Address',
     trc20: 'TRC20 USDT Address',
     base: 'Base USDC Address',
     saveConfig: 'Save Settings',
@@ -255,8 +526,8 @@ function buildText(lang: string) {
     configSaveSuccess: 'Site settings saved',
     loadFailed: 'Failed to load data',
     actionFailed: 'Action failed',
-    statusLabel: 'Status',
     allTimeBoston: 'All times are displayed in the Boston, US time zone.',
+    editOrder: 'Edit Order',
   }
 }
 
@@ -365,8 +636,9 @@ export default function AdminPage() {
         credentials: 'include',
         cache: 'no-store',
       })
-      const data = await res.json()
+      const data = await readJsonSafe(res)
       if (!res.ok) throw new Error(data?.error || text.loadFailed)
+
       if (data?.item) {
         setSiteConfig({
           premium_3m_price: Number(data.item.premium_3m_price ?? 13.1),
@@ -386,6 +658,7 @@ export default function AdminPage() {
     async (silent = false) => {
       try {
         if (!silent) setLoadingOrders(true)
+
         const params = new URLSearchParams()
         if (search.trim()) params.set('search', search.trim())
         if (statusFilter !== 'all') params.set('status', statusFilter)
@@ -395,11 +668,14 @@ export default function AdminPage() {
           credentials: 'include',
           cache: 'no-store',
         })
-        const data = await res.json()
+
+        const data = await readJsonSafe(res)
+
         if (res.status === 401) {
           router.replace(`/admin/login?lang=${lang}`)
           return
         }
+
         if (!res.ok) throw new Error(data?.error || text.loadFailed)
 
         const nextOrders: OrderItem[] = Array.isArray(data?.orders) ? data.orders : []
@@ -439,11 +715,18 @@ export default function AdminPage() {
           credentials: 'include',
           cache: 'no-store',
         })
+
         if (res.status === 401) {
           router.replace(`/admin/login?lang=${lang}`)
           return
         }
-        if (!res.ok) throw new Error(text.redirecting)
+
+        const data = await readJsonSafe(res)
+
+        if (!res.ok) {
+          throw new Error(data?.error || text.redirecting)
+        }
+
         if (!active) return
         setAuthChecking(false)
       } catch {
@@ -481,6 +764,7 @@ export default function AdminPage() {
 
   async function saveOrder() {
     if (!selectedOrder) return
+
     try {
       setSaveLoading(true)
       setMessage('')
@@ -500,7 +784,8 @@ export default function AdminPage() {
           admin_note: form.admin_note.trim(),
         }),
       })
-      const data = await res.json()
+
+      const data = await readJsonSafe(res)
       if (!res.ok) throw new Error(data?.error || text.actionFailed)
 
       setMessage(text.saveSuccess)
@@ -541,7 +826,8 @@ export default function AdminPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       })
-      const data = await res.json()
+
+      const data = await readJsonSafe(res)
       if (!res.ok) throw new Error(data?.error || text.actionFailed)
 
       setMessage(text.actionSuccess)
@@ -573,7 +859,8 @@ export default function AdminPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(siteConfig),
       })
-      const data = await res.json()
+
+      const data = await readJsonSafe(res)
       if (!res.ok) throw new Error(data?.error || text.actionFailed)
 
       setMessage(text.configSaveSuccess)
@@ -619,7 +906,10 @@ export default function AdminPage() {
           </div>
 
           <div className="hero-actions">
-            <LanguageSwitcher />
+            <div className="lang-slot">
+              <LanguageSwitcher />
+            </div>
+
             <button type="button" className="logout-btn" onClick={logout}>
               {text.logout}
             </button>
@@ -636,7 +926,7 @@ export default function AdminPage() {
           </button>
           <button
             type="button"
-            className={`tab-btn ${tab === 'pricing' || tab === 'payment' ? 'active' : ''}`}
+            className={`tab-btn ${tab === 'pricing' ? 'active' : ''}`}
             onClick={() => setTab('pricing')}
           >
             {text.tabs.pricing}
@@ -708,7 +998,7 @@ export default function AdminPage() {
             </section>
 
             <section className="card editor-card">
-              <h2 className="section-title">编辑订单</h2>
+              <h2 className="section-title">{text.editOrder}</h2>
 
               {selectedOrder ? (
                 <>
@@ -882,7 +1172,7 @@ export default function AdminPage() {
           </div>
         ) : null}
 
-        {tab === 'pricing' || tab === 'payment' ? (
+        {tab === 'pricing' ? (
           <section className="card single-card">
             <h2 className="section-title">{text.pricesTitle}</h2>
 
@@ -1048,10 +1338,28 @@ const styles = `
   }
 
   .hero-actions {
-    display: flex;
-    align-items: center;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 12px;
-    flex-wrap: wrap;
+    width: 100%;
+    max-width: 460px;
+    align-items: stretch;
+  }
+
+  .lang-slot {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .lang-slot :global(button),
+  .lang-slot :global(select),
+  .lang-slot :global(.language-switcher),
+  .lang-slot :global(.language-switcher button) {
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 56px !important;
+    border-radius: 20px !important;
+    box-sizing: border-box !important;
   }
 
   .small-btn,
@@ -1075,7 +1383,8 @@ const styles = `
   }
 
   .logout-btn {
-    min-width: 168px;
+    width: 100%;
+    min-width: 0;
     background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
     color: #071b57;
     border-color: rgba(7, 27, 87, 0.12);
@@ -1500,6 +1809,11 @@ const styles = `
 
     .hero-card {
       padding: 14px;
+    }
+
+    .hero-actions {
+      max-width: none;
+      grid-template-columns: 1fr 1fr;
     }
 
     .two-tabs {
