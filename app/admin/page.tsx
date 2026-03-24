@@ -8,15 +8,11 @@ import LanguageSwitcher from '../../components/language-switcher'
 const API = {
   session: '/api/admin/session',
   orders: '/api/admin/orders',
-  saveOrder: '/api/admin/save-order',
-  orderAction: '/api/admin/order-action',
-  deleteOrder: '/api/admin/delete-order',
-  siteConfig: '/api/admin/site-config',
+  settings: '/api/admin/settings',
   logout: '/api/admin/logout',
 }
 
 type AdminTab = 'orders' | 'pricing'
-
 type OrderStatus = 'pending_payment' | 'paid' | 'completed' | 'cancelled'
 
 type OrderItem = {
@@ -59,13 +55,10 @@ type FormState = {
 
 async function readJsonSafe(res: Response) {
   const raw = await res.text()
-
   try {
     return JSON.parse(raw)
   } catch {
-    throw new Error(
-      `接口没有返回 JSON（状态 ${res.status}），通常是 API 路径写错、接口不存在，或被重定向到了 HTML 页面。`
-    )
+    throw new Error(`接口没有返回 JSON（状态 ${res.status}）`)
   }
 }
 
@@ -76,10 +69,7 @@ function buildText(lang: string) {
       subtitle: 'Bestellverwaltung, Preiseinstellungen und Zahlungsadressverwaltung',
       checking: 'Anmeldestatus wird geprüft...',
       redirecting: 'Nicht eingeloggt. Weiterleitung...',
-      tabs: {
-        orders: 'Bestellungen',
-        pricing: 'Preise & Adressen',
-      },
+      tabs: { orders: 'Bestellungen', pricing: 'Preise & Adressen' },
       logout: 'Abmelden',
       refreshing: 'Wird aktualisiert...',
       refreshNow: 'Jetzt aktualisieren',
@@ -142,10 +132,7 @@ function buildText(lang: string) {
       subtitle: 'Gestión de pedidos, precios y direcciones de cobro',
       checking: 'Comprobando sesión...',
       redirecting: 'Sin iniciar sesión. Redirigiendo...',
-      tabs: {
-        orders: 'Pedidos',
-        pricing: 'Precios y direcciones',
-      },
+      tabs: { orders: 'Pedidos', pricing: 'Precios y direcciones' },
       logout: 'Cerrar sesión',
       refreshing: 'Actualizando...',
       refreshNow: 'Actualizar ahora',
@@ -208,10 +195,7 @@ function buildText(lang: string) {
       subtitle: 'Gestion des commandes, des prix et des adresses de paiement',
       checking: 'Vérification de la session...',
       redirecting: 'Non connecté. Redirection...',
-      tabs: {
-        orders: 'Commandes',
-        pricing: 'Tarifs et adresses',
-      },
+      tabs: { orders: 'Commandes', pricing: 'Tarifs et adresses' },
       logout: 'Se déconnecter',
       refreshing: 'Actualisation...',
       refreshNow: 'Actualiser',
@@ -274,10 +258,7 @@ function buildText(lang: string) {
       subtitle: '注文管理、価格設定、入金先アドレス管理',
       checking: 'ログイン状態を確認中...',
       redirecting: '未ログインのため移動中...',
-      tabs: {
-        orders: '注文管理',
-        pricing: '価格とアドレス',
-      },
+      tabs: { orders: '注文管理', pricing: '価格とアドレス' },
       logout: 'ログアウト',
       refreshing: '更新中...',
       refreshNow: '今すぐ更新',
@@ -340,10 +321,7 @@ function buildText(lang: string) {
       subtitle: '订单管理、价格配置与收款地址管理',
       checking: '检查登录状态中...',
       redirecting: '尚未登录，正在跳转...',
-      tabs: {
-        orders: '订单管理',
-        pricing: '价格与地址',
-      },
+      tabs: { orders: '订单管理', pricing: '价格与地址' },
       logout: '退出登录',
       refreshing: '刷新中...',
       refreshNow: '立即刷新',
@@ -406,10 +384,7 @@ function buildText(lang: string) {
       subtitle: '訂單管理、價格配置與收款地址管理',
       checking: '檢查登入狀態中...',
       redirecting: '尚未登入，正在跳轉...',
-      tabs: {
-        orders: '訂單管理',
-        pricing: '價格與地址',
-      },
+      tabs: { orders: '訂單管理', pricing: '價格與地址' },
       logout: '退出登入',
       refreshing: '刷新中...',
       refreshNow: '立即刷新',
@@ -471,10 +446,7 @@ function buildText(lang: string) {
     subtitle: 'Order management, pricing settings and payment address management',
     checking: 'Checking session...',
     redirecting: 'Not logged in. Redirecting...',
-    tabs: {
-      orders: 'Orders',
-      pricing: 'Pricing & Address',
-    },
+    tabs: { orders: 'Orders', pricing: 'Pricing & Address' },
     logout: 'Log Out',
     refreshing: 'Refreshing...',
     refreshNow: 'Refresh Now',
@@ -631,7 +603,7 @@ export default function AdminPage() {
 
   const loadSiteConfig = useCallback(async () => {
     try {
-      const res = await fetch(API.siteConfig, {
+      const res = await fetch(API.settings, {
         method: 'GET',
         credentials: 'include',
         cache: 'no-store',
@@ -660,8 +632,10 @@ export default function AdminPage() {
         if (!silent) setLoadingOrders(true)
 
         const params = new URLSearchParams()
-        if (search.trim()) params.set('search', search.trim())
+        if (search.trim()) params.set('q', search.trim())
         if (statusFilter !== 'all') params.set('status', statusFilter)
+        params.set('page', '1')
+        params.set('page_size', '50')
 
         const res = await fetch(`${API.orders}?${params.toString()}`, {
           method: 'GET',
@@ -678,7 +652,7 @@ export default function AdminPage() {
 
         if (!res.ok) throw new Error(data?.error || text.loadFailed)
 
-        const nextOrders: OrderItem[] = Array.isArray(data?.orders) ? data.orders : []
+        const nextOrders: OrderItem[] = Array.isArray(data?.items) ? data.items : []
         setOrders(nextOrders)
 
         if (!selectedOrderNo && nextOrders[0]) {
@@ -716,18 +690,14 @@ export default function AdminPage() {
           cache: 'no-store',
         })
 
-        if (res.status === 401) {
+        const data = await readJsonSafe(res)
+        if (!active) return
+
+        if (!data?.authenticated) {
           router.replace(`/admin/login?lang=${lang}`)
           return
         }
 
-        const data = await readJsonSafe(res)
-
-        if (!res.ok) {
-          throw new Error(data?.error || text.redirecting)
-        }
-
-        if (!active) return
         setAuthChecking(false)
       } catch {
         router.replace(`/admin/login?lang=${lang}`)
@@ -739,7 +709,7 @@ export default function AdminPage() {
     return () => {
       active = false
     }
-  }, [lang, router, text.redirecting])
+  }, [lang, router])
 
   useEffect(() => {
     if (authChecking) return
@@ -770,8 +740,8 @@ export default function AdminPage() {
       setMessage('')
       setError('')
 
-      const res = await fetch(API.saveOrder, {
-        method: 'POST',
+      const res = await fetch(API.orders, {
+        method: 'PATCH',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -800,32 +770,36 @@ export default function AdminPage() {
   async function runOrderAction(kind: 'complete' | 'restore' | 'cancel' | 'delete') {
     if (!selectedOrder) return
 
-    const endpoint = kind === 'delete' ? API.deleteOrder : API.orderAction
-
     try {
       setActionLoading(kind)
       setMessage('')
       setError('')
 
-      const payload =
-        kind === 'delete'
-          ? { order_no: selectedOrder.order_no }
-          : {
-              order_no: selectedOrder.order_no,
-              action:
-                kind === 'complete'
-                  ? 'completed'
-                  : kind === 'restore'
-                    ? 'restore_paid'
-                    : 'cancelled',
-            }
+      let res: Response
 
-      const res = await fetch(endpoint, {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      })
+      if (kind === 'delete') {
+        res = await fetch(API.orders, {
+          method: 'DELETE',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ order_no: selectedOrder.order_no }),
+        })
+      } else {
+        res = await fetch(API.orders, {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            order_no: selectedOrder.order_no,
+            action:
+              kind === 'complete'
+                ? 'completed'
+                : kind === 'restore'
+                  ? 'restore_paid'
+                  : 'cancelled',
+          }),
+        })
+      }
 
       const data = await readJsonSafe(res)
       if (!res.ok) throw new Error(data?.error || text.actionFailed)
@@ -853,8 +827,8 @@ export default function AdminPage() {
       setMessage('')
       setError('')
 
-      const res = await fetch(API.siteConfig, {
-        method: 'POST',
+      const res = await fetch(API.settings, {
+        method: 'PATCH',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(siteConfig),
@@ -1342,24 +1316,13 @@ const styles = `
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 12px;
     width: 100%;
-    max-width: 460px;
+    max-width: 560px;
     align-items: stretch;
   }
 
   .lang-slot {
     min-width: 0;
     width: 100%;
-  }
-
-  .lang-slot :global(button),
-  .lang-slot :global(select),
-  .lang-slot :global(.language-switcher),
-  .lang-slot :global(.language-switcher button) {
-    width: 100% !important;
-    min-width: 0 !important;
-    min-height: 56px !important;
-    border-radius: 20px !important;
-    box-sizing: border-box !important;
   }
 
   .small-btn,
