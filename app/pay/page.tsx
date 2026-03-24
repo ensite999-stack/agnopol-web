@@ -4,8 +4,6 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useI18n } from '../../components/language-provider'
 import LanguageSwitcher from '../../components/language-switcher'
 
-type PaymentNetwork = 'trc20_usdt' | 'base_usdc'
-
 type PayParams = {
   username: string
   email: string
@@ -23,6 +21,16 @@ type PublicConfig = {
   trc20_address: string
   base_address: string
   updated_at?: string
+}
+
+type PaymentMethod = {
+  id: number
+  display_name: string
+  chain_name: string
+  token_name: string
+  address: string
+  sort_order: number
+  is_enabled: boolean
 }
 
 const defaultConfig: PublicConfig = {
@@ -71,7 +79,7 @@ function buildUi(lang: string) {
       email: '邮箱',
       warningTitle: '重要提示',
       warningBody:
-        '转账请使用正确的 TRC20 USDT 或 Base USDC 网络与币种，不要使用其他网络。实际到账金额必须与订单金额完全一致。',
+        '转账请使用当前所选支付方式对应的正确链与币种，不要使用其他网络。实际到账金额必须与订单金额完全一致。',
       eta: '为了确保资金安全与合规审查，我们的标准处理时间为 5 - 15 分钟。在网络拥堵时，最迟不超过 2 小时。',
       paymentMethod: '支付方式',
       trc20Label: 'TRC20 USDT',
@@ -113,7 +121,7 @@ function buildUi(lang: string) {
       email: '電子郵件',
       warningTitle: '重要提示',
       warningBody:
-        '轉帳請使用正確的 TRC20 USDT 或 Base USDC 網路與幣種，不要使用其他網路。實際到帳金額必須與訂單金額完全一致。',
+        '轉帳請使用目前所選支付方式對應的正確鏈與幣種，不要使用其他網路。實際到帳金額必須與訂單金額完全一致。',
       eta: '為了確保資金安全與合規審查，我們的標準處理時間為 5 - 15 分鐘。在網路擁堵時，最遲不超過 2 小時。',
       paymentMethod: '支付方式',
       trc20Label: 'TRC20 USDT',
@@ -154,7 +162,7 @@ function buildUi(lang: string) {
     email: 'Email',
     warningTitle: 'Important',
     warningBody:
-      'For transfers, please use the correct TRC20 USDT or Base USDC network and token only. The received amount must exactly match the order amount.',
+      'For transfers, please use the correct network and token for the currently selected payment method only. The received amount must exactly match the order amount.',
     eta: 'For fund security and compliance review, our standard processing time is 5 - 15 minutes. During network congestion, it may take up to 2 hours.',
     paymentMethod: 'Payment Method',
     trc20Label: 'TRC20 USDT',
@@ -199,10 +207,11 @@ export default function PayPage() {
   })
 
   const [config, setConfig] = useState<PublicConfig>(defaultConfig)
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([])
   const [configError, setConfigError] = useState('')
   const [ready, setReady] = useState(false)
-  const [selectedNetwork, setSelectedNetwork] = useState<PaymentNetwork>('trc20_usdt')
-  const [copiedNetwork, setCopiedNetwork] = useState<PaymentNetwork | null>(null)
+  const [selectedMethodId, setSelectedMethodId] = useState<number | null>(null)
+  const [copiedMethodId, setCopiedMethodId] = useState<number | null>(null)
   const [proofName, setProofName] = useState('')
   const [proofBase64, setProofBase64] = useState('')
   const [proofPreview, setProofPreview] = useState('')
@@ -239,6 +248,21 @@ export default function PayPage() {
             base_address: String(data.item.base_address ?? defaultConfig.base_address),
             updated_at: data.item.updated_at,
           })
+        }
+
+        const methodsResponse = await fetch('/api/public/payment-methods', {
+          cache: 'no-store',
+        })
+        const methodsData = await methodsResponse.json()
+
+        if (!methodsResponse.ok) {
+          throw new Error(methodsData?.error || 'Failed to load payment methods')
+        }
+
+        if (active) {
+          const nextMethods = Array.isArray(methodsData?.items) ? methodsData.items : []
+          setPaymentMethods(nextMethods)
+          setSelectedMethodId(nextMethods[0]?.id ?? null)
         }
       } catch (error) {
         if (active) {
@@ -285,36 +309,38 @@ export default function PayPage() {
 
   const isLocked = Boolean(successOrderNo)
 
-  const networkAddress =
-    selectedNetwork === 'trc20_usdt' ? config.trc20_address : config.base_address
+  const selectedMethod = useMemo(
+    () => paymentMethods.find((item) => item.id === selectedMethodId) || null,
+    [paymentMethods, selectedMethodId]
+  )
+
+  const networkAddress = selectedMethod?.address || ''
 
   const productLabel = useMemo(() => {
     if (params.productType === 'tg_stars') {
       return `${t.home.tgStars} ${params.starsAmount}`
     }
+
     if (params.duration === '3m') return `${t.home.tgPremium} ${t.home.months3}`
     if (params.duration === '6m') return `${t.home.tgPremium} ${t.home.months6}`
     return `${t.home.tgPremium} ${t.home.months12}`
-  }, [params.productType, params.duration, params.starsAmount, t])
+  }, [params, t])
 
-  async function handleCopy(text: string, network: PaymentNetwork) {
+  async function handleCopy(text: string, methodId: number) {
     try {
       await navigator.clipboard.writeText(text)
-      setCopiedNetwork(network)
-      setTimeout(() => setCopiedNetwork(null), 1800)
+      setCopiedMethodId(methodId)
+      window.setTimeout(() => setCopiedMethodId(null), 1800)
     } catch {
-      setCopiedNetwork(null)
+      setCopiedMethodId(null)
     }
   }
-
   function handleChooseFile() {
     if (isLocked) return
     fileRef.current?.click()
   }
 
   function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
-    if (isLocked) return
-
     const file = event.target.files?.[0]
     if (!file) return
 
@@ -322,7 +348,7 @@ export default function PayPage() {
 
     const reader = new FileReader()
     reader.onload = () => {
-      const result = reader.result as string
+      const result = String(reader.result || '')
       setProofBase64(result)
       setProofPreview(result)
     }
@@ -330,26 +356,26 @@ export default function PayPage() {
   }
 
   async function handleSubmit() {
-    if (isLocked) return
-
-    setSubmitting(true)
     setErrorText('')
-    setSuccessOrderNo('')
+
+    if (!params.email || !params.priceUsd || Number(params.priceUsd) <= 0) {
+      setErrorText(ui.invalidOrder)
+      return
+    }
+
+    if (!selectedMethod) {
+      setErrorText(
+        lang === 'zh-cn'
+          ? '当前没有可用的支付方式。'
+          : lang === 'zh-tw'
+            ? '目前沒有可用的支付方式。'
+            : 'No enabled payment methods are available.'
+      )
+      return
+    }
 
     try {
-      if (!params.email || !params.priceUsd || Number(params.priceUsd) <= 0) {
-        throw new Error(ui.invalidOrder)
-      }
-
-      if (!proofBase64 && !txHash.trim()) {
-        throw new Error(
-          lang === 'zh-cn'
-            ? '请先上传付款截图或填写交易哈希。'
-            : lang === 'zh-tw'
-            ? '請先上傳付款截圖或填寫交易哈希。'
-            : 'Please upload payment proof or enter a transaction hash.'
-        )
-      }
+      setSubmitting(true)
 
       const payload = {
         username: params.username,
@@ -358,8 +384,8 @@ export default function PayPage() {
         duration: params.productType === 'tg_premium' ? params.duration : null,
         stars_amount: params.productType === 'tg_stars' ? Number(params.starsAmount) : null,
         price_usd: Number(params.priceUsd),
-        payment_network: selectedNetwork,
-        payment_address: networkAddress,
+        payment_network: selectedMethod.display_name,
+        payment_address: selectedMethod.address,
         proof_image_base64: proofBase64 || null,
         tx_hash: txHash.trim() || null,
       }
@@ -368,7 +394,6 @@ export default function PayPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
-        cache: 'no-store',
       })
 
       const data = await response.json()
@@ -377,13 +402,14 @@ export default function PayPage() {
         throw new Error(data?.error || ui.createError)
       }
 
-      setSuccessOrderNo(data?.order_no || '')
+      const orderNo = String(data?.order_no || '')
+      setSuccessOrderNo(orderNo)
 
       if (pageLockKey) {
         sessionStorage.setItem(
           pageLockKey,
           JSON.stringify({
-            order_no: data?.order_no || '',
+            order_no: orderNo,
             proof_name: proofName,
             proof_preview: proofPreview,
             tx_hash: txHash.trim(),
@@ -397,53 +423,31 @@ export default function PayPage() {
     }
   }
 
-  if (!ready) {
-    return (
-      <main className="site-shell">
-        <div className="site-container" style={{ display: 'flex', justifyContent: 'center', paddingTop: 80 }}>
-          <div className="card">{t.common.loading}</div>
-        </div>
-      </main>
-    )
-  }
-
   return (
     <main className="site-shell">
-      <div className="site-container" style={{ minWidth: 0 }}>
+      <div className="site-container">
         <div
           style={{
-            marginBottom: 16,
             display: 'flex',
             justifyContent: 'space-between',
-            alignItems: 'center',
             gap: 12,
+            alignItems: 'center',
             flexWrap: 'wrap',
+            marginBottom: 16,
           }}
         >
-          <a href={`/?lang=${lang}`} style={{ textDecoration: 'none', color: '#475569', fontSize: 14 }}>
+          <a href={`/?lang=${lang}`} className="btn-secondary" style={{ textDecoration: 'none' }}>
             ← {ui.back}
           </a>
+
           <LanguageSwitcher />
         </div>
 
         <header className="hero-center" style={{ marginBottom: 18 }}>
-          <h1 className="brand-title" style={{ fontSize: 'clamp(42px, 8vw, 76px)' }}>
-            {t.common.brand}
-          </h1>
-
-          <p
-            style={{
-              marginTop: 10,
-              marginBottom: 0,
-              color: '#64748b',
-              fontSize: 'clamp(20px, 3vw, 26px)',
-              fontWeight: 700,
-            }}
-          >
+          <h1 className="brand-title" style={{ marginBottom: 8 }}>
             {ui.title}
-          </p>
-
-          <p style={{ marginTop: 8, color: '#64748b', fontSize: 15 }}>
+          </h1>
+          <p style={{ margin: 0, color: '#64748b', fontSize: 15 }}>
             {ui.subtitle}
           </p>
         </header>
@@ -532,23 +536,17 @@ export default function PayPage() {
             <div style={{ fontSize: 14, color: '#64748b' }}>{ui.paymentMethod}</div>
 
             <div className="network-tabs">
-              <button
-                type="button"
-                className={`network-tab ${selectedNetwork === 'trc20_usdt' ? 'active' : ''}`}
-                onClick={() => setSelectedNetwork('trc20_usdt')}
-                disabled={isLocked}
-              >
-                {ui.trc20Label}
-              </button>
-
-              <button
-                type="button"
-                className={`network-tab ${selectedNetwork === 'base_usdc' ? 'active' : ''}`}
-                onClick={() => setSelectedNetwork('base_usdc')}
-                disabled={isLocked}
-              >
-                {ui.baseLabel}
-              </button>
+              {paymentMethods.map((method) => (
+                <button
+                  key={method.id}
+                  type="button"
+                  className={`network-tab ${selectedMethodId === method.id ? 'active' : ''}`}
+                  onClick={() => setSelectedMethodId(method.id)}
+                  disabled={isLocked}
+                >
+                  {method.display_name}
+                </button>
+              ))}
             </div>
 
             <div
@@ -565,7 +563,7 @@ export default function PayPage() {
               </div>
 
               <div style={{ fontWeight: 800, color: '#0f172a', marginBottom: 10 }}>
-                {selectedNetwork === 'trc20_usdt' ? ui.trc20Label : ui.baseLabel}
+                {selectedMethod?.display_name || '-'}
               </div>
 
               <div
@@ -578,7 +576,7 @@ export default function PayPage() {
                   borderRadius: 12,
                   background: '#fff',
                   border:
-                    copiedNetwork === selectedNetwork
+                    copiedMethodId === selectedMethod?.id
                       ? '1px solid rgba(34, 197, 94, 0.45)'
                       : '1px solid rgba(15, 23, 42, 0.08)',
                 }}
@@ -589,20 +587,20 @@ export default function PayPage() {
               <button
                 type="button"
                 className="btn-secondary"
-                onClick={() => handleCopy(networkAddress, selectedNetwork)}
+                onClick={() => selectedMethod && handleCopy(networkAddress, selectedMethod.id)}
                 style={{ marginTop: 10 }}
               >
-                {copiedNetwork === selectedNetwork ? `${ui.copied} ✓` : ui.copy}
+                {copiedMethodId === selectedMethod?.id ? `${ui.copied} ✓` : ui.copy}
               </button>
 
-              {copiedNetwork === selectedNetwork ? (
+              {copiedMethodId === selectedMethod?.id ? (
                 <div className="status-box-success" style={{ textAlign: 'center' }}>
                   {ui.copySuccess}
                 </div>
               ) : null}
             </div>
-
-            <div style={{ marginTop: 16 }}>
+            
+  <div style={{ marginTop: 16 }}>
               <div style={{ fontSize: 14, color: '#64748b', marginBottom: 8 }}>
                 {ui.uploadTitle}
               </div>
