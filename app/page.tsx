@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState, type ChangeEvent } from 'react'
+import { Suspense, useEffect, useMemo, useState, type ChangeEvent } from 'react'
 import { useI18n } from '../components/language-provider'
 import LanguageSwitcher from '../components/language-switcher'
 import { withLang } from '../lib/i18n'
@@ -485,7 +485,7 @@ function OrderLookupSection() {
   )
 }
 
-export default function HomePage() {
+function HomePageInner() {
   const { lang, t } = useI18n()
   const [tab, setTab] = useState<ProductType>('premium')
   const [duration, setDuration] = useState<DurationType>('12m')
@@ -767,5 +767,27 @@ export default function HomePage() {
         </footer>
       </div>
     </main>
+  )
+}
+
+function PageFallback() {
+  return (
+    <main className="site-shell">
+      <div className="site-container">
+        <section className="hero-center">
+          <p className="small-muted" style={{ margin: 0 }}>
+            Loading...
+          </p>
+        </section>
+      </div>
+    </main>
+  )
+}
+
+export default function HomePage() {
+  return (
+    <Suspense fallback={<PageFallback />}>
+      <HomePageInner />
+    </Suspense>
   )
 }
