@@ -1,34 +1,29 @@
 'use client'
 
 import { ChangeEvent, useMemo } from 'react'
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useI18n } from './language-provider'
+import { type LangCode } from '../lib/i18n'
 
-const LANGUAGE_OPTIONS = [
+const LANGUAGE_OPTIONS: Array<{ value: LangCode; label: string }> = [
   { value: 'de', label: 'Deutsch' },
   { value: 'en', label: 'English' },
   { value: 'es', label: 'Español' },
   { value: 'fr', label: 'Français' },
   { value: 'ja', label: '日本語' },
+  { value: 'ko', label: '한국어' },
   { value: 'zh-cn', label: '简体中文' },
   { value: 'zh-tw', label: '繁體中文' },
 ]
 
 export default function LanguageSwitcher() {
-  const router = useRouter()
-  const pathname = usePathname()
-  const searchParams = useSearchParams()
-  const { lang } = useI18n()
+  const { lang, setLang } = useI18n()
 
   const currentLang = useMemo(() => {
     return LANGUAGE_OPTIONS.some((item) => item.value === lang) ? lang : 'en'
   }, [lang])
 
   function handleChange(event: ChangeEvent<HTMLSelectElement>) {
-    const nextLang = event.target.value
-    const params = new URLSearchParams(searchParams?.toString() || '')
-    params.set('lang', nextLang)
-    router.replace(`${pathname}?${params.toString()}`)
+    setLang(event.target.value as LangCode)
   }
 
   return (
