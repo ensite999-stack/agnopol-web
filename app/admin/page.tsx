@@ -2,9 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useI18n } from '@/components/language-provider'
-import LanguageSwitcher from '@/components/language-switcher'
-
+import { useI18n } from '../../components/language-provider'
+import LanguageSwitcher from '../../components/language-switcher'
 const API = {
   session: '/api/admin/session',
   orders: '/api/admin/orders',
