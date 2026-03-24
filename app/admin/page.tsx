@@ -9,6 +9,7 @@ const API = {
   session: '/api/admin/session',
   orders: '/api/admin/orders',
   settings: '/api/admin/settings',
+  paymentMethods: '/api/admin/payment-methods',
   logout: '/api/admin/logout',
 }
 
@@ -44,6 +45,17 @@ type SiteConfig = {
   base_address: string
 }
 
+type PaymentMethod = {
+  id?: number
+  display_name: string
+  chain_name: string
+  token_name: string
+  address: string
+  sort_order: number
+  is_enabled: boolean
+  updated_at?: string | null
+}
+
 type FormState = {
   username: string
   email: string
@@ -59,6 +71,75 @@ async function readJsonSafe(res: Response) {
     return JSON.parse(raw)
   } catch {
     throw new Error(`接口没有返回 JSON（状态 ${res.status}）`)
+  }
+}
+
+function buildPaymentMethodUi(lang: string) {
+  if (lang === 'zh-cn') {
+    return {
+      sectionTitle: '支付方式管理',
+      sectionHint: '后台可新增、删除、启用停用、修改链、币种、地址和排序，前台会按排序自动同步显示。',
+      add: '新增支付方式',
+      saveAll: '一键保存支付方式',
+      saving: '保存中...',
+      displayName: '显示名称',
+      chainName: '链名称',
+      tokenName: '币种名称',
+      address: '收款地址',
+      sortOrder: '排序',
+      enabled: '启用',
+      delete: '删除',
+      emptyName: '例如：TON / Toncoin',
+      emptyChain: '例如：TON',
+      emptyToken: '例如：Toncoin',
+      deleteConfirm: '确定删除这个支付方式吗？',
+      saveSuccess: '支付方式已保存。',
+      deleteSuccess: '支付方式已删除。',
+    }
+  }
+
+  if (lang === 'zh-tw') {
+    return {
+      sectionTitle: '支付方式管理',
+      sectionHint: '後台可新增、刪除、啟用停用、修改鏈、幣種、地址與排序，前台會按排序自動同步顯示。',
+      add: '新增支付方式',
+      saveAll: '一鍵保存支付方式',
+      saving: '保存中...',
+      displayName: '顯示名稱',
+      chainName: '鏈名稱',
+      tokenName: '幣種名稱',
+      address: '收款地址',
+      sortOrder: '排序',
+      enabled: '啟用',
+      delete: '刪除',
+      emptyName: '例如：TON / Toncoin',
+      emptyChain: '例如：TON',
+      emptyToken: '例如：Toncoin',
+      deleteConfirm: '確定刪除這個支付方式嗎？',
+      saveSuccess: '支付方式已保存。',
+      deleteSuccess: '支付方式已刪除。',
+    }
+  }
+
+  return {
+    sectionTitle: 'Payment Methods',
+    sectionHint: 'Add, remove, enable/disable, edit chain, token, address and sort order here. The pay page will sync automatically in this order.',
+    add: 'Add Payment Method',
+    saveAll: 'Save All Payment Methods',
+    saving: 'Saving...',
+    displayName: 'Display Name',
+    chainName: 'Chain',
+    tokenName: 'Token',
+    address: 'Address',
+    sortOrder: 'Sort Order',
+    enabled: 'Enabled',
+    delete: 'Delete',
+    emptyName: 'Example: TON / Toncoin',
+    emptyChain: 'Example: TON',
+    emptyToken: 'Example: Toncoin',
+    deleteConfirm: 'Delete this payment method?',
+    saveSuccess: 'Payment methods saved.',
+    deleteSuccess: 'Payment method deleted.',
   }
 }
 
@@ -188,7 +269,6 @@ function buildText(lang: string) {
       editOrder: 'Editar pedido',
     }
   }
-
   if (lang === 'fr') {
     return {
       title: 'Console d’administration',
@@ -615,6 +695,7 @@ export default function AdminPage() {
   const router = useRouter()
   const { lang } = useI18n()
   const text = useMemo(() => buildText(lang), [lang])
+  const methodUi = useMemo(() => buildPaymentMethodUi(lang), [lang])
 
   const [authChecking, setAuthChecking] = useState(true)
   const [tab, setTab] = useState<AdminTab>('orders')
@@ -641,6 +722,9 @@ export default function AdminPage() {
     trc20_address: '',
     base_address: '',
   })
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([])
+  const [methodsLoading, setMethodsLoading] = useState(false)
+  const [methodsSaving, setMethodsSaving] = useState(false)
 
   const [saveLoading, setSaveLoading] = useState(false)
   const [configLoading, setConfigLoading] = useState(false)
@@ -686,6 +770,24 @@ export default function AdminPage() {
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : text.loadFailed)
+    }
+  }, [text.loadFailed])
+
+  const loadPaymentMethods = useCallback(async () => {
+    try {
+      setMethodsLoading(true)
+      const res = await fetch(API.paymentMethods, {
+        method: 'GET',
+        credentials: 'include',
+        cache: 'no-store',
+      })
+      const data = await readJsonSafe(res)
+      if (!res.ok) throw new Error(data?.error || text.loadFailed)
+      setPaymentMethods(Array.isArray(data?.items) ? data.items : [])
+    } catch (err) {
+      setError(err instanceof Error ? err.message : text.loadFailed)
+    } finally {
+      setMethodsLoading(false)
     }
   }, [text.loadFailed])
 
@@ -741,7 +843,6 @@ export default function AdminPage() {
     },
     [lang, router, search, selectedOrderNo, statusFilter, syncFormFromOrder, text.loadFailed]
   )
-
   useEffect(() => {
     let active = true
 
@@ -778,7 +879,8 @@ export default function AdminPage() {
     if (authChecking) return
     loadOrders()
     loadSiteConfig()
-  }, [authChecking, loadOrders, loadSiteConfig])
+    loadPaymentMethods()
+  }, [authChecking, loadOrders, loadSiteConfig, loadPaymentMethods])
 
   useEffect(() => {
     if (authChecking || !autoRefresh) return
@@ -905,6 +1007,114 @@ export default function AdminPage() {
       setError(err instanceof Error ? err.message : text.actionFailed)
     } finally {
       setConfigLoading(false)
+    }
+  }
+
+  function createEmptyMethod(nextOrder: number): PaymentMethod {
+    return {
+      display_name: '',
+      chain_name: '',
+      token_name: '',
+      address: '',
+      sort_order: nextOrder,
+      is_enabled: true,
+    }
+  }
+
+  function addPaymentMethod() {
+    const nextOrder =
+      paymentMethods.length > 0
+        ? Math.max(...paymentMethods.map((item) => Number(item.sort_order || 0))) + 1
+        : 1
+
+    setPaymentMethods((prev) => [...prev, createEmptyMethod(nextOrder)])
+  }
+
+  function updatePaymentMethod(index: number, patch: Partial<PaymentMethod>) {
+    setPaymentMethods((prev) =>
+      prev.map((item, itemIndex) => (itemIndex === index ? { ...item, ...patch } : item))
+    )
+  }
+
+  async function saveAllPaymentMethods() {
+    try {
+      setMethodsSaving(true)
+      setMessage('')
+      setError('')
+
+      for (const method of paymentMethods) {
+        const payload = {
+          id: method.id,
+          display_name:
+            method.display_name.trim() ||
+            `${method.chain_name.trim()} / ${method.token_name.trim()}`,
+          chain_name: method.chain_name.trim(),
+          token_name: method.token_name.trim(),
+          address: method.address.trim(),
+          sort_order: Number(method.sort_order || 0),
+          is_enabled: Boolean(method.is_enabled),
+        }
+
+        if (!payload.chain_name || !payload.token_name || !payload.address) {
+          throw new Error(
+            lang === 'zh-cn'
+              ? '支付方式的链名称、币种名称和地址不能为空。'
+              : lang === 'zh-tw'
+                ? '支付方式的鏈名稱、幣種名稱與地址不能為空。'
+                : 'Chain, token and address are required for each payment method.'
+          )
+        }
+
+        const res = await fetch(API.paymentMethods, {
+          method: method.id ? 'PATCH' : 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        })
+
+        const data = await readJsonSafe(res)
+        if (!res.ok) throw new Error(data?.error || text.actionFailed)
+      }
+
+      setMessage(methodUi.saveSuccess)
+      await loadPaymentMethods()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : text.actionFailed)
+    } finally {
+      setMethodsSaving(false)
+    }
+  }
+
+  async function deletePaymentMethod(item: PaymentMethod, index: number) {
+    const ok = window.confirm(methodUi.deleteConfirm)
+    if (!ok) return
+
+    if (!item.id) {
+      setPaymentMethods((prev) => prev.filter((_, i) => i !== index))
+      return
+    }
+
+    try {
+      setMethodsSaving(true)
+      setMessage('')
+      setError('')
+
+      const res = await fetch(API.paymentMethods, {
+        method: 'DELETE',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: item.id }),
+      })
+
+      const data = await readJsonSafe(res)
+      if (!res.ok) throw new Error(data?.error || text.actionFailed)
+
+      setMessage(methodUi.deleteSuccess)
+      await loadPaymentMethods()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : text.actionFailed)
+    } finally {
+      setMethodsSaving(false)
     }
   }
 
@@ -1277,35 +1487,110 @@ export default function AdminPage() {
                   }
                 />
               </label>
-
-              <label className="setting-field">
-                <span>{text.trc20}</span>
-                <textarea
-                  className="textarea mono"
-                  value={siteConfig.trc20_address}
-                  onChange={(e) =>
-                    setSiteConfig((prev) => ({ ...prev, trc20_address: e.target.value }))
-                  }
-                  rows={3}
-                />
-              </label>
-
-              <label className="setting-field">
-                <span>{text.base}</span>
-                <textarea
-                  className="textarea mono"
-                  value={siteConfig.base_address}
-                  onChange={(e) =>
-                    setSiteConfig((prev) => ({ ...prev, base_address: e.target.value }))
-                  }
-                  rows={3}
-                />
-              </label>
             </div>
 
             <button type="button" className="primary-btn" onClick={saveSiteConfig} disabled={configLoading}>
               {configLoading ? text.configSaving : text.saveConfig}
             </button>
+
+            <div className="payment-methods-head">
+              <div>
+                <h3 className="subsection-title">{methodUi.sectionTitle}</h3>
+                <p className="subsection-hint">{methodUi.sectionHint}</p>
+              </div>
+              <div className="payment-method-actions">
+                <button type="button" className="small-btn" onClick={addPaymentMethod}>
+                  {methodUi.add}
+                </button>
+                <button type="button" className="primary-btn slim" onClick={saveAllPaymentMethods} disabled={methodsSaving}>
+                  {methodsSaving ? methodUi.saving : methodUi.saveAll}
+                </button>
+              </div>
+            </div>
+
+            <div className="payment-methods-grid">
+              {methodsLoading ? (
+                <div className="empty-text">{text.refreshing}</div>
+              ) : paymentMethods.length === 0 ? (
+                <div className="empty-text">No payment methods yet.</div>
+              ) : (
+                paymentMethods.map((item, index) => (
+                  <div key={item.id ?? `new-${index}`} className="method-card">
+                    <div className="method-grid">
+                      <label className="setting-field">
+                        <span>{methodUi.displayName}</span>
+                        <input
+                          className="input"
+                          value={item.display_name}
+                          onChange={(e) => updatePaymentMethod(index, { display_name: e.target.value })}
+                          placeholder={methodUi.emptyName}
+                        />
+                      </label>
+
+                      <label className="setting-field">
+                        <span>{methodUi.chainName}</span>
+                        <input
+                          className="input"
+                          value={item.chain_name}
+                          onChange={(e) => updatePaymentMethod(index, { chain_name: e.target.value })}
+                          placeholder={methodUi.emptyChain}
+                        />
+                      </label>
+
+                      <label className="setting-field">
+                        <span>{methodUi.tokenName}</span>
+                        <input
+                          className="input"
+                          value={item.token_name}
+                          onChange={(e) => updatePaymentMethod(index, { token_name: e.target.value })}
+                          placeholder={methodUi.emptyToken}
+                        />
+                      </label>
+
+                      <label className="setting-field">
+                        <span>{methodUi.sortOrder}</span>
+                        <input
+                          className="input"
+                          type="number"
+                          value={item.sort_order}
+                          onChange={(e) => updatePaymentMethod(index, { sort_order: Number(e.target.value || 0) })}
+                        />
+                      </label>
+                    </div>
+
+                    <label className="setting-field">
+                      <span>{methodUi.address}</span>
+                      <textarea
+                        className="textarea mono"
+                        rows={3}
+                        value={item.address}
+                        onChange={(e) => updatePaymentMethod(index, { address: e.target.value })}
+                      />
+                    </label>
+
+                    <div className="method-bottom">
+                      <label className="checkbox-row">
+                        <input
+                          type="checkbox"
+                          checked={item.is_enabled}
+                          onChange={(e) => updatePaymentMethod(index, { is_enabled: e.target.checked })}
+                        />
+                        <span>{methodUi.enabled}</span>
+                      </label>
+
+                      <button
+                        type="button"
+                        className="method-delete-btn"
+                        onClick={() => deletePaymentMethod(item, index)}
+                        disabled={methodsSaving}
+                      >
+                        {methodUi.delete}
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
           </section>
         ) : null}
       </div>
@@ -1314,7 +1599,6 @@ export default function AdminPage() {
     </main>
   )
 }
-
 const styles = `
   .admin-shell {
     min-height: 100vh;
@@ -1800,6 +2084,85 @@ const styles = `
     box-shadow: 0 12px 28px rgba(220, 38, 38, 0.22);
   }
 
+  .payment-methods-head {
+    margin-top: 28px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+
+  .subsection-title {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 900;
+    color: #0f172a;
+  }
+
+  .subsection-hint {
+    margin: 8px 0 0;
+    color: #64748b;
+    font-size: 14px;
+    line-height: 1.7;
+    max-width: 760px;
+  }
+
+  .payment-method-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .primary-btn.slim {
+    min-height: 56px;
+    width: auto;
+    padding: 0 20px;
+  }
+
+  .payment-methods-grid {
+    display: grid;
+    gap: 14px;
+    margin-top: 16px;
+  }
+
+  .method-card {
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    background: #f8fafc;
+    border-radius: 22px;
+    padding: 16px;
+    display: grid;
+    gap: 12px;
+  }
+
+  .method-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .method-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .method-delete-btn {
+    min-height: 46px;
+    padding: 0 16px;
+    border-radius: 16px;
+    border: 1px solid rgba(185, 28, 28, 0.12);
+    background: #fff;
+    color: #b91c1c;
+    font-weight: 900;
+  }
+
+  .method-delete-btn:hover {
+    background: #fef2f2;
+  }
+
   .settings-grid {
     display: grid;
     gap: 14px;
@@ -1826,6 +2189,10 @@ const styles = `
     .order-list-card {
       max-height: none;
     }
+
+    .method-grid {
+      grid-template-columns: 1fr 1fr;
+    }
   }
 
   @media (max-width: 640px) {
@@ -1850,6 +2217,10 @@ const styles = `
       grid-template-columns: 1fr;
     }
 
+    .method-grid {
+      grid-template-columns: 1fr;
+    }
+
     .section-title {
       font-size: 22px;
     }
@@ -1864,3 +2235,4 @@ const styles = `
     }
   }
 `
+  
