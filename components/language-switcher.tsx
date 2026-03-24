@@ -53,14 +53,14 @@ export default function LanguageSwitcher() {
           min-height: 56px;
           box-sizing: border-box;
           border-radius: 20px;
-          border: 3px solid #d79a00;
+          border: 1px solid rgba(15, 23, 42, 0.12);
           background: #ffffff;
           color: #4b5563;
           font-size: 16px;
           font-weight: 800;
-          padding: 0 48px 0 20px;
+          padding: 0 46px 0 20px;
           outline: none;
-          box-shadow: 0 10px 22px rgba(15, 23, 42, 0.05);
+          box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06);
           appearance: none;
           -webkit-appearance: none;
           -moz-appearance: none;
@@ -68,24 +68,18 @@ export default function LanguageSwitcher() {
             linear-gradient(45deg, transparent 50%, #4b5563 50%),
             linear-gradient(135deg, #4b5563 50%, transparent 50%);
           background-position:
-            calc(100% - 26px) calc(50% - 3px),
+            calc(100% - 24px) calc(50% - 3px),
             calc(100% - 18px) calc(50% - 3px);
-          background-size: 8px 8px, 8px 8px;
+          background-size: 7px 7px, 7px 7px;
           background-repeat: no-repeat;
           transition: all 0.16s ease;
         }
 
         .language-switcher select:focus {
+          border-color: rgba(7, 27, 87, 0.24);
           box-shadow:
-            0 10px 22px rgba(15, 23, 42, 0.05),
-            0 0 0 4px rgba(215, 154, 0, 0.12);
-        }
-
-        @media (max-width: 640px) {
-          .language-switcher select {
-            min-height: 56px;
-            font-size: 16px;
-          }
+            0 12px 28px rgba(15, 23, 42, 0.06),
+            0 0 0 4px rgba(7, 27, 87, 0.08);
         }
       `}</style>
     </div>
