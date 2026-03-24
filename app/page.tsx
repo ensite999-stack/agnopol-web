@@ -61,6 +61,171 @@ function formatBostonTime(value: string | null) {
 }
 
 function buildLookupUi(lang: string) {
+  if (lang === 'de') {
+    return {
+      title: 'Bestellabfrage',
+      subtitle:
+        'Geben Sie Ihre Bestell-E-Mail ein, um den Status, Systemhinweise und gegebenenfalls neue Zahlungsnachweise gemäß Admin-Hinweis einzureichen.',
+      placeholder: 'Bestell-E-Mail eingeben',
+      button: 'Bestellung prüfen',
+      loading: 'Wird geprüft...',
+      orderNo: 'Bestellnummer',
+      email: 'E-Mail',
+      status: 'Status',
+      product: 'Produkt',
+      amount: 'Betrag',
+      network: 'Zahlungsnetzwerk',
+      createdAt: 'Erstellt am',
+      note: 'Systemhinweis',
+      txHash: 'Transaktions-Hash',
+      resubmit: 'Nachweis erneut hochladen',
+      proofReady: 'Neuer Nachweis ist bereit:',
+      hashPlaceholder: 'Transaktions-Hash erneut eingeben (optional)',
+      resubmitButton: 'Neuen Nachweis senden',
+      resubmitting: 'Wird gesendet...',
+      noOrders: 'Keine passenden Bestellungen gefunden.',
+      pending: 'Ausstehende Zahlung',
+      paid: 'Bezahlt',
+      completed: 'Abgeschlossen',
+      cancelled: 'Storniert',
+      resubmitSuccess:
+        'Der neue Zahlungsnachweis wurde erfolgreich übermittelt. Bitte prüfen Sie den Bestellstatus später erneut.',
+      resubmitError: 'Der Zahlungsnachweis konnte nicht erneut übermittelt werden.',
+    }
+  }
+
+  if (lang === 'es') {
+    return {
+      title: 'Consulta de pedido',
+      subtitle:
+        'Introduzca el correo de su pedido para comprobar el estado, los avisos del sistema y volver a enviar el comprobante de pago cuando el administrador lo indique.',
+      placeholder: 'Introduzca el correo del pedido',
+      button: 'Consultar pedido',
+      loading: 'Consultando...',
+      orderNo: 'Número de pedido',
+      email: 'Correo electrónico',
+      status: 'Estado',
+      product: 'Producto',
+      amount: 'Importe',
+      network: 'Red de pago',
+      createdAt: 'Fecha de creación',
+      note: 'Aviso del sistema',
+      txHash: 'Hash de transacción',
+      resubmit: 'Volver a subir comprobante',
+      proofReady: 'El nuevo comprobante está listo:',
+      hashPlaceholder: 'Volver a escribir el hash de transacción (opcional)',
+      resubmitButton: 'Enviar nuevo comprobante',
+      resubmitting: 'Enviando...',
+      noOrders: 'No se encontraron pedidos relacionados.',
+      pending: 'Pago pendiente',
+      paid: 'Pagado',
+      completed: 'Completado',
+      cancelled: 'Cancelado',
+      resubmitSuccess:
+        'El nuevo comprobante de pago se ha enviado correctamente. Vuelva a consultar el estado del pedido más tarde.',
+      resubmitError: 'No se pudo reenviar el comprobante de pago.',
+    }
+  }
+
+  if (lang === 'fr') {
+    return {
+      title: 'Recherche de commande',
+      subtitle:
+        "Entrez l'e-mail de votre commande pour consulter le statut, les avis du système et renvoyer la preuve de paiement si l'administrateur le demande.",
+      placeholder: "Entrez l'e-mail de commande",
+      button: 'Rechercher la commande',
+      loading: 'Recherche en cours...',
+      orderNo: 'N° de commande',
+      email: 'E-mail',
+      status: 'Statut',
+      product: 'Produit',
+      amount: 'Montant',
+      network: 'Réseau de paiement',
+      createdAt: 'Créé le',
+      note: 'Avis du système',
+      txHash: 'Hash de transaction',
+      resubmit: 'Téléverser à nouveau la preuve',
+      proofReady: 'La nouvelle preuve est prête :',
+      hashPlaceholder: 'Saisir à nouveau le hash de transaction (facultatif)',
+      resubmitButton: 'Envoyer la nouvelle preuve',
+      resubmitting: 'Envoi...',
+      noOrders: 'Aucune commande correspondante trouvée.',
+      pending: 'Paiement en attente',
+      paid: 'Payé',
+      completed: 'Terminé',
+      cancelled: 'Annulé',
+      resubmitSuccess:
+        'La nouvelle preuve de paiement a été envoyée avec succès. Veuillez consulter à nouveau le statut plus tard.',
+      resubmitError: "Échec de l'envoi de la nouvelle preuve de paiement.",
+    }
+  }
+
+  if (lang === 'ja') {
+    return {
+      title: '注文照会',
+      subtitle:
+        '注文時のメールアドレスを入力すると、注文状況、システム案内、管理者の案内に従った支払い証明の再提出を確認できます。',
+      placeholder: '注文メールアドレスを入力',
+      button: '注文を確認',
+      loading: '照会中...',
+      orderNo: '注文番号',
+      email: 'メール',
+      status: '状態',
+      product: '商品',
+      amount: '金額',
+      network: '支払いネットワーク',
+      createdAt: '作成時間',
+      note: 'システム案内',
+      txHash: 'トランザクションハッシュ',
+      resubmit: '証明を再アップロード',
+      proofReady: '新しい証明の準備ができました：',
+      hashPlaceholder: 'トランザクションハッシュを再入力（任意）',
+      resubmitButton: '新しい証明を送信',
+      resubmitting: '送信中...',
+      noOrders: '関連する注文が見つかりませんでした。',
+      pending: '未払い',
+      paid: '支払い済み',
+      completed: '完了',
+      cancelled: 'キャンセル済み',
+      resubmitSuccess:
+        '新しい支払い証明が正常に送信されました。しばらくしてから注文状況を再度ご確認ください。',
+      resubmitError: '支払い証明の再送信に失敗しました。',
+    }
+  }
+
+  if (lang === 'ko') {
+    return {
+      title: '주문 조회',
+      subtitle:
+        '주문 이메일을 입력하면 주문 상태, 시스템 안내, 그리고 관리자 안내에 따른 결제 증빙 재제출 여부를 확인할 수 있습니다.',
+      placeholder: '주문 이메일 입력',
+      button: '주문 조회',
+      loading: '조회 중...',
+      orderNo: '주문번호',
+      email: '이메일',
+      status: '상태',
+      product: '상품',
+      amount: '금액',
+      network: '결제 네트워크',
+      createdAt: '생성 시간',
+      note: '시스템 안내',
+      txHash: '거래 해시',
+      resubmit: '증빙 다시 업로드',
+      proofReady: '새 증빙이 준비되었습니다:',
+      hashPlaceholder: '거래 해시 다시 입력 (선택)',
+      resubmitButton: '새 증빙 제출',
+      resubmitting: '제출 중...',
+      noOrders: '관련 주문을 찾지 못했습니다.',
+      pending: '미결제',
+      paid: '결제됨',
+      completed: '완료됨',
+      cancelled: '취소됨',
+      resubmitSuccess:
+        '새 결제 증빙이 성공적으로 제출되었습니다. 잠시 후 주문 상태를 다시 조회하세요.',
+      resubmitError: '결제 증빙 재제출에 실패했습니다.',
+    }
+  }
+
   if (lang === 'zh-cn') {
     return {
       title: '订单查询',
