@@ -1,13 +1,26 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
-import { useI18n } from '../../components/language-provider'
-import LanguageSwitcher from '../../components/language-switcher'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { useI18n } from '@/components/language-provider'
+import LanguageSwitcher from '@/components/language-switcher'
 
-type AdminOrderStatus = 'pending_payment' | 'paid' | 'completed' | 'cancelled'
+const API = {
+  session: '/api/admin/session',
+  orders: '/api/admin/orders',
+  saveOrder: '/api/admin/save-order',
+  orderAction: '/api/admin/order-action',
+  deleteOrder: '/api/admin/delete-order',
+  siteConfig: '/api/admin/site-config',
+  logout: '/api/admin/logout',
+}
 
-type AdminOrder = {
-  id: number
+type AdminTab = 'orders' | 'pricing' | 'payment'
+
+type OrderStatus = 'pending_payment' | 'paid' | 'completed' | 'cancelled'
+
+type OrderItem = {
+  id?: number
   order_no: string
   username: string | null
   email: string | null
@@ -19,247 +32,237 @@ type AdminOrder = {
   payment_network: string | null
   tx_hash: string | null
   proof_image_base64: string | null
-  status: AdminOrderStatus
+  status: OrderStatus | string | null
   public_note: string | null
   admin_note: string | null
   created_at: string | null
-  updated_at: string | null
+  updated_at?: string | null
 }
 
-type SiteSettings = {
-  id: number
+type SiteConfig = {
   premium_3m_price: number
   premium_6m_price: number
   premium_12m_price: number
   stars_rate: number
   trc20_address: string
   base_address: string
-  updated_at: string
 }
 
-const adminTexts = {
-  'zh-cn': {
-    title: '后台管理',
-    subtitle: '订单管理、价格配置与收款地址管理',
-    checking: '正在检查登录状态...',
-    unauthorized: '尚未登录，正在跳转...',
-    logout: '退出登录',
-    loggingOut: '退出中...',
-    tabOrders: '订单管理',
-    tabSettings: '价格与地址',
-    search: '按邮箱 / 订单号 / 用户名搜索',
-    statusAll: '全部',
-    statusPending: '待支付',
-    statusPaid: '已支付',
-    statusCompleted: '已完成',
-    statusCancelled: '已取消',
-    autoRefresh: '自动刷新',
-    refreshNow: '立即刷新',
-    refreshing: '刷新中...',
-    noOrders: '暂无订单。',
-    editTitle: '编辑订单',
-    orderNo: '订单号',
-    product: '产品',
-    amount: '金额',
-    status: '状态',
-    createdAt: '创建时间',
-    updatedAt: '更新时间',
-    username: 'TG 用户名',
-    email: '邮箱',
-    paymentNetwork: '支付网络',
-    txHash: '交易哈希',
-    proofImage: '付款截图',
-    openImage: '查看大图',
-    closeImage: '关闭预览',
-    publicNote: '用户可见提示',
-    adminNote: '后台备注',
-    saveChanges: '保存修改',
-    saveHint: '保存订单信息、用户可见提示与后台备注',
-    completeOrder: '已完成',
-    restorePayment: '恢复支付',
-    cancelOrder: '取消订单',
-    deleteOrder: '删除订单',
-    saving: '保存中...',
-    deleting: '删除中...',
-    settingsTitle: '站点配置',
-    premium3: 'Premium 3个月',
-    premium6: 'Premium 6个月',
-    premium12: 'Premium 12个月',
-    starsRate: 'Stars 汇率',
-    trc20: 'TRC20 地址',
-    base: 'Base 地址',
-    saveSettings: '保存配置',
-    settingsSaved: '价格与收款地址已保存，前台刷新后会同步。',
-    orderSaved: '订单信息与用户可见提示已保存。',
-    orderCompleted: '订单已改为已完成，前台查询会显示已完成。',
-    orderRestored: '订单已恢复为待支付。',
-    orderCancelled: '订单已取消。',
-    orderDeleted: '订单已删除。',
-    noSettings: '暂无配置数据。',
-    confirmDelete: '确认删除这个订单吗？删除后无法恢复。',
-    proofMissing: '该订单暂无上传图片。',
-    timezoneHint: '所有时间均按美国波士顿时区显示。',
-  },
-  'zh-tw': {
-    title: '後台管理',
-    subtitle: '訂單管理、價格配置與收款地址管理',
-    checking: '正在檢查登入狀態...',
-    unauthorized: '尚未登入，正在跳轉...',
-    logout: '登出',
-    loggingOut: '登出中...',
-    tabOrders: '訂單管理',
-    tabSettings: '價格與地址',
-    search: '按電子郵件 / 訂單號 / 用戶名搜尋',
-    statusAll: '全部',
-    statusPending: '待支付',
-    statusPaid: '已支付',
-    statusCompleted: '已完成',
-    statusCancelled: '已取消',
-    autoRefresh: '自動刷新',
-    refreshNow: '立即刷新',
-    refreshing: '刷新中...',
-    noOrders: '暫無訂單。',
-    editTitle: '編輯訂單',
-    orderNo: '訂單號',
-    product: '產品',
-    amount: '金額',
-    status: '狀態',
-    createdAt: '建立時間',
-    updatedAt: '更新時間',
-    username: 'TG 用戶名',
-    email: '電子郵件',
-    paymentNetwork: '支付網路',
-    txHash: '交易哈希',
-    proofImage: '付款截圖',
-    openImage: '查看大圖',
-    closeImage: '關閉預覽',
-    publicNote: '用戶可見提示',
-    adminNote: '後台備註',
-    saveChanges: '保存修改',
-    saveHint: '保存訂單資訊、用戶可見提示與後台備註',
-    completeOrder: '已完成',
-    restorePayment: '恢復支付',
-    cancelOrder: '取消訂單',
-    deleteOrder: '刪除訂單',
-    saving: '保存中...',
-    deleting: '刪除中...',
-    settingsTitle: '站點配置',
-    premium3: 'Premium 3個月',
-    premium6: 'Premium 6個月',
-    premium12: 'Premium 12個月',
-    starsRate: 'Stars 匯率',
-    trc20: 'TRC20 地址',
-    base: 'Base 地址',
-    saveSettings: '保存配置',
-    settingsSaved: '價格與收款地址已保存，前台刷新後會同步。',
-    orderSaved: '訂單資訊與用戶可見提示已保存。',
-    orderCompleted: '訂單已改為已完成，前台查詢會顯示已完成。',
-    orderRestored: '訂單已恢復為待支付。',
-    orderCancelled: '訂單已取消。',
-    orderDeleted: '訂單已刪除。',
-    noSettings: '暫無配置資料。',
-    confirmDelete: '確認刪除這個訂單嗎？刪除後無法恢復。',
-    proofMissing: '此訂單暫無上傳圖片。',
-    timezoneHint: '所有時間均按美國波士頓時區顯示。',
-  },
-  en: {
-    title: 'Admin Console',
-    subtitle: 'Order management, pricing settings and payment address management',
+type FormState = {
+  username: string
+  email: string
+  payment_network: string
+  tx_hash: string
+  public_note: string
+  admin_note: string
+}
+
+function buildText(lang: string) {
+  if (lang === 'zh-tw') {
+    return {
+      title: 'Agnopol 管理後台',
+      subtitle: '訂單管理、價格設定與收款地址設定',
+      checking: '檢查登入狀態中...',
+      redirecting: '尚未登入，正在跳轉...',
+      tabs: {
+        orders: '訂單管理',
+        pricing: '價格設定',
+        payment: '收款地址',
+      },
+      logout: '退出登入',
+      refreshing: '刷新中...',
+      refreshNow: '立即刷新',
+      autoRefresh: '自動刷新',
+      searchPlaceholder: '按郵箱 / 訂單號 / 用戶名搜索',
+      all: '全部',
+      pending: '待支付',
+      paid: '已支付',
+      completed: '已完成',
+      cancelled: '已取消',
+      noOrders: '暫無訂單',
+      selectHint: '請先選擇一筆訂單',
+      orderNo: '訂單號',
+      product: '產品',
+      amount: '金額',
+      createdAt: '建立時間',
+      username: 'Telegram 用戶名',
+      email: '電子郵件',
+      network: '支付網路',
+      txHash: '交易哈希',
+      currentStatus: '目前狀態',
+      userNote: '用戶可見提示',
+      adminNote: '後台備註',
+      saveHint: '保存訂單資訊、用戶可見提示與後台備註',
+      saveChanges: '保存修改',
+      saving: '保存中...',
+      completedBtn: '已完成',
+      restoring: '恢復支付中...',
+      restoreBtn: '恢復支付',
+      completing: '標記完成中...',
+      cancelling: '取消中...',
+      cancelBtn: '取消訂單',
+      deleting: '刪除中...',
+      deleteBtn: '刪除訂單',
+      viewLarge: '查看大圖',
+      noImage: '暫無圖片憑證',
+      noHash: '請上傳交易哈希',
+      pricesTitle: '套餐價格設定',
+      price3m: 'TG Premium 3個月',
+      price6m: 'TG Premium 6個月',
+      price12m: 'TG Premium 12個月',
+      starsRate: 'Stars 單價（每顆美元）',
+      paymentTitle: '收款地址設定',
+      trc20: 'TRC20 USDT 地址',
+      base: 'Base USDC 地址',
+      saveConfig: '保存設定',
+      configSaving: '保存中...',
+      actionSuccess: '操作成功',
+      saveSuccess: '保存成功',
+      configSaveSuccess: '站點設定已保存',
+      loadFailed: '讀取失敗',
+      actionFailed: '操作失敗',
+      openImage: '打開圖片',
+      statusLabel: '狀態',
+    }
+  }
+
+  if (lang === 'zh-cn') {
+    return {
+      title: 'Agnopol 管理后台',
+      subtitle: '订单管理、价格设置与收款地址设置',
+      checking: '检查登录状态中...',
+      redirecting: '尚未登录，正在跳转...',
+      tabs: {
+        orders: '订单管理',
+        pricing: '价格设置',
+        payment: '收款地址',
+      },
+      logout: '退出登录',
+      refreshing: '刷新中...',
+      refreshNow: '立即刷新',
+      autoRefresh: '自动刷新',
+      searchPlaceholder: '按邮箱 / 订单号 / 用户名搜索',
+      all: '全部',
+      pending: '待支付',
+      paid: '已支付',
+      completed: '已完成',
+      cancelled: '已取消',
+      noOrders: '暂无订单',
+      selectHint: '请先选择一笔订单',
+      orderNo: '订单号',
+      product: '产品',
+      amount: '金额',
+      createdAt: '创建时间',
+      username: 'Telegram 用户名',
+      email: '电子邮箱',
+      network: '支付网络',
+      txHash: '交易哈希',
+      currentStatus: '当前状态',
+      userNote: '用户可见提示',
+      adminNote: '后台备注',
+      saveHint: '保存订单信息、用户可见提示与后台备注',
+      saveChanges: '保存修改',
+      saving: '保存中...',
+      completedBtn: '已完成',
+      restoring: '恢复支付中...',
+      restoreBtn: '恢复支付',
+      completing: '标记完成中...',
+      cancelling: '取消中...',
+      cancelBtn: '取消订单',
+      deleting: '删除中...',
+      deleteBtn: '删除订单',
+      viewLarge: '查看大图',
+      noImage: '暂无图片凭证',
+      noHash: '请上传交易哈希',
+      pricesTitle: '套餐价格设置',
+      price3m: 'TG Premium 3个月',
+      price6m: 'TG Premium 6个月',
+      price12m: 'TG Premium 12个月',
+      starsRate: 'Stars 单价（每颗美元）',
+      paymentTitle: '收款地址设置',
+      trc20: 'TRC20 USDT 地址',
+      base: 'Base USDC 地址',
+      saveConfig: '保存设置',
+      configSaving: '保存中...',
+      actionSuccess: '操作成功',
+      saveSuccess: '保存成功',
+      configSaveSuccess: '站点设置已保存',
+      loadFailed: '读取失败',
+      actionFailed: '操作失败',
+      openImage: '打开图片',
+      statusLabel: '状态',
+    }
+  }
+
+  return {
+    title: 'Agnopol Admin Console',
+    subtitle: 'Order management, pricing settings, and payment address settings',
     checking: 'Checking session...',
-    unauthorized: 'Not logged in. Redirecting...',
-    logout: 'Logout',
-    loggingOut: 'Logging out...',
-    tabOrders: 'Orders',
-    tabSettings: 'Pricing & Addresses',
-    search: 'Search by email / order no / username',
-    statusAll: 'All',
-    statusPending: 'Pending Payment',
-    statusPaid: 'Paid',
-    statusCompleted: 'Completed',
-    statusCancelled: 'Cancelled',
-    autoRefresh: 'Auto Refresh',
-    refreshNow: 'Refresh Now',
+    redirecting: 'Not logged in. Redirecting...',
+    tabs: {
+      orders: 'Orders',
+      pricing: 'Pricing',
+      payment: 'Payment Addresses',
+    },
+    logout: 'Log Out',
     refreshing: 'Refreshing...',
-    noOrders: 'No orders found.',
-    editTitle: 'Edit Order',
+    refreshNow: 'Refresh Now',
+    autoRefresh: 'Auto Refresh',
+    searchPlaceholder: 'Search by email / order no / username',
+    all: 'All',
+    pending: 'Pending Payment',
+    paid: 'Paid',
+    completed: 'Completed',
+    cancelled: 'Cancelled',
+    noOrders: 'No orders yet',
+    selectHint: 'Please select an order first',
     orderNo: 'Order No',
     product: 'Product',
     amount: 'Amount',
-    status: 'Status',
     createdAt: 'Created At',
-    updatedAt: 'Updated At',
     username: 'Telegram Username',
     email: 'Email',
-    paymentNetwork: 'Payment Network',
+    network: 'Payment Network',
     txHash: 'Transaction Hash',
-    proofImage: 'Payment Screenshot',
-    openImage: 'Preview Image',
-    closeImage: 'Close Preview',
-    publicNote: 'User Visible Note',
-    adminNote: 'Internal Admin Note',
+    currentStatus: 'Current Status',
+    userNote: 'User Visible Notice',
+    adminNote: 'Admin Note',
+    saveHint: 'Save order info, user visible notice and admin note',
     saveChanges: 'Save Changes',
-    saveHint: 'Save order info, public note and admin note',
-    completeOrder: 'Mark Completed',
-    restorePayment: 'Restore Payment',
-    cancelOrder: 'Cancel Order',
-    deleteOrder: 'Delete Order',
     saving: 'Saving...',
+    completedBtn: 'Completed',
+    restoring: 'Restoring...',
+    restoreBtn: 'Restore Payment',
+    completing: 'Completing...',
+    cancelling: 'Cancelling...',
+    cancelBtn: 'Cancel Order',
     deleting: 'Deleting...',
-    settingsTitle: 'Site Settings',
-    premium3: 'Premium 3 Months',
-    premium6: 'Premium 6 Months',
-    premium12: 'Premium 12 Months',
-    starsRate: 'Stars Rate',
-    trc20: 'TRC20 Address',
-    base: 'Base Address',
-    saveSettings: 'Save Settings',
-    settingsSaved: 'Pricing and payment addresses saved. Frontend will sync after refresh.',
-    orderSaved: 'Order information and user-visible note saved.',
-    orderCompleted: 'Order marked as completed. Frontend lookup will show completed.',
-    orderRestored: 'Order restored to pending payment.',
-    orderCancelled: 'Order cancelled.',
-    orderDeleted: 'Order deleted.',
-    noSettings: 'No settings data.',
-    confirmDelete: 'Delete this order? This action cannot be undone.',
-    proofMissing: 'No uploaded proof image for this order.',
-    timezoneHint: 'All times are displayed in Boston time.',
-  },
-} as const
-
-function getStatusLabel(status: AdminOrderStatus, text: (typeof adminTexts)[keyof typeof adminTexts]) {
-  if (status === 'pending_payment') return text.statusPending
-  if (status === 'paid') return text.statusPaid
-  if (status === 'completed') return text.statusCompleted
-  return text.statusCancelled
-}
-
-function getStatusColor(status: AdminOrderStatus) {
-  if (status === 'completed') return '#166534'
-  if (status === 'paid') return '#1d4ed8'
-  if (status === 'cancelled') return '#991b1b'
-  return '#475569'
-}
-
-function getStatusBg(status: AdminOrderStatus) {
-  if (status === 'completed') return 'rgba(22, 101, 52, 0.08)'
-  if (status === 'paid') return 'rgba(29, 78, 216, 0.08)'
-  if (status === 'cancelled') return 'rgba(153, 27, 27, 0.08)'
-  return 'rgba(71, 85, 105, 0.08)'
-}
-
-function getProductLabel(item: AdminOrder) {
-  if (item.product_type === 'tg_stars') {
-    return `TG Stars ${item.stars_amount ?? 0}`
+    deleteBtn: 'Delete Order',
+    viewLarge: 'View Large',
+    noImage: 'No payment proof image',
+    noHash: 'Please upload a transaction hash',
+    pricesTitle: 'Plan Pricing',
+    price3m: 'TG Premium 3 Months',
+    price6m: 'TG Premium 6 Months',
+    price12m: 'TG Premium 12 Months',
+    starsRate: 'Stars Unit Price (USD each)',
+    paymentTitle: 'Payment Addresses',
+    trc20: 'TRC20 USDT Address',
+    base: 'Base USDC Address',
+    saveConfig: 'Save Settings',
+    configSaving: 'Saving...',
+    actionSuccess: 'Action completed',
+    saveSuccess: 'Saved successfully',
+    configSaveSuccess: 'Site settings saved',
+    loadFailed: 'Failed to load data',
+    actionFailed: 'Action failed',
+    openImage: 'Open Image',
+    statusLabel: 'Status',
   }
-  if (item.duration === '3m') return 'TG Premium 3M'
-  if (item.duration === '6m') return 'TG Premium 6M'
-  if (item.duration === '12m') return 'TG Premium 12M'
-  return item.product_type || '-'
 }
 
 function formatBostonTime(value: string | null) {
   if (!value) return '-'
-
   try {
     return new Intl.DateTimeFormat('en-US', {
       timeZone: 'America/New_York',
@@ -276,901 +279,1242 @@ function formatBostonTime(value: string | null) {
   }
 }
 
+function getProductLabel(order: OrderItem, text: ReturnType<typeof buildText>) {
+  if (order.product_type === 'tg_stars') {
+    return `TG Stars ${order.stars_amount ?? 0}`
+  }
+  if (order.duration === '3m') return text.price3m
+  if (order.duration === '6m') return text.price6m
+  return text.price12m
+}
+
+function getStatusLabel(status: string | null | undefined, text: ReturnType<typeof buildText>) {
+  const s = String(status || '').toLowerCase()
+  if (s === 'pending' || s === 'pending_payment') return text.pending
+  if (s === 'paid') return text.paid
+  if (s === 'completed') return text.completed
+  if (s === 'cancelled' || s === 'failed') return text.cancelled
+  return status || '-'
+}
+
+function getStatusClass(status: string | null | undefined) {
+  const s = String(status || '').toLowerCase()
+  if (s === 'pending' || s === 'pending_payment') return 'status pending'
+  if (s === 'paid') return 'status paid'
+  if (s === 'completed') return 'status completed'
+  if (s === 'cancelled' || s === 'failed') return 'status cancelled'
+  return 'status'
+}
+
 export default function AdminPage() {
+  const router = useRouter()
   const { lang } = useI18n()
-  const langKey = lang === 'zh-cn' || lang === 'zh-tw' || lang === 'en' ? lang : 'en'
-  const text = useMemo(() => adminTexts[langKey], [langKey])
+  const text = useMemo(() => buildText(lang), [lang])
 
-  const [authStatus, setAuthStatus] = useState<'checking' | 'ok' | 'unauthorized'>('checking')
-  const [loggingOut, setLoggingOut] = useState(false)
-
-  const [tab, setTab] = useState<'orders' | 'settings'>('orders')
-
-  const [orders, setOrders] = useState<AdminOrder[]>([])
-  const [selectedOrder, setSelectedOrder] = useState<AdminOrder | null>(null)
-  const [ordersLoading, setOrdersLoading] = useState(false)
-  const [ordersMessage, setOrdersMessage] = useState('')
-  const [ordersError, setOrdersError] = useState('')
-  const [query, setQuery] = useState('')
-  const [statusFilter, setStatusFilter] = useState<'all' | AdminOrderStatus>('all')
+  const [authChecking, setAuthChecking] = useState(true)
+  const [tab, setTab] = useState<AdminTab>('orders')
+  const [orders, setOrders] = useState<OrderItem[]>([])
+  const [loadingOrders, setLoadingOrders] = useState(false)
+  const [search, setSearch] = useState('')
+  const [statusFilter, setStatusFilter] = useState('all')
   const [autoRefresh, setAutoRefresh] = useState(true)
+  const [selectedOrderNo, setSelectedOrderNo] = useState('')
+  const [form, setForm] = useState<FormState>({
+    username: '',
+    email: '',
+    payment_network: '',
+    tx_hash: '',
+    public_note: '',
+    admin_note: '',
+  })
 
-  const [settings, setSettings] = useState<SiteSettings | null>(null)
-  const [settingsLoading, setSettingsLoading] = useState(false)
-  const [settingsMessage, setSettingsMessage] = useState('')
-  const [settingsError, setSettingsError] = useState('')
-  const [savingSettings, setSavingSettings] = useState(false)
+  const [siteConfig, setSiteConfig] = useState<SiteConfig>({
+    premium_3m_price: 13.1,
+    premium_6m_price: 17.1,
+    premium_12m_price: 31.1,
+    stars_rate: 0.02,
+    trc20_address: '',
+    base_address: '',
+  })
 
-  const [previewImage, setPreviewImage] = useState<string | null>(null)
+  const [saveLoading, setSaveLoading] = useState(false)
+  const [configLoading, setConfigLoading] = useState(false)
+  const [actionLoading, setActionLoading] = useState<'complete' | 'restore' | 'cancel' | 'delete' | null>(null)
+  const [message, setMessage] = useState('')
+  const [error, setError] = useState('')
 
-  useEffect(() => {
-    const run = async () => {
-      try {
-        const response = await fetch('/api/admin/session', {
-          cache: 'no-store',
-          credentials: 'include',
+  const selectedOrder = useMemo(
+    () => orders.find((item) => item.order_no === selectedOrderNo) || null,
+    [orders, selectedOrderNo]
+  )
+
+  const syncFormFromOrder = useCallback((order: OrderItem | null) => {
+    setForm({
+      username: order?.username || '',
+      email: order?.email || '',
+      payment_network: order?.payment_network || '',
+      tx_hash: order?.tx_hash || '',
+      public_note: order?.public_note || '',
+      admin_note: order?.admin_note || '',
+    })
+  }, [])
+
+  const loadSiteConfig = useCallback(async () => {
+    try {
+      const res = await fetch(API.siteConfig, {
+        method: 'GET',
+        credentials: 'include',
+        cache: 'no-store',
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data?.error || text.loadFailed)
+      if (data?.item) {
+        setSiteConfig({
+          premium_3m_price: Number(data.item.premium_3m_price ?? 13.1),
+          premium_6m_price: Number(data.item.premium_6m_price ?? 17.1),
+          premium_12m_price: Number(data.item.premium_12m_price ?? 31.1),
+          stars_rate: Number(data.item.stars_rate ?? 0.02),
+          trc20_address: String(data.item.trc20_address ?? ''),
+          base_address: String(data.item.base_address ?? ''),
         })
-        const data = await response.json()
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : text.loadFailed)
+    }
+  }, [text.loadFailed])
 
-        if (!data?.authenticated) {
-          setAuthStatus('unauthorized')
-          setTimeout(() => {
-            window.location.href = `/admin/login?lang=${langKey}`
-          }, 500)
+  const loadOrders = useCallback(
+    async (silent = false) => {
+      try {
+        if (!silent) setLoadingOrders(true)
+        const params = new URLSearchParams()
+        if (search.trim()) params.set('search', search.trim())
+        if (statusFilter !== 'all') params.set('status', statusFilter)
+
+        const res = await fetch(`${API.orders}?${params.toString()}`, {
+          method: 'GET',
+          credentials: 'include',
+          cache: 'no-store',
+        })
+        const data = await res.json()
+        if (res.status === 401) {
+          router.replace(`/admin/login?lang=${lang}`)
+          return
+        }
+        if (!res.ok) throw new Error(data?.error || text.loadFailed)
+
+        const nextOrders: OrderItem[] = Array.isArray(data?.orders) ? data.orders : []
+        setOrders(nextOrders)
+
+        if (!selectedOrderNo && nextOrders[0]) {
+          setSelectedOrderNo(nextOrders[0].order_no)
+          syncFormFromOrder(nextOrders[0])
           return
         }
 
-        setAuthStatus('ok')
+        if (selectedOrderNo) {
+          const nextSelected = nextOrders.find((item) => item.order_no === selectedOrderNo) || null
+          if (nextSelected) {
+            syncFormFromOrder(nextSelected)
+          } else {
+            setSelectedOrderNo(nextOrders[0]?.order_no || '')
+            syncFormFromOrder(nextOrders[0] || null)
+          }
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : text.loadFailed)
+      } finally {
+        if (!silent) setLoadingOrders(false)
+      }
+    },
+    [lang, router, search, selectedOrderNo, statusFilter, syncFormFromOrder, text.loadFailed]
+  )
+
+  useEffect(() => {
+    let active = true
+
+    async function bootstrap() {
+      try {
+        const res = await fetch(API.session, {
+          method: 'GET',
+          credentials: 'include',
+          cache: 'no-store',
+        })
+        if (res.status === 401) {
+          router.replace(`/admin/login?lang=${lang}`)
+          return
+        }
+        if (!res.ok) throw new Error(text.redirecting)
+        if (!active) return
+        setAuthChecking(false)
       } catch {
-        setAuthStatus('unauthorized')
-        setTimeout(() => {
-          window.location.href = `/admin/login?lang=${langKey}`
-        }, 500)
+        router.replace(`/admin/login?lang=${lang}`)
       }
     }
 
-    run()
-  }, [langKey])
+    bootstrap()
 
-  async function fetchOrders() {
-    setOrdersLoading(true)
-    setOrdersError('')
+    return () => {
+      active = false
+    }
+  }, [lang, router, text.redirecting])
 
+  useEffect(() => {
+    if (authChecking) return
+    loadOrders()
+    loadSiteConfig()
+  }, [authChecking, loadOrders, loadSiteConfig])
+
+  useEffect(() => {
+    if (authChecking || !autoRefresh) return
+    const timer = window.setInterval(() => {
+      loadOrders(true)
+    }, 15000)
+    return () => window.clearInterval(timer)
+  }, [authChecking, autoRefresh, loadOrders])
+
+  function pickOrder(order: OrderItem) {
+    setSelectedOrderNo(order.order_no)
+    syncFormFromOrder(order)
+    setMessage('')
+    setError('')
+  }
+
+  async function saveOrder() {
+    if (!selectedOrder) return
     try {
-      const params = new URLSearchParams()
-      params.set('status', statusFilter)
-      params.set('q', query.trim())
-      params.set('page', '1')
-      params.set('page_size', '50')
+      setSaveLoading(true)
+      setMessage('')
+      setError('')
 
-      const response = await fetch(`/api/admin/orders?${params.toString()}`, {
-        cache: 'no-store',
+      const res = await fetch(API.saveOrder, {
+        method: 'POST',
         credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          order_no: selectedOrder.order_no,
+          username: form.username.trim(),
+          email: form.email.trim(),
+          payment_network: form.payment_network.trim(),
+          tx_hash: form.tx_hash.trim(),
+          public_note: form.public_note.trim(),
+          admin_note: form.admin_note.trim(),
+        }),
       })
-      const data = await response.json()
+      const data = await res.json()
+      if (!res.ok) throw new Error(data?.error || text.actionFailed)
 
-      if (!response.ok) {
-        throw new Error(data?.error || 'Failed to load orders')
-      }
-
-      const nextOrders: AdminOrder[] = data.items || []
-      setOrders(nextOrders)
-
-      setSelectedOrder((prev) => {
-        if (!prev) return nextOrders[0] || null
-        const matched = nextOrders.find((item) => item.id === prev.id)
-        return matched || nextOrders[0] || null
-      })
-    } catch (error) {
-      setOrdersError(error instanceof Error ? error.message : 'Failed to load orders')
+      setMessage(text.saveSuccess)
+      await loadOrders(true)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : text.actionFailed)
     } finally {
-      setOrdersLoading(false)
+      setSaveLoading(false)
     }
   }
 
-  async function fetchSettings() {
-    setSettingsLoading(true)
-    setSettingsError('')
+  async function runOrderAction(kind: 'complete' | 'restore' | 'cancel' | 'delete') {
+    if (!selectedOrder) return
+
+    const endpoint = kind === 'delete' ? API.deleteOrder : API.orderAction
 
     try {
-      const response = await fetch('/api/admin/settings', {
-        cache: 'no-store',
+      setActionLoading(kind)
+      setMessage('')
+      setError('')
+
+      const payload =
+        kind === 'delete'
+          ? { order_no: selectedOrder.order_no }
+          : {
+              order_no: selectedOrder.order_no,
+              action:
+                kind === 'complete'
+                  ? 'completed'
+                  : kind === 'restore'
+                    ? 'restore_paid'
+                    : 'cancelled',
+            }
+
+      const res = await fetch(endpoint, {
+        method: 'POST',
         credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
       })
-      const data = await response.json()
+      const data = await res.json()
+      if (!res.ok) throw new Error(data?.error || text.actionFailed)
 
-      if (!response.ok) {
-        throw new Error(data?.error || 'Failed to load settings')
+      setMessage(text.actionSuccess)
+
+      if (kind === 'delete') {
+        const next = orders.filter((item) => item.order_no !== selectedOrder.order_no)
+        setOrders(next)
+        setSelectedOrderNo(next[0]?.order_no || '')
+        syncFormFromOrder(next[0] || null)
+      } else {
+        await loadOrders(true)
       }
-
-      setSettings(data.item || null)
-    } catch (error) {
-      setSettingsError(error instanceof Error ? error.message : 'Failed to load settings')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : text.actionFailed)
     } finally {
-      setSettingsLoading(false)
+      setActionLoading(null)
     }
   }
 
-  useEffect(() => {
-    if (authStatus !== 'ok') return
-    fetchOrders()
-    fetchSettings()
-  }, [authStatus])
-
-  useEffect(() => {
-    if (authStatus !== 'ok') return
-    fetchOrders()
-  }, [statusFilter])
-
-  useEffect(() => {
-    if (authStatus !== 'ok' || !autoRefresh) return
-
-    const timer = setInterval(() => {
-      fetchOrders()
-    }, 10000)
-
-    return () => clearInterval(timer)
-  }, [authStatus, autoRefresh, statusFilter, query])
-
-  async function handleLogout() {
-    setLoggingOut(true)
-
+  async function saveSiteConfig() {
     try {
-      await fetch('/api/admin/logout', {
+      setConfigLoading(true)
+      setMessage('')
+      setError('')
+
+      const res = await fetch(API.siteConfig, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(siteConfig),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data?.error || text.actionFailed)
+
+      setMessage(text.configSaveSuccess)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : text.actionFailed)
+    } finally {
+      setConfigLoading(false)
+    }
+  }
+
+  async function logout() {
+    try {
+      await fetch(API.logout, {
         method: 'POST',
         credentials: 'include',
       })
     } finally {
-      window.location.href = `/admin/login?lang=${langKey}`
+      router.replace(`/admin/login?lang=${lang}`)
     }
   }
 
-  async function handleSaveOrder() {
-    if (!selectedOrder) return
-
-    setOrdersMessage('')
-    setOrdersError('')
-
-    try {
-      const response = await fetch(`/api/admin/orders/${selectedOrder.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({
-          username: selectedOrder.username || '',
-          email: selectedOrder.email || '',
-          payment_network: selectedOrder.payment_network || '',
-          tx_hash: selectedOrder.tx_hash || '',
-          public_note: selectedOrder.public_note || '',
-          admin_note: selectedOrder.admin_note || '',
-          status: selectedOrder.status,
-        }),
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data?.error || 'Failed to save order')
-      }
-
-      setOrdersMessage(text.orderSaved)
-      setSelectedOrder(data.item)
-      await fetchOrders()
-    } catch (error) {
-      setOrdersError(error instanceof Error ? error.message : 'Failed to save order')
-    }
-  }
-
-  async function handleDeleteOrder() {
-    if (!selectedOrder) return
-    if (!window.confirm(text.confirmDelete)) return
-
-    setOrdersMessage('')
-    setOrdersError('')
-
-    try {
-      const response = await fetch(`/api/admin/orders/${selectedOrder.id}`, {
-        method: 'DELETE',
-        credentials: 'include',
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data?.error || 'Failed to delete order')
-      }
-
-      setOrdersMessage(text.orderDeleted)
-      setSelectedOrder(null)
-      await fetchOrders()
-    } catch (error) {
-      setOrdersError(error instanceof Error ? error.message : 'Failed to delete order')
-    }
-  }
-
-  async function updateStatus(status: AdminOrderStatus) {
-    if (!selectedOrder) return
-
-    setOrdersMessage('')
-    setOrdersError('')
-
-    try {
-      const response = await fetch(`/api/admin/orders/${selectedOrder.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({
-          status,
-        }),
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data?.error || 'Failed to update status')
-      }
-
-      if (status === 'completed') {
-        setOrdersMessage(text.orderCompleted)
-      } else if (status === 'pending_payment') {
-        setOrdersMessage(text.orderRestored)
-      } else if (status === 'cancelled') {
-        setOrdersMessage(text.orderCancelled)
-      } else {
-        setOrdersMessage(text.orderSaved)
-      }
-
-      setSelectedOrder(data.item)
-      await fetchOrders()
-    } catch (error) {
-      setOrdersError(error instanceof Error ? error.message : 'Failed to update status')
-    }
-  }
-
-  async function handleSaveSettings() {
-    if (!settings) return
-
-    setSavingSettings(true)
-    setSettingsMessage('')
-    setSettingsError('')
-
-    try {
-      const response = await fetch('/api/admin/settings', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({
-          premium_3m_price: settings.premium_3m_price,
-          premium_6m_price: settings.premium_6m_price,
-          premium_12m_price: settings.premium_12m_price,
-          stars_rate: settings.stars_rate,
-          trc20_address: settings.trc20_address,
-          base_address: settings.base_address,
-        }),
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data?.error || 'Failed to save settings')
-      }
-
-      setSettings(data.item)
-      setSettingsMessage(text.settingsSaved)
-    } catch (error) {
-      setSettingsError(error instanceof Error ? error.message : 'Failed to save settings')
-    } finally {
-      setSavingSettings(false)
-    }
-  }
-
-  if (authStatus === 'checking') {
+  if (authChecking) {
     return (
-      <main className="site-shell">
-        <div className="site-container" style={{ display: 'flex', justifyContent: 'center', paddingTop: 80 }}>
-          <div className="card">{text.checking}</div>
-        </div>
-      </main>
-    )
-  }
-
-  if (authStatus === 'unauthorized') {
-    return (
-      <main className="site-shell">
-        <div className="site-container" style={{ display: 'flex', justifyContent: 'center', paddingTop: 80 }}>
-          <div className="card">{text.unauthorized}</div>
+      <main className="admin-shell">
+        <div className="admin-panel small-panel">
+          <div className="loading-card">{text.checking}</div>
+          <style jsx>{styles}</style>
         </div>
       </main>
     )
   }
 
   return (
-    <main className="site-shell">
-      <div className="site-container" style={{ minWidth: 0 }}>
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            gap: 12,
-            marginBottom: 18,
-            flexWrap: 'wrap',
-          }}
-        >
+    <main className="admin-shell">
+      <div className="admin-panel">
+        <section className="hero-card">
           <div>
-            <h1 style={{ margin: 0, fontSize: 'clamp(28px, 4vw, 42px)', fontWeight: 900 }}>
-              {text.title}
-            </h1>
-            <p className="small-muted" style={{ marginTop: 8 }}>
-              {text.subtitle}
-            </p>
-            <p className="small-muted" style={{ marginTop: 6 }}>
-              {text.timezoneHint}
-            </p>
+            <h1 className="hero-title">{text.title}</h1>
+            <p className="hero-subtitle">{text.subtitle}</p>
           </div>
 
-          <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+          <div className="hero-actions">
             <LanguageSwitcher />
-            <button
-              type="button"
-              className="btn-secondary"
-              onClick={handleLogout}
-              disabled={loggingOut}
-              style={{ width: 'auto', minWidth: 120 }}
-            >
-              {loggingOut ? text.loggingOut : text.logout}
+            <button type="button" className="logout-btn" onClick={logout}>
+              {text.logout}
             </button>
           </div>
-        </div>
+        </section>
 
-        <div className="segment-tabs" style={{ maxWidth: 520, marginBottom: 18 }}>
+        <section className="tabs-row">
           <button
             type="button"
-            className={`segment-btn ${tab === 'orders' ? 'active' : ''}`}
+            className={`tab-btn ${tab === 'orders' ? 'active' : ''}`}
             onClick={() => setTab('orders')}
           >
-            {text.tabOrders}
+            {text.tabs.orders}
           </button>
           <button
             type="button"
-            className={`segment-btn ${tab === 'settings' ? 'active' : ''}`}
-            onClick={() => setTab('settings')}
+            className={`tab-btn ${tab === 'pricing' ? 'active' : ''}`}
+            onClick={() => setTab('pricing')}
           >
-            {text.tabSettings}
+            {text.tabs.pricing}
           </button>
-        </div>
+          <button
+            type="button"
+            className={`tab-btn ${tab === 'payment' ? 'active' : ''}`}
+            onClick={() => setTab('payment')}
+          >
+            {text.tabs.payment}
+          </button>
+        </section>
+
+        {message ? <div className="status-box success">{message}</div> : null}
+        {error ? <div className="status-box error">{error}</div> : null}
 
         {tab === 'orders' ? (
-          <div className="admin-grid">
-            <aside className="admin-side" style={{ minWidth: 0 }}>
-              <div className="card-soft">
+          <div className="grid-layout">
+            <section className="card search-card">
+              <div className="search-row">
                 <input
                   className="input"
-                  placeholder={text.search}
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder={text.searchPlaceholder}
                 />
-
-                <button
-                  type="button"
-                  className="btn-secondary"
-                  style={{ marginTop: 10 }}
-                  onClick={fetchOrders}
-                >
-                  {ordersLoading ? text.refreshing : text.refreshNow}
+                <button type="button" className="small-btn" onClick={() => loadOrders()}>
+                  {loadingOrders ? text.refreshing : text.refreshNow}
                 </button>
+              </div>
 
-                <div style={{ marginTop: 12 }}>
-                  <select
-                    className="input"
-                    value={statusFilter}
-                    onChange={(e) =>
-                      setStatusFilter(e.target.value as 'all' | AdminOrderStatus)
-                    }
-                  >
-                    <option value="all">{text.statusAll}</option>
-                    <option value="pending_payment">{text.statusPending}</option>
-                    <option value="paid">{text.statusPaid}</option>
-                    <option value="completed">{text.statusCompleted}</option>
-                    <option value="cancelled">{text.statusCancelled}</option>
-                  </select>
-                </div>
-
-                <label
-                  style={{
-                    marginTop: 12,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 8,
-                    color: '#475569',
-                    fontSize: 14,
-                  }}
+              <div className="filter-row">
+                <select
+                  className="input"
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
                 >
+                  <option value="all">{text.all}</option>
+                  <option value="pending_payment">{text.pending}</option>
+                  <option value="paid">{text.paid}</option>
+                  <option value="completed">{text.completed}</option>
+                  <option value="cancelled">{text.cancelled}</option>
+                </select>
+
+                <label className="checkbox-row">
                   <input
                     type="checkbox"
                     checked={autoRefresh}
                     onChange={(e) => setAutoRefresh(e.target.checked)}
                   />
-                  {text.autoRefresh}
+                  <span>{text.autoRefresh}</span>
                 </label>
               </div>
+            </section>
 
-              <div
-                className="card-soft"
-                style={{
-                  maxHeight: 620,
-                  overflowY: 'auto',
-                  display: 'grid',
-                  gap: 10,
-                }}
-              >
-                {orders.length === 0 ? (
-                  <div className="small-muted">{text.noOrders}</div>
-                ) : (
-                  orders.map((item) => (
-                    <button
-                      key={item.id}
-                      type="button"
-                      onClick={() => {
-                        setSelectedOrder(item)
-                        setOrdersMessage('')
-                        setOrdersError('')
-                      }}
-                      style={{
-                        textAlign: 'left',
-                        padding: 14,
-                        borderRadius: 14,
-                        border:
-                          selectedOrder?.id === item.id
-                            ? '1px solid #0f234f'
-                            : '1px solid rgba(15, 23, 42, 0.08)',
-                        background:
-                          selectedOrder?.id === item.id
-                            ? 'rgba(11, 23, 51, 0.06)'
-                            : '#fff',
-                        cursor: 'pointer',
-                        minWidth: 0,
-                        overflow: 'hidden',
-                      }}
-                    >
-                      <div style={{ fontWeight: 800, color: '#0f172a', wordBreak: 'break-all' }}>
-                        {item.order_no}
-                      </div>
+            <section className="card order-list-card">
+              {orders.length === 0 ? (
+                <div className="empty-text">{text.noOrders}</div>
+              ) : (
+                orders.map((order) => (
+                  <button
+                    key={order.order_no}
+                    type="button"
+                    onClick={() => pickOrder(order)}
+                    className={`order-item ${selectedOrderNo === order.order_no ? 'active' : ''}`}
+                  >
+                    <div className="order-item-title">{order.order_no}</div>
+                    <div className="order-item-sub">{order.email || '-'}</div>
+                    <div className="order-item-sub">{getProductLabel(order, text)}</div>
+                    <div className={getStatusClass(order.status)}>
+                      {getStatusLabel(order.status, text)}
+                    </div>
+                  </button>
+                ))
+              )}
+            </section>
 
-                      <div className="small-muted" style={{ marginTop: 6, wordBreak: 'break-all' }}>
-                        {item.email || '-'}
-                      </div>
+            <section className="card editor-card">
+              {selectedOrder ? (
+                <>
+                  <h2 className="section-title">{text.tabs.orders}</h2>
 
-                      <div className="small-muted" style={{ marginTop: 4 }}>
-                        {getProductLabel(item)}
-                      </div>
+                  <div className="meta-grid">
+                    <div>
+                      <span className="meta-label">{text.orderNo}:</span> {selectedOrder.order_no}
+                    </div>
+                    <div>
+                      <span className="meta-label">{text.product}:</span>{' '}
+                      {getProductLabel(selectedOrder, text)}
+                    </div>
+                    <div>
+                      <span className="meta-label">{text.amount}:</span> $
+                      {selectedOrder.price_usd ?? selectedOrder.amount ?? 0}
+                    </div>
+                    <div>
+                      <span className="meta-label">{text.createdAt}:</span>{' '}
+                      {formatBostonTime(selectedOrder.created_at)}
+                    </div>
+                  </div>
 
-                      {item.proof_image_base64 ? (
+                  <div className="preview-box">
+                    {selectedOrder.proof_image_base64 ? (
+                      <>
                         <img
-                          src={item.proof_image_base64}
-                          alt="thumb"
-                          style={{
-                            marginTop: 8,
-                            width: 76,
-                            height: 76,
-                            objectFit: 'cover',
-                            borderRadius: 10,
-                            border: '1px solid rgba(15, 23, 42, 0.08)',
-                            display: 'block',
-                          }}
+                          src={selectedOrder.proof_image_base64}
+                          alt="payment proof"
+                          className="proof-image"
                         />
-                      ) : null}
-
-                      {item.tx_hash ? (
-                        <div
-                          style={{
-                            marginTop: 8,
-                            fontSize: 12,
-                            color: '#475569',
-                            wordBreak: 'break-all',
-                            overflowWrap: 'anywhere',
-                            whiteSpace: 'pre-wrap',
-                          }}
+                        <button
+                          type="button"
+                          className="secondary-wide-btn"
+                          onClick={() => window.open(selectedOrder.proof_image_base64 || '', '_blank')}
                         >
-                          {item.tx_hash}
-                        </div>
-                      ) : null}
+                          {text.viewLarge}
+                        </button>
+                      </>
+                    ) : (
+                      <div className="empty-text">{text.noImage}</div>
+                    )}
+                  </div>
 
-                      <div
-                        style={{
-                          marginTop: 8,
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          padding: '6px 10px',
-                          borderRadius: 999,
-                          background: getStatusBg(item.status),
-                          color: getStatusColor(item.status),
-                          fontWeight: 800,
-                          fontSize: 12,
-                        }}
-                      >
-                        {getStatusLabel(item.status, text)}
-                      </div>
-                    </button>
-                  ))
-                )}
-              </div>
-            </aside>
-
-            <section className="admin-main" style={{ minWidth: 0 }}>
-              <div className="card-soft" style={{ minWidth: 0, overflow: 'hidden' }}>
-                <div
-                  style={{
-                    fontSize: 'clamp(18px, 2.2vw, 22px)',
-                    fontWeight: 800,
-                    color: '#111827',
-                    marginBottom: 12,
-                  }}
-                >
-                  {text.editTitle}
-                </div>
-
-                {!selectedOrder ? (
-                  <div className="small-muted">{text.noOrders}</div>
-                ) : (
-                  <div style={{ display: 'grid', gap: 12, minWidth: 0 }}>
-                    <div style={{ wordBreak: 'break-all' }}>
-                      <strong>{text.orderNo}:</strong> {selectedOrder.order_no}
-                    </div>
-
-                    <div>
-                      <strong>{text.product}:</strong> {getProductLabel(selectedOrder)}
-                    </div>
-
-                    <div>
-                      <strong>{text.amount}:</strong> ${selectedOrder.price_usd ?? selectedOrder.amount ?? 0}
-                    </div>
-
-                    <div>
-                      <strong>{text.createdAt}:</strong> {formatBostonTime(selectedOrder.created_at)}
-                    </div>
-
-                    <div>
-                      <strong>{text.updatedAt}:</strong> {formatBostonTime(selectedOrder.updated_at)}
-                    </div>
-
-                    <div>
-                      <div style={{ marginBottom: 6, fontSize: 13, color: '#64748b' }}>
-                        {text.status}
-                      </div>
-                      <div
-                        style={{
-                          width: '100%',
-                          minHeight: 52,
-                          borderRadius: 16,
-                          border: '1px solid rgba(15, 23, 42, 0.1)',
-                          background: getStatusBg(selectedOrder.status),
-                          color: getStatusColor(selectedOrder.status),
-                          display: 'flex',
-                          alignItems: 'center',
-                          padding: '0 16px',
-                          fontWeight: 800,
-                          boxSizing: 'border-box',
-                        }}
-                      >
-                        {getStatusLabel(selectedOrder.status, text)}
-                      </div>
-                    </div>
-
+                  <div className="form-grid">
                     <input
                       className="input"
+                      value={form.username}
+                      onChange={(e) => setForm((prev) => ({ ...prev, username: e.target.value }))}
                       placeholder={text.username}
-                      value={selectedOrder.username || ''}
-                      onChange={(e) =>
-                        setSelectedOrder({ ...selectedOrder, username: e.target.value })
-                      }
                     />
-
                     <input
                       className="input"
+                      value={form.email}
+                      onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
                       placeholder={text.email}
-                      value={selectedOrder.email || ''}
-                      onChange={(e) =>
-                        setSelectedOrder({ ...selectedOrder, email: e.target.value })
-                      }
                     />
-
                     <input
                       className="input"
-                      placeholder={text.paymentNetwork}
-                      value={selectedOrder.payment_network || ''}
+                      value={form.payment_network}
                       onChange={(e) =>
-                        setSelectedOrder({ ...selectedOrder, payment_network: e.target.value })
+                        setForm((prev) => ({ ...prev, payment_network: e.target.value }))
                       }
+                      placeholder={text.network}
                     />
+                  </div>
 
-                    <div>
-                      <div style={{ marginBottom: 6, fontSize: 13, color: '#64748b' }}>
-                        {text.txHash}
-                      </div>
-                      <textarea
-                        className="textarea"
-                        placeholder={text.txHash}
-                        value={selectedOrder.tx_hash || ''}
-                        onChange={(e) =>
-                          setSelectedOrder({ ...selectedOrder, tx_hash: e.target.value })
-                        }
-                        style={{
-                          minHeight: 96,
-                          wordBreak: 'break-all',
-                          overflowWrap: 'anywhere',
-                          whiteSpace: 'pre-wrap',
-                        }}
-                      />
-                    </div>
+                  <div className="readonly-status-row">
+                    <span className="meta-label">{text.currentStatus}:</span>
+                    <span className={getStatusClass(selectedOrder.status)}>
+                      {getStatusLabel(selectedOrder.status, text)}
+                    </span>
+                  </div>
 
-                    <div>
-                      <div style={{ marginBottom: 6, fontSize: 13, color: '#64748b' }}>
-                        {text.proofImage}
-                      </div>
+                  <div className="hash-box">
+                    <div className="field-label">{text.txHash}</div>
+                    <textarea
+                      className="textarea mono"
+                      value={form.tx_hash}
+                      onChange={(e) => setForm((prev) => ({ ...prev, tx_hash: e.target.value }))}
+                      placeholder={text.noHash}
+                      rows={3}
+                    />
+                  </div>
 
-                      {selectedOrder.proof_image_base64 ? (
-                        <div style={{ display: 'grid', gap: 10 }}>
-                          <img
-                            src={selectedOrder.proof_image_base64}
-                            alt="payment proof"
-                            style={{
-                              width: '100%',
-                              maxWidth: 280,
-                              borderRadius: 14,
-                              border: '1px solid rgba(15, 23, 42, 0.08)',
-                              display: 'block',
-                              cursor: 'pointer',
-                            }}
-                            onClick={() => setPreviewImage(selectedOrder.proof_image_base64 || null)}
-                          />
-
-                          <button
-                            type="button"
-                            className="btn-secondary"
-                            onClick={() => setPreviewImage(selectedOrder.proof_image_base64 || null)}
-                          >
-                            {text.openImage}
-                          </button>
-                        </div>
-                      ) : (
-                        <div className="small-muted">{text.proofMissing}</div>
-                      )}
-                    </div>
-
+                  <div className="preview-note-box">
+                    <div className="field-label">{text.userNote}</div>
                     <textarea
                       className="textarea"
-                      placeholder={text.publicNote}
-                      value={selectedOrder.public_note || ''}
+                      value={form.public_note}
                       onChange={(e) =>
-                        setSelectedOrder({ ...selectedOrder, public_note: e.target.value })
+                        setForm((prev) => ({ ...prev, public_note: e.target.value }))
                       }
+                      placeholder={text.userNote}
+                      rows={4}
                     />
+                  </div>
 
+                  <div className="preview-note-box">
+                    <div className="field-label">{text.adminNote}</div>
                     <textarea
                       className="textarea"
+                      value={form.admin_note}
+                      onChange={(e) =>
+                        setForm((prev) => ({ ...prev, admin_note: e.target.value }))
+                      }
                       placeholder={text.adminNote}
-                      value={selectedOrder.admin_note || ''}
-                      onChange={(e) =>
-                        setSelectedOrder({ ...selectedOrder, admin_note: e.target.value })
-                      }
+                      rows={4}
                     />
+                  </div>
 
-                    <div className="small-muted">{text.saveHint}</div>
+                  <div className="save-hint">{text.saveHint}</div>
 
-                    <div
-                      style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-                        gap: 10,
-                      }}
+                  <button
+                    type="button"
+                    className="primary-btn"
+                    onClick={saveOrder}
+                    disabled={saveLoading || actionLoading !== null}
+                  >
+                    {saveLoading ? text.saving : text.saveChanges}
+                  </button>
+
+                  <div className="action-grid">
+                    <button
+                      type="button"
+                      className={`admin-action-btn admin-action-complete ${
+                        actionLoading === 'complete' ? 'loading' : ''
+                      }`}
+                      disabled={saveLoading || actionLoading !== null}
+                      onClick={() => runOrderAction('complete')}
                     >
-                      <button className="btn-primary" onClick={handleSaveOrder}>
-                        {text.saveChanges}
-                      </button>
+                      {actionLoading === 'complete' ? text.completing : text.completedBtn}
+                    </button>
 
-                      <button
-                        className="btn-secondary"
-                        onClick={() => updateStatus('completed')}
-                        disabled={selectedOrder.status === 'completed'}
-                      >
-                        {text.completeOrder}
-                      </button>
+                    <button
+                      type="button"
+                      className={`admin-action-btn admin-action-restore ${
+                        actionLoading === 'restore' ? 'loading' : ''
+                      }`}
+                      disabled={saveLoading || actionLoading !== null}
+                      onClick={() => runOrderAction('restore')}
+                    >
+                      {actionLoading === 'restore' ? text.restoring : text.restoreBtn}
+                    </button>
 
-                      <button
-                        className="btn-secondary"
-                        onClick={() => updateStatus('pending_payment')}
-                        disabled={selectedOrder.status === 'pending_payment'}
-                      >
-                        {text.restorePayment}
-                      </button>
+                    <button
+                      type="button"
+                      className={`admin-action-btn admin-action-cancel ${
+                        actionLoading === 'cancel' ? 'loading' : ''
+                      }`}
+                      disabled={saveLoading || actionLoading !== null}
+                      onClick={() => runOrderAction('cancel')}
+                    >
+                      {actionLoading === 'cancel' ? text.cancelling : text.cancelBtn}
+                    </button>
 
-                      <button
-                        className="btn-secondary"
-                        onClick={() => updateStatus('cancelled')}
-                        disabled={selectedOrder.status === 'cancelled'}
-                      >
-                        {text.cancelOrder}
-                      </button>
-
-                      <button className="btn-secondary" onClick={handleDeleteOrder}>
-                        {text.deleteOrder}
-                      </button>
-                    </div>
+                    <button
+                      type="button"
+                      className={`admin-action-btn admin-action-delete ${
+                        actionLoading === 'delete' ? 'loading' : ''
+                      }`}
+                      disabled={saveLoading || actionLoading !== null}
+                      onClick={() => runOrderAction('delete')}
+                    >
+                      {actionLoading === 'delete' ? text.deleting : text.deleteBtn}
+                    </button>
                   </div>
-                )}
-
-                {ordersMessage ? (
-                  <div className="status-box-success" style={{ marginTop: 16 }}>
-                    <strong>{ordersMessage}</strong>
-                  </div>
-                ) : null}
-
-                {ordersError ? (
-                  <div className="status-box-error" style={{ marginTop: 16 }}>
-                    <strong>{ordersError}</strong>
-                  </div>
-                ) : null}
-              </div>
+                </>
+              ) : (
+                <div className="empty-text">{text.selectHint}</div>
+              )}
             </section>
           </div>
-        ) : (
-          <section className="card-soft" style={{ minWidth: 0 }}>
-            <div
-              style={{
-                fontSize: 'clamp(18px, 2.2vw, 22px)',
-                fontWeight: 800,
-                color: '#111827',
-                marginBottom: 12,
-              }}
-            >
-              {text.settingsTitle}
-            </div>
+        ) : null}
 
-            {settingsLoading ? (
-              <div className="small-muted">{text.saving}</div>
-            ) : !settings ? (
-              <div className="small-muted">{text.noSettings}</div>
-            ) : (
-              <div style={{ display: 'grid', gap: 12, maxWidth: 860 }}>
+        {tab === 'pricing' ? (
+          <section className="card single-card">
+            <h2 className="section-title">{text.pricesTitle}</h2>
+
+            <div className="settings-grid">
+              <label className="setting-field">
+                <span>{text.price3m}</span>
                 <input
                   className="input"
                   type="number"
                   step="0.01"
-                  placeholder={text.premium3}
-                  value={settings.premium_3m_price}
+                  value={siteConfig.premium_3m_price}
                   onChange={(e) =>
-                    setSettings({ ...settings, premium_3m_price: Number(e.target.value) })
+                    setSiteConfig((prev) => ({
+                      ...prev,
+                      premium_3m_price: Number(e.target.value || 0),
+                    }))
                   }
                 />
+              </label>
 
+              <label className="setting-field">
+                <span>{text.price6m}</span>
                 <input
                   className="input"
                   type="number"
                   step="0.01"
-                  placeholder={text.premium6}
-                  value={settings.premium_6m_price}
+                  value={siteConfig.premium_6m_price}
                   onChange={(e) =>
-                    setSettings({ ...settings, premium_6m_price: Number(e.target.value) })
+                    setSiteConfig((prev) => ({
+                      ...prev,
+                      premium_6m_price: Number(e.target.value || 0),
+                    }))
                   }
                 />
+              </label>
 
+              <label className="setting-field">
+                <span>{text.price12m}</span>
                 <input
                   className="input"
                   type="number"
                   step="0.01"
-                  placeholder={text.premium12}
-                  value={settings.premium_12m_price}
+                  value={siteConfig.premium_12m_price}
                   onChange={(e) =>
-                    setSettings({ ...settings, premium_12m_price: Number(e.target.value) })
+                    setSiteConfig((prev) => ({
+                      ...prev,
+                      premium_12m_price: Number(e.target.value || 0),
+                    }))
                   }
                 />
+              </label>
 
+              <label className="setting-field">
+                <span>{text.starsRate}</span>
                 <input
                   className="input"
                   type="number"
                   step="0.0001"
-                  placeholder={text.starsRate}
-                  value={settings.stars_rate}
+                  value={siteConfig.stars_rate}
                   onChange={(e) =>
-                    setSettings({ ...settings, stars_rate: Number(e.target.value) })
+                    setSiteConfig((prev) => ({
+                      ...prev,
+                      stars_rate: Number(e.target.value || 0),
+                    }))
                   }
                 />
+              </label>
+            </div>
 
-                <textarea
-                  className="textarea"
-                  placeholder={text.trc20}
-                  value={settings.trc20_address}
-                  onChange={(e) =>
-                    setSettings({ ...settings, trc20_address: e.target.value })
-                  }
-                />
-
-                <textarea
-                  className="textarea"
-                  placeholder={text.base}
-                  value={settings.base_address}
-                  onChange={(e) =>
-                    setSettings({ ...settings, base_address: e.target.value })
-                  }
-                />
-
-                <div className="small-muted">
-                  {text.updatedAt}: {formatBostonTime(settings.updated_at)}
-                </div>
-
-                <button
-                  className="btn-primary"
-                  onClick={handleSaveSettings}
-                  disabled={savingSettings}
-                  style={{ opacity: savingSettings ? 0.8 : 1 }}
-                >
-                  {savingSettings ? text.saving : text.saveSettings}
-                </button>
-              </div>
-            )}
-
-            {settingsMessage ? (
-              <div className="status-box-success" style={{ marginTop: 16 }}>
-                <strong>{settingsMessage}</strong>
-              </div>
-            ) : null}
-
-            {settingsError ? (
-              <div className="status-box-error" style={{ marginTop: 16 }}>
-                <strong>{settingsError}</strong>
-              </div>
-            ) : null}
+            <button type="button" className="primary-btn" onClick={saveSiteConfig} disabled={configLoading}>
+              {configLoading ? text.configSaving : text.saveConfig}
+            </button>
           </section>
-        )}
+        ) : null}
+
+        {tab === 'payment' ? (
+          <section className="card single-card">
+            <h2 className="section-title">{text.paymentTitle}</h2>
+
+            <div className="settings-grid">
+              <label className="setting-field">
+                <span>{text.trc20}</span>
+                <textarea
+                  className="textarea mono"
+                  value={siteConfig.trc20_address}
+                  onChange={(e) =>
+                    setSiteConfig((prev) => ({ ...prev, trc20_address: e.target.value }))
+                  }
+                  rows={3}
+                />
+              </label>
+
+              <label className="setting-field">
+                <span>{text.base}</span>
+                <textarea
+                  className="textarea mono"
+                  value={siteConfig.base_address}
+                  onChange={(e) =>
+                    setSiteConfig((prev) => ({ ...prev, base_address: e.target.value }))
+                  }
+                  rows={3}
+                />
+              </label>
+            </div>
+
+            <button type="button" className="primary-btn" onClick={saveSiteConfig} disabled={configLoading}>
+              {configLoading ? text.configSaving : text.saveConfig}
+            </button>
+          </section>
+        ) : null}
       </div>
 
-      {previewImage ? (
-        <div
-          onClick={() => setPreviewImage(null)}
-          style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(0,0,0,0.82)',
-            zIndex: 9999,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: 16,
-          }}
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              maxWidth: '100%',
-              maxHeight: '100%',
-              display: 'grid',
-              gap: 12,
-              justifyItems: 'center',
-            }}
-          >
-            <img
-              src={previewImage}
-              alt="payment proof preview"
-              style={{
-                maxWidth: '100%',
-                maxHeight: '80vh',
-                borderRadius: 12,
-                display: 'block',
-              }}
-            />
-            <button
-              type="button"
-              className="btn-secondary"
-              onClick={() => setPreviewImage(null)}
-              style={{ width: 'auto', minWidth: 140 }}
-            >
-              {text.closeImage}
-            </button>
-          </div>
-        </div>
-      ) : null}
+      <style jsx>{styles}</style>
     </main>
   )
 }
+
+const styles = `
+  .admin-shell {
+    min-height: 100vh;
+    background: linear-gradient(180deg, #f7f8fb 0%, #eef2f8 100%);
+    padding: 20px 12px 40px;
+  }
+
+  .admin-panel {
+    max-width: 1220px;
+    margin: 0 auto;
+    display: grid;
+    gap: 16px;
+  }
+
+  .small-panel {
+    max-width: 720px;
+  }
+
+  .loading-card,
+  .card,
+  .hero-card,
+  .tabs-row,
+  .status-box {
+    border-radius: 24px;
+    background: rgba(255,255,255,0.92);
+    border: 1px solid rgba(15,23,42,0.06);
+    box-shadow: 0 18px 50px rgba(15, 23, 42, 0.06);
+  }
+
+  .loading-card {
+    padding: 22px;
+    font-size: 18px;
+    font-weight: 700;
+    text-align: center;
+  }
+
+  .hero-card {
+    padding: 18px;
+    display: flex;
+    justify-content: space-between;
+    gap: 14px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .hero-title {
+    margin: 0;
+    font-size: clamp(24px, 4vw, 34px);
+    line-height: 1.1;
+    color: #0f172a;
+    font-weight: 900;
+  }
+
+  .hero-subtitle {
+    margin: 6px 0 0;
+    color: #64748b;
+    font-size: 14px;
+  }
+
+  .hero-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .logout-btn,
+  .small-btn,
+  .secondary-wide-btn {
+    border: 1px solid rgba(15,23,42,0.08);
+    background: #ffffff;
+    color: #0f172a;
+    border-radius: 16px;
+    min-height: 48px;
+    padding: 0 16px;
+    font-size: 15px;
+    font-weight: 800;
+    transition: all .16s ease;
+  }
+
+  .logout-btn:active,
+  .small-btn:active,
+  .secondary-wide-btn:active,
+  .primary-btn:active,
+  .tab-btn:active,
+  .order-item:active,
+  .admin-action-btn:active {
+    transform: translateY(1px) scale(.985);
+  }
+
+  .logout-btn:hover,
+  .small-btn:hover,
+  .secondary-wide-btn:hover {
+    background: #f8fafc;
+  }
+
+  .tabs-row {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0,1fr));
+    gap: 10px;
+    padding: 10px;
+  }
+
+  .tab-btn {
+    border: none;
+    border-radius: 18px;
+    min-height: 52px;
+    font-size: 16px;
+    font-weight: 900;
+    color: #0f172a;
+    background: #f8fafc;
+    transition: all .16s ease;
+  }
+
+  .tab-btn.active {
+    background: #071b57;
+    color: #ffffff;
+    box-shadow: 0 14px 30px rgba(7, 27, 87, 0.22);
+  }
+
+  .status-box {
+    padding: 14px 16px;
+    font-size: 15px;
+    font-weight: 700;
+  }
+
+  .status-box.success {
+    border-color: rgba(22,163,74,0.16);
+    color: #166534;
+    background: #ecfdf3;
+  }
+
+  .status-box.error {
+    border-color: rgba(220,38,38,0.16);
+    color: #991b1b;
+    background: #fef2f2;
+  }
+
+  .grid-layout {
+    display: grid;
+    grid-template-columns: 320px minmax(0, 1fr) minmax(0, 1.2fr);
+    gap: 16px;
+    align-items: start;
+  }
+
+  .card {
+    padding: 16px;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .single-card {
+    max-width: 860px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .search-card {
+    display: grid;
+    gap: 12px;
+  }
+
+  .search-row {
+    display: grid;
+    grid-template-columns: minmax(0,1fr) 120px;
+    gap: 10px;
+  }
+
+  .filter-row {
+    display: grid;
+    gap: 10px;
+  }
+
+  .checkbox-row {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #334155;
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  .input,
+  .textarea {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    border-radius: 18px;
+    border: 1px solid rgba(15,23,42,0.12);
+    background: #ffffff;
+    color: #111827;
+    font-size: 16px;
+    padding: 14px 16px;
+    outline: none;
+    transition: border-color .16s ease, box-shadow .16s ease;
+  }
+
+  .input:focus,
+  .textarea:focus {
+    border-color: rgba(245, 158, 11, 0.9);
+    box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.12);
+  }
+
+  .textarea {
+    resize: vertical;
+    line-height: 1.65;
+  }
+
+  .mono {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    word-break: break-all;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+  }
+
+  .order-list-card {
+    display: grid;
+    gap: 12px;
+    max-height: 80vh;
+    overflow: auto;
+  }
+
+  .order-item {
+    width: 100%;
+    text-align: left;
+    border-radius: 20px;
+    border: 1px solid rgba(15,23,42,0.08);
+    background: #ffffff;
+    padding: 14px;
+    display: grid;
+    gap: 6px;
+    transition: all .16s ease;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.04);
+  }
+
+  .order-item.active {
+    border-color: rgba(7, 27, 87, 0.4);
+    box-shadow: 0 16px 30px rgba(7, 27, 87, 0.12);
+  }
+
+  .order-item-title {
+    font-size: 18px;
+    font-weight: 900;
+    color: #0f172a;
+    word-break: break-all;
+  }
+
+  .order-item-sub {
+    color: #64748b;
+    font-size: 14px;
+    word-break: break-word;
+  }
+
+  .status {
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    min-height: 34px;
+    padding: 0 12px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 900;
+    border: 1px solid rgba(15,23,42,0.08);
+    background: #f8fafc;
+    color: #0f172a;
+  }
+
+  .status.pending {
+    background: #fff7ed;
+    color: #c2410c;
+    border-color: rgba(194,65,12,0.16);
+  }
+
+  .status.paid {
+    background: #eff6ff;
+    color: #1d4ed8;
+    border-color: rgba(29,78,216,0.16);
+  }
+
+  .status.completed {
+    background: #ecfdf3;
+    color: #166534;
+    border-color: rgba(22,101,52,0.16);
+  }
+
+  .status.cancelled {
+    background: #fef2f2;
+    color: #b91c1c;
+    border-color: rgba(185,28,28,0.16);
+  }
+
+  .editor-card {
+    display: grid;
+    gap: 14px;
+  }
+
+  .section-title {
+    margin: 0;
+    font-size: 26px;
+    font-weight: 900;
+    color: #0f172a;
+  }
+
+  .meta-grid {
+    display: grid;
+    gap: 8px;
+    color: #111827;
+    line-height: 1.7;
+    font-size: 16px;
+  }
+
+  .meta-label,
+  .field-label {
+    font-weight: 900;
+    color: #0f172a;
+  }
+
+  .preview-box {
+    display: grid;
+    gap: 10px;
+  }
+
+  .proof-image {
+    width: 100%;
+    display: block;
+    max-height: 320px;
+    object-fit: cover;
+    border-radius: 22px;
+    border: 1px solid rgba(15,23,42,0.08);
+    background: #f8fafc;
+  }
+
+  .form-grid {
+    display: grid;
+    gap: 10px;
+  }
+
+  .readonly-status-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .hash-box,
+  .preview-note-box {
+    display: grid;
+    gap: 8px;
+  }
+
+  .save-hint {
+    color: #64748b;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .primary-btn {
+    width: 100%;
+    min-height: 58px;
+    border: none;
+    border-radius: 20px;
+    background: #071b57;
+    color: #ffffff;
+    font-size: 18px;
+    font-weight: 900;
+    box-shadow: 0 16px 32px rgba(7, 27, 87, 0.2);
+    transition: all .16s ease;
+  }
+
+  .primary-btn:disabled,
+  .admin-action-btn:disabled {
+    cursor: not-allowed;
+    opacity: .72;
+  }
+
+  .action-grid {
+    display: grid;
+    gap: 12px;
+  }
+
+  .admin-action-btn {
+    width: 100%;
+    min-height: 56px;
+    border-radius: 18px;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    font-size: 18px;
+    font-weight: 900;
+    transition:
+      transform 0.16s ease,
+      box-shadow 0.16s ease,
+      background-color 0.16s ease,
+      border-color 0.16s ease,
+      color 0.16s ease,
+      opacity 0.16s ease;
+    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06);
+    background: #ffffff;
+  }
+
+  .admin-action-complete {
+    background: #ecfdf3;
+    color: #166534;
+    border-color: rgba(22, 101, 52, 0.16);
+  }
+
+  .admin-action-complete.loading,
+  .admin-action-complete:hover {
+    background: #16a34a;
+    color: #ffffff;
+    border-color: #16a34a;
+    box-shadow: 0 12px 28px rgba(22, 163, 74, 0.22);
+  }
+
+  .admin-action-restore {
+    background: #eff6ff;
+    color: #1d4ed8;
+    border-color: rgba(29, 78, 216, 0.16);
+  }
+
+  .admin-action-restore.loading,
+  .admin-action-restore:hover {
+    background: #2563eb;
+    color: #ffffff;
+    border-color: #2563eb;
+    box-shadow: 0 12px 28px rgba(37, 99, 235, 0.22);
+  }
+
+  .admin-action-cancel {
+    background: #fff7ed;
+    color: #c2410c;
+    border-color: rgba(194, 65, 12, 0.16);
+  }
+
+  .admin-action-cancel.loading,
+  .admin-action-cancel:hover {
+    background: #ea580c;
+    color: #ffffff;
+    border-color: #ea580c;
+    box-shadow: 0 12px 28px rgba(234, 88, 12, 0.22);
+  }
+
+  .admin-action-delete {
+    background: #fef2f2;
+    color: #b91c1c;
+    border-color: rgba(185, 28, 28, 0.16);
+  }
+
+  .admin-action-delete.loading,
+  .admin-action-delete:hover {
+    background: #dc2626;
+    color: #ffffff;
+    border-color: #dc2626;
+    box-shadow: 0 12px 28px rgba(220, 38, 38, 0.22);
+  }
+
+  .settings-grid {
+    display: grid;
+    gap: 14px;
+  }
+
+  .setting-field {
+    display: grid;
+    gap: 8px;
+    color: #0f172a;
+    font-weight: 800;
+  }
+
+  .empty-text {
+    color: #64748b;
+    font-size: 15px;
+    line-height: 1.7;
+  }
+
+  @media (max-width: 1080px) {
+    .grid-layout {
+      grid-template-columns: 1fr;
+    }
+
+    .order-list-card {
+      max-height: none;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .admin-shell {
+      padding: 14px 10px 28px;
+    }
+
+    .hero-card {
+      padding: 14px;
+    }
+
+    .tabs-row {
+      grid-template-columns: 1fr;
+    }
+
+    .search-row {
+      grid-template-columns: 1fr;
+    }
+
+    .section-title {
+      font-size: 22px;
+    }
+
+    .primary-btn,
+    .admin-action-btn,
+    .logout-btn,
+    .small-btn,
+    .secondary-wide-btn {
+      min-height: 54px;
+      font-size: 17px;
+    }
+  }
+`
