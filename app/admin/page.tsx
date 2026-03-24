@@ -60,13 +60,13 @@ type FormState = {
 function buildText(lang: string) {
   if (lang === 'zh-tw') {
     return {
-      title: 'Agnopol 管理後台',
-      subtitle: '訂單管理、價格設定與收款地址設定',
+      title: '後台管理',
+      subtitle: '訂單管理、價格配置與收款地址管理',
       checking: '檢查登入狀態中...',
       redirecting: '尚未登入，正在跳轉...',
       tabs: {
         orders: '訂單管理',
-        pricing: '價格設定',
+        pricing: '價格與地址',
         payment: '收款地址',
       },
       logout: '退出登入',
@@ -79,39 +79,39 @@ function buildText(lang: string) {
       paid: '已支付',
       completed: '已完成',
       cancelled: '已取消',
-      noOrders: '暫無訂單',
-      selectHint: '請先選擇一筆訂單',
+      noOrders: '暫無訂單。',
+      selectHint: '暫無訂單。',
       orderNo: '訂單號',
       product: '產品',
       amount: '金額',
       createdAt: '建立時間',
       username: 'Telegram 用戶名',
-      email: '電子郵件',
+      email: '電子郵箱',
       network: '支付網路',
       txHash: '交易哈希',
-      currentStatus: '目前狀態',
+      currentStatus: '當前狀態',
       userNote: '用戶可見提示',
       adminNote: '後台備註',
       saveHint: '保存訂單資訊、用戶可見提示與後台備註',
       saveChanges: '保存修改',
       saving: '保存中...',
       completedBtn: '已完成',
-      restoring: '恢復支付中...',
       restoreBtn: '恢復支付',
-      completing: '標記完成中...',
-      cancelling: '取消中...',
       cancelBtn: '取消訂單',
-      deleting: '刪除中...',
       deleteBtn: '刪除訂單',
+      restoring: '恢復支付中...',
+      completing: '處理中...',
+      cancelling: '取消中...',
+      deleting: '刪除中...',
       viewLarge: '查看大圖',
       noImage: '暫無圖片憑證',
       noHash: '請上傳交易哈希',
-      pricesTitle: '套餐價格設定',
+      pricesTitle: '價格與地址',
       price3m: 'TG Premium 3個月',
       price6m: 'TG Premium 6個月',
       price12m: 'TG Premium 12個月',
       starsRate: 'Stars 單價（每顆美元）',
-      paymentTitle: '收款地址設定',
+      paymentTitle: '收款地址',
       trc20: 'TRC20 USDT 地址',
       base: 'Base USDC 地址',
       saveConfig: '保存設定',
@@ -121,20 +121,20 @@ function buildText(lang: string) {
       configSaveSuccess: '站點設定已保存',
       loadFailed: '讀取失敗',
       actionFailed: '操作失敗',
-      openImage: '打開圖片',
       statusLabel: '狀態',
+      allTimeBoston: '所有時間均按美國波士頓時區顯示。',
     }
   }
 
   if (lang === 'zh-cn') {
     return {
-      title: 'Agnopol 管理后台',
-      subtitle: '订单管理、价格设置与收款地址设置',
+      title: '后台管理',
+      subtitle: '订单管理、价格配置与收款地址管理',
       checking: '检查登录状态中...',
       redirecting: '尚未登录，正在跳转...',
       tabs: {
         orders: '订单管理',
-        pricing: '价格设置',
+        pricing: '价格与地址',
         payment: '收款地址',
       },
       logout: '退出登录',
@@ -147,8 +147,8 @@ function buildText(lang: string) {
       paid: '已支付',
       completed: '已完成',
       cancelled: '已取消',
-      noOrders: '暂无订单',
-      selectHint: '请先选择一笔订单',
+      noOrders: '暂无订单。',
+      selectHint: '暂无订单。',
       orderNo: '订单号',
       product: '产品',
       amount: '金额',
@@ -164,22 +164,22 @@ function buildText(lang: string) {
       saveChanges: '保存修改',
       saving: '保存中...',
       completedBtn: '已完成',
-      restoring: '恢复支付中...',
       restoreBtn: '恢复支付',
-      completing: '标记完成中...',
-      cancelling: '取消中...',
       cancelBtn: '取消订单',
-      deleting: '删除中...',
       deleteBtn: '删除订单',
+      restoring: '恢复支付中...',
+      completing: '处理中...',
+      cancelling: '取消中...',
+      deleting: '删除中...',
       viewLarge: '查看大图',
       noImage: '暂无图片凭证',
       noHash: '请上传交易哈希',
-      pricesTitle: '套餐价格设置',
+      pricesTitle: '价格与地址',
       price3m: 'TG Premium 3个月',
       price6m: 'TG Premium 6个月',
       price12m: 'TG Premium 12个月',
       starsRate: 'Stars 单价（每颗美元）',
-      paymentTitle: '收款地址设置',
+      paymentTitle: '收款地址',
       trc20: 'TRC20 USDT 地址',
       base: 'Base USDC 地址',
       saveConfig: '保存设置',
@@ -189,20 +189,20 @@ function buildText(lang: string) {
       configSaveSuccess: '站点设置已保存',
       loadFailed: '读取失败',
       actionFailed: '操作失败',
-      openImage: '打开图片',
       statusLabel: '状态',
+      allTimeBoston: '所有时间均按美国波士顿时区显示。',
     }
   }
 
   return {
-    title: 'Agnopol Admin Console',
-    subtitle: 'Order management, pricing settings, and payment address settings',
+    title: 'Admin Console',
+    subtitle: 'Order management, pricing settings and payment address management',
     checking: 'Checking session...',
     redirecting: 'Not logged in. Redirecting...',
     tabs: {
       orders: 'Orders',
-      pricing: 'Pricing',
-      payment: 'Payment Addresses',
+      pricing: 'Pricing & Address',
+      payment: 'Payment Address',
     },
     logout: 'Log Out',
     refreshing: 'Refreshing...',
@@ -214,8 +214,8 @@ function buildText(lang: string) {
     paid: 'Paid',
     completed: 'Completed',
     cancelled: 'Cancelled',
-    noOrders: 'No orders yet',
-    selectHint: 'Please select an order first',
+    noOrders: 'No orders.',
+    selectHint: 'No orders.',
     orderNo: 'Order No',
     product: 'Product',
     amount: 'Amount',
@@ -227,26 +227,26 @@ function buildText(lang: string) {
     currentStatus: 'Current Status',
     userNote: 'User Visible Notice',
     adminNote: 'Admin Note',
-    saveHint: 'Save order info, user visible notice and admin note',
+    saveHint: 'Save order info, user notice and admin note',
     saveChanges: 'Save Changes',
     saving: 'Saving...',
     completedBtn: 'Completed',
-    restoring: 'Restoring...',
     restoreBtn: 'Restore Payment',
-    completing: 'Completing...',
-    cancelling: 'Cancelling...',
     cancelBtn: 'Cancel Order',
-    deleting: 'Deleting...',
     deleteBtn: 'Delete Order',
+    restoring: 'Restoring...',
+    completing: 'Processing...',
+    cancelling: 'Cancelling...',
+    deleting: 'Deleting...',
     viewLarge: 'View Large',
     noImage: 'No payment proof image',
     noHash: 'Please upload a transaction hash',
-    pricesTitle: 'Plan Pricing',
+    pricesTitle: 'Pricing & Address',
     price3m: 'TG Premium 3 Months',
     price6m: 'TG Premium 6 Months',
     price12m: 'TG Premium 12 Months',
-    starsRate: 'Stars Unit Price (USD each)',
-    paymentTitle: 'Payment Addresses',
+    starsRate: 'Stars unit price (USD each)',
+    paymentTitle: 'Payment Address',
     trc20: 'TRC20 USDT Address',
     base: 'Base USDC Address',
     saveConfig: 'Save Settings',
@@ -256,8 +256,8 @@ function buildText(lang: string) {
     configSaveSuccess: 'Site settings saved',
     loadFailed: 'Failed to load data',
     actionFailed: 'Action failed',
-    openImage: 'Open Image',
     statusLabel: 'Status',
+    allTimeBoston: 'All times are displayed in the Boston, US time zone.',
   }
 }
 
@@ -614,6 +614,9 @@ export default function AdminPage() {
           <div>
             <h1 className="hero-title">{text.title}</h1>
             <p className="hero-subtitle">{text.subtitle}</p>
+            <p className="hero-subtitle" style={{ marginTop: 18 }}>
+              {text.allTimeBoston}
+            </p>
           </div>
 
           <div className="hero-actions">
@@ -624,7 +627,7 @@ export default function AdminPage() {
           </div>
         </section>
 
-        <section className="tabs-row">
+        <section className="tabs-row two-tabs">
           <button
             type="button"
             className={`tab-btn ${tab === 'orders' ? 'active' : ''}`}
@@ -634,17 +637,10 @@ export default function AdminPage() {
           </button>
           <button
             type="button"
-            className={`tab-btn ${tab === 'pricing' ? 'active' : ''}`}
+            className={`tab-btn ${tab === 'pricing' || tab === 'payment' ? 'active' : ''}`}
             onClick={() => setTab('pricing')}
           >
             {text.tabs.pricing}
-          </button>
-          <button
-            type="button"
-            className={`tab-btn ${tab === 'payment' ? 'active' : ''}`}
-            onClick={() => setTab('payment')}
-          >
-            {text.tabs.payment}
           </button>
         </section>
 
@@ -713,10 +709,10 @@ export default function AdminPage() {
             </section>
 
             <section className="card editor-card">
+              <h2 className="section-title">编辑订单</h2>
+
               {selectedOrder ? (
                 <>
-                  <h2 className="section-title">{text.tabs.orders}</h2>
-
                   <div className="meta-grid">
                     <div>
                       <span className="meta-label">{text.orderNo}:</span> {selectedOrder.order_no}
@@ -733,27 +729,6 @@ export default function AdminPage() {
                       <span className="meta-label">{text.createdAt}:</span>{' '}
                       {formatBostonTime(selectedOrder.created_at)}
                     </div>
-                  </div>
-
-                  <div className="preview-box">
-                    {selectedOrder.proof_image_base64 ? (
-                      <>
-                        <img
-                          src={selectedOrder.proof_image_base64}
-                          alt="payment proof"
-                          className="proof-image"
-                        />
-                        <button
-                          type="button"
-                          className="secondary-wide-btn"
-                          onClick={() => window.open(selectedOrder.proof_image_base64 || '', '_blank')}
-                        >
-                          {text.viewLarge}
-                        </button>
-                      </>
-                    ) : (
-                      <div className="empty-text">{text.noImage}</div>
-                    )}
                   </div>
 
                   <div className="form-grid">
@@ -786,6 +761,27 @@ export default function AdminPage() {
                     </span>
                   </div>
 
+                  <div className="preview-box">
+                    {selectedOrder.proof_image_base64 ? (
+                      <>
+                        <img
+                          src={selectedOrder.proof_image_base64}
+                          alt="payment proof"
+                          className="proof-image"
+                        />
+                        <button
+                          type="button"
+                          className="secondary-wide-btn"
+                          onClick={() => window.open(selectedOrder.proof_image_base64 || '', '_blank')}
+                        >
+                          {text.viewLarge}
+                        </button>
+                      </>
+                    ) : (
+                      <div className="empty-text">{text.noImage}</div>
+                    )}
+                  </div>
+
                   <div className="hash-box">
                     <div className="field-label">{text.txHash}</div>
                     <textarea
@@ -793,7 +789,7 @@ export default function AdminPage() {
                       value={form.tx_hash}
                       onChange={(e) => setForm((prev) => ({ ...prev, tx_hash: e.target.value }))}
                       placeholder={text.noHash}
-                      rows={3}
+                      rows={4}
                     />
                   </div>
 
@@ -887,7 +883,7 @@ export default function AdminPage() {
           </div>
         ) : null}
 
-        {tab === 'pricing' ? (
+        {tab === 'pricing' || tab === 'payment' ? (
           <section className="card single-card">
             <h2 className="section-title">{text.pricesTitle}</h2>
 
@@ -955,19 +951,7 @@ export default function AdminPage() {
                   }
                 />
               </label>
-            </div>
 
-            <button type="button" className="primary-btn" onClick={saveSiteConfig} disabled={configLoading}>
-              {configLoading ? text.configSaving : text.saveConfig}
-            </button>
-          </section>
-        ) : null}
-
-        {tab === 'payment' ? (
-          <section className="card single-card">
-            <h2 className="section-title">{text.paymentTitle}</h2>
-
-            <div className="settings-grid">
               <label className="setting-field">
                 <span>{text.trc20}</span>
                 <textarea
@@ -1067,22 +1051,43 @@ const styles = `
   .hero-actions {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
     flex-wrap: wrap;
   }
 
-  .logout-btn,
   .small-btn,
-  .secondary-wide-btn {
+  .secondary-wide-btn,
+  .logout-btn {
     border: 1px solid rgba(15,23,42,0.08);
     background: #ffffff;
     color: #0f172a;
-    border-radius: 16px;
-    min-height: 48px;
-    padding: 0 16px;
-    font-size: 15px;
-    font-weight: 800;
+    border-radius: 20px;
+    min-height: 56px;
+    padding: 0 20px;
+    font-size: 16px;
+    font-weight: 900;
     transition: all .16s ease;
+    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06);
+  }
+
+  .small-btn:hover,
+  .secondary-wide-btn:hover {
+    background: #f8fafc;
+  }
+
+  .logout-btn {
+    min-width: 168px;
+    background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+    color: #071b57;
+    border-color: rgba(7, 27, 87, 0.12);
+    box-shadow: 0 12px 28px rgba(7, 27, 87, 0.08);
+  }
+
+  .logout-btn:hover {
+    background: #eef4ff;
+    color: #071b57;
+    border-color: rgba(7, 27, 87, 0.22);
+    box-shadow: 0 16px 34px rgba(7, 27, 87, 0.12);
   }
 
   .logout-btn:active,
@@ -1095,17 +1100,19 @@ const styles = `
     transform: translateY(1px) scale(.985);
   }
 
-  .logout-btn:hover,
-  .small-btn:hover,
-  .secondary-wide-btn:hover {
-    background: #f8fafc;
+  .logout-btn:disabled {
+    opacity: .72;
+    cursor: not-allowed;
   }
 
   .tabs-row {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0,1fr));
     gap: 10px;
     padding: 10px;
+  }
+
+  .two-tabs {
+    grid-template-columns: repeat(2, minmax(0,1fr));
   }
 
   .tab-btn {
@@ -1496,8 +1503,8 @@ const styles = `
       padding: 14px;
     }
 
-    .tabs-row {
-      grid-template-columns: 1fr;
+    .two-tabs {
+      grid-template-columns: 1fr 1fr;
     }
 
     .search-row {
@@ -1513,8 +1520,8 @@ const styles = `
     .logout-btn,
     .small-btn,
     .secondary-wide-btn {
-      min-height: 54px;
-      font-size: 17px;
+      min-height: 56px;
+      font-size: 16px;
     }
   }
 `
