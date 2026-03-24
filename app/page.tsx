@@ -496,7 +496,12 @@ export default function HomePage() {
   const [configError, setConfigError] = useState('')
   const [configLoading, setConfigLoading] = useState(true)
 
+  const startYear = 2026
   const currentYear = new Date().getFullYear()
+  const copyrightText =
+    currentYear > startYear
+      ? `© ${startYear}–${currentYear} Agnopol. All rights reserved.`
+      : `© ${startYear} Agnopol. All rights reserved.`
 
   useEffect(() => {
     let active = true
@@ -747,7 +752,7 @@ export default function HomePage() {
         </div>
 
         <footer className="footer">
-          <p>{t.common.rights.replace('{year}', String(currentYear))}</p>
+          <p>{copyrightText}</p>
 
           <p style={{ marginTop: 4 }}>
             <span style={{ marginRight: 6 }}>{t.common.officialEmail}:</span>
