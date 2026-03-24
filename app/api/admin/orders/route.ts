@@ -24,6 +24,12 @@ function noStoreJson(data: any, init?: ResponseInit) {
   return response
 }
 
+function unauthorizedOr500(error: unknown) {
+  const message = error instanceof Error ? error.message : 'Server error'
+  const status = error instanceof Error && error.message === 'Unauthorized' ? 401 : 500
+  return noStoreJson({ error: message }, { status })
+}
+
 export async function GET(req: Request) {
   try {
     requireAdminSession()
@@ -32,7 +38,6 @@ export async function GET(req: Request) {
     await expirePendingOrders(supabase)
 
     const { searchParams } = new URL(req.url)
-
     const status = String(searchParams.get('status') || 'all')
     const q = String(searchParams.get('q') || '').trim()
     const page = Math.max(1, Number(searchParams.get('page') || 1))
@@ -71,9 +76,133 @@ export async function GET(req: Request) {
       page_size: pageSize,
     })
   } catch (error) {
-    return noStoreJson(
-      { error: error instanceof Error ? error.message : 'Server error' },
-      { status: error instanceof Error && error.message === 'Unauthorized' ? 401 : 500 }
-    )
+    return unauthorizedOr500(error)
+  }
+}
+
+export async function PATCH(req: Request) {
+  try {
+    requireAdminSession()
+
+    const supabase = getSupabase()
+    const body = await req.json()
+
+    const orderNo = String(body?.order_no || '').trim()
+    if (!orderNo) {
+      return noStoreJson({ error: 'Missing order_no' }, { status: 400 })
+    }
+
+    const patch = {
+      username: String(body?.username || '').trim() || null,
+      email: String(body?.email || '').trim() || null,
+      payment_network: String(body?.payment_network || '').trim() || null,
+      tx_hash: String(body?.tx_hash || '').trim() || null,
+      public_note: String(body?.public_note || '').trim() || null,
+      admin_note: String(body?.admin_note || '').trim() || null,
+      updated_at: new Date().toISOString(),
+    }
+
+    const { data, error } = await supabase
+      .from('orders')
+      .update(patch)
+      .eq('order_no', orderNo)
+      .select(
+        'id, order_no, username, email, product_type, duration, stars_amount, amount, price_usd, payment_network, tx_hash, proof_image_base64, status, public_note, admin_note, created_at, updated_at'
+      )
+      .single()
+
+    if (error) {
+      return noStoreJson({ error: error.message }, { status: 500 })
+    }
+
+    return noStoreJson({
+      success: true,
+      item: data,
+    })
+  } catch (error) {
+    return unauthorizedOr500(error)
+  }
+}
+
+export async function POST(req: Request) {
+  try {
+    requireAdminSession()
+
+    const supabase = getSupabase()
+    const body = await req.json()
+
+    const orderNo = String(body?.order_no || '').trim()
+    const action = String(body?.action || '').trim()
+
+    if (!orderNo) {
+      return noStoreJson({ error: 'Missing order_no' }, { status: 400 })
+    }
+
+    let patch: Record<string, any> = {
+      updated_at: new Date().toISOString(),
+    }
+
+    if (action === 'completed') {
+      patch.status = 'completed'
+      patch.public_note =
+        String(body?.public_note || '').trim() || 'Completed'
+    } else if (action === 'restore_paid') {
+      patch.status = 'paid'
+      patch.public_note =
+        String(body?.public_note || '').trim() || 'Payment restored'
+    } else if (action === 'cancelled') {
+      patch.status = 'cancelled'
+      patch.public_note =
+        String(body?.public_note || '').trim() || 'Order cancelled'
+    } else {
+      return noStoreJson({ error: 'Unsupported action' }, { status: 400 })
+    }
+
+    const { data, error } = await supabase
+      .from('orders')
+      .update(patch)
+      .eq('order_no', orderNo)
+      .select(
+        'id, order_no, username, email, product_type, duration, stars_amount, amount, price_usd, payment_network, tx_hash, proof_image_base64, status, public_note, admin_note, created_at, updated_at'
+      )
+      .single()
+
+    if (error) {
+      return noStoreJson({ error: error.message }, { status: 500 })
+    }
+
+    return noStoreJson({
+      success: true,
+      item: data,
+    })
+  } catch (error) {
+    return unauthorizedOr500(error)
+  }
+}
+
+export async function DELETE(req: Request) {
+  try {
+    requireAdminSession()
+
+    const supabase = getSupabase()
+    const body = await req.json()
+    const orderNo = String(body?.order_no || '').trim()
+
+    if (!orderNo) {
+      return noStoreJson({ error: 'Missing order_no' }, { status: 400 })
+    }
+
+    const { error } = await supabase.from('orders').delete().eq('order_no', orderNo)
+
+    if (error) {
+      return noStoreJson({ error: error.message }, { status: 500 })
+    }
+
+    return noStoreJson({
+      success: true,
+      order_no: orderNo,
+    })
+  } catch (error) {
+    return unauthorizedOr500(error)
   }
 }
