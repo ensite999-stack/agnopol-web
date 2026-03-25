@@ -19,23 +19,31 @@ const themeInitScript = `
 (function () {
   try {
     var root = document.documentElement;
-    var dark = false;
+    var savedMode = null;
 
     try {
-      if (window.matchMedia) {
-        dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      } else {
-        var hour = new Date().getHours();
-        dark = hour < 7 || hour >= 19;
-      }
+      savedMode = localStorage.getItem('agnopol-theme-mode');
+    } catch (e) {}
+
+    var systemDark = false;
+    try {
+      systemDark = !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
     } catch (e) {
-      var h = new Date().getHours();
-      dark = h < 7 || h >= 19;
+      systemDark = false;
     }
 
-    var theme = dark ? 'dark' : 'light';
+    var mode = savedMode === 'light' || savedMode === 'dark' || savedMode === 'auto'
+      ? savedMode
+      : 'auto';
+
+    var theme = mode === 'light'
+      ? 'light'
+      : mode === 'dark'
+        ? 'dark'
+        : (systemDark ? 'dark' : 'light');
+
+    root.dataset.themeMode = mode;
     root.dataset.theme = theme;
-    root.dataset.themeMode = 'auto';
     root.style.colorScheme = theme;
   } catch (e) {}
 })();
@@ -48,6 +56,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <meta name="color-scheme" content="light dark" />
+      </head>
       <body>
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
         <LanguageProvider>
