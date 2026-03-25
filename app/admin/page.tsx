@@ -4,7 +4,6 @@ import { Suspense, useCallback, useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useI18n } from '../../components/language-provider'
 import LanguageSwitcher from '../../components/language-switcher'
-import ThemeToggle from '../../components/theme-toggle'
 
 const API = {
   session: '/api/admin/session',
@@ -1295,6 +1294,7 @@ function AdminPageInner() {
       <main className="admin-shell">
         <div className="admin-panel small-panel">
           <div className="loading-card">{text.checking}</div>
+          <style jsx global>{globalThemeStyles}</style>
           <style jsx>{styles}</style>
         </div>
       </main>
@@ -1320,8 +1320,6 @@ function AdminPageInner() {
                 {text.logout}
               </button>
             </div>
-
-            <ThemeToggle size="hero" fullWidth />
           </div>
         </section>
 
@@ -1767,6 +1765,7 @@ function AdminPageInner() {
         </div>
       ) : null}
 
+      <style jsx global>{globalThemeStyles}</style>
       <style jsx>{styles}</style>
     </main>
   )
@@ -1778,6 +1777,8 @@ function PageFallback() {
       <div className="admin-panel small-panel">
         <div className="loading-card">Loading...</div>
       </div>
+      <style jsx global>{globalThemeStyles}</style>
+      <style jsx>{styles}</style>
     </main>
   )
 }
@@ -1789,6 +1790,51 @@ export default function AdminPage() {
     </Suspense>
   )
 }
+
+const globalThemeStyles = `
+  :root {
+    --bg-main: linear-gradient(180deg, #f7f8fb 0%, #eef2f8 100%);
+    --bg-card: rgba(255, 255, 255, 0.92);
+    --bg-card-soft: rgba(255, 255, 255, 0.88);
+    --bg-input: #ffffff;
+    --bg-muted: rgba(15, 23, 42, 0.035);
+    --text-main: #111827;
+    --text-strong: #0f172a;
+    --text-soft: #64748b;
+    --border-soft: rgba(15, 23, 42, 0.08);
+    --shadow-soft: 0 18px 50px rgba(15, 23, 42, 0.06);
+    --brand: #071b57;
+    --brand-contrast: #ffffff;
+  }
+
+  html[data-theme='dark'] {
+    --bg-main: linear-gradient(180deg, #07111f 0%, #0b1324 100%);
+    --bg-card: rgba(15, 23, 42, 0.86);
+    --bg-card-soft: rgba(15, 23, 42, 0.82);
+    --bg-input: rgba(15, 23, 42, 0.92);
+    --bg-muted: rgba(255, 255, 255, 0.04);
+    --text-main: #e5e7eb;
+    --text-strong: #f8fafc;
+    --text-soft: #94a3b8;
+    --border-soft: rgba(255, 255, 255, 0.08);
+    --shadow-soft: 0 18px 50px rgba(0, 0, 0, 0.28);
+    --brand: #1d4ed8;
+    --brand-contrast: #ffffff;
+  }
+
+  html,
+  body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg-main);
+    color: var(--text-main);
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+`
 
 const styles = `
   .admin-shell {
@@ -1852,8 +1898,7 @@ const styles = `
   .hero-actions-wrap {
     width: 100%;
     max-width: 620px;
-    display: grid;
-    gap: 12px;
+    display: block;
   }
 
   .hero-actions-row {
