@@ -34,17 +34,6 @@ function getSystemTheme(): EffectiveTheme {
   }
 }
 
-function resolveAutoTheme(): EffectiveTheme {
-  if (typeof document !== 'undefined') {
-    const current = document.documentElement.dataset.theme
-    if (current === 'light' || current === 'dark') {
-      return current
-    }
-  }
-
-  return getSystemTheme()
-}
-
 function applyTheme(theme: EffectiveTheme) {
   const root = document.documentElement
   root.dataset.theme = theme
@@ -53,10 +42,7 @@ function applyTheme(theme: EffectiveTheme) {
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [effectiveTheme, setEffectiveTheme] = useState<EffectiveTheme>(() => {
-    if (typeof window === 'undefined') return 'light'
-    return resolveAutoTheme()
-  })
+  const [effectiveTheme, setEffectiveTheme] = useState<EffectiveTheme>('light')
 
   useEffect(() => {
     if (typeof window === 'undefined') return
