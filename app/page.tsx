@@ -319,6 +319,58 @@ const NAV_UI: Record<string, { preparing: string; redirecting: string }> = {
   'zh-tw': { preparing: '正在準備訂單...', redirecting: '正在跳轉支付頁' },
 }
 
+const HOME_FORM_ERRORS: Record<string, { username: string; email: string; emailInvalid: string }> = {
+  de: {
+    username: 'Bitte geben Sie Ihren Telegram-Benutzernamen ein.',
+    email: 'Bitte geben Sie Ihre E-Mail-Adresse ein.',
+    emailInvalid: 'Bitte geben Sie eine gültige E-Mail-Adresse ein.',
+  },
+  en: {
+    username: 'Please enter your Telegram username.',
+    email: 'Please enter your email address.',
+    emailInvalid: 'Please enter a valid email address.',
+  },
+  es: {
+    username: 'Por favor, introduzca su nombre de usuario de Telegram.',
+    email: 'Por favor, introduzca su correo electrónico.',
+    emailInvalid: 'Por favor, introduzca un correo electrónico válido.',
+  },
+  fr: {
+    username: "Veuillez saisir votre nom d'utilisateur Telegram.",
+    email: 'Veuillez saisir votre e-mail.',
+    emailInvalid: 'Veuillez saisir une adresse e-mail valide.',
+  },
+  ja: {
+    username: 'Telegramユーザー名を入力してください。',
+    email: 'メールアドレスを入力してください。',
+    emailInvalid: '有効なメールアドレスを入力してください。',
+  },
+  ko: {
+    username: 'Telegram 사용자명을 입력하세요.',
+    email: '이메일을 입력하세요.',
+    emailInvalid: '올바른 이메일 주소를 입력하세요.',
+  },
+  'zh-cn': {
+    username: '请输入 TG 用户名。',
+    email: '请输入邮箱地址。',
+    emailInvalid: '请输入有效的邮箱地址。',
+  },
+  'zh-tw': {
+    username: '請輸入 TG 用戶名。',
+    email: '請輸入電子郵件地址。',
+    emailInvalid: '請輸入有效的電子郵件地址。',
+  },
+}
+
+function isValidEmail(value: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
+}
+
+function getHomeFormError(lang: string, key: 'username' | 'email' | 'emailInvalid') {
+  const messages = HOME_FORM_ERRORS[lang] || HOME_FORM_ERRORS.en
+  return messages[key]
+}
+
 function formatBostonTime(value: string | null) {
   if (!value) return '-'
   try {
@@ -567,6 +619,7 @@ function HomePageInner() {
   const [configError, setConfigError] = useState('')
   const [configLoading, setConfigLoading] = useState(true)
   const [routingToPay, setRoutingToPay] = useState(false)
+  const [formError, setFormError] = useState('')
 
   const startYear = 2026
   const currentYear = new Date().getFullYear()
@@ -647,10 +700,30 @@ function HomePageInner() {
   }, [tab, duration, safeStars, t])
 
   function goPay() {
+    const trimmedUsername = username.trim()
+    const trimmedEmail = email.trim().toLowerCase()
+
+    if (!trimmedUsername) {
+      setFormError(getHomeFormError(lang, 'username'))
+      return
+    }
+
+    if (!trimmedEmail) {
+      setFormError(getHomeFormError(lang, 'email'))
+      return
+    }
+
+    if (!isValidEmail(trimmedEmail)) {
+      setFormError(getHomeFormError(lang, 'emailInvalid'))
+      return
+    }
+
+    setFormError('')
+
     const params = new URLSearchParams()
     params.set('lang', lang)
-    params.set('username', username.trim())
-    params.set('email', email.trim())
+    params.set('username', trimmedUsername)
+    params.set('email', trimmedEmail)
     params.set('price_usd', String(selectedPrice))
 
     if (tab === 'premium') {
@@ -757,20 +830,37 @@ function HomePageInner() {
         <div className="form-stack">
           <input
             value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            onChange={(e) => {
+              setUsername(e.target.value)
+              if (formError) setFormError('')
+            }}
             placeholder={t.home.usernamePlaceholder}
             className="input"
+            autoComplete="off"
           />
 
           <input
+            type="email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => {
+              setEmail(e.target.value)
+              if (formError) setFormError('')
+            }}
             placeholder={t.home.emailPlaceholder}
             className="input"
+            autoComplete="email"
+            inputMode="email"
           />
 
-          <button onClick={goPay} className="btn-primary">
-            {t.home.createOrder}
+          {formError ? <div className="status-box-error">{formError}</div> : null}
+
+          <button
+            onClick={goPay}
+            className="btn-primary"
+            disabled={routingToPay}
+            style={{ opacity: routingToPay ? 0.8 : 1 }}
+          >
+            {routingToPay ? navUi.redirecting : t.home.createOrder}
           </button>
         </div>
 
