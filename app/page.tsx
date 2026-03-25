@@ -3,7 +3,7 @@
 import { Suspense, useEffect, useMemo, useState, type ChangeEvent } from 'react'
 import { useI18n } from '../components/language-provider'
 import LanguageSwitcher from '../components/language-switcher'
-import ThemeSwitcher from '../components/theme-switcher'
+import ThemeToggle from '../components/theme-toggle'
 import { withLang } from '../lib/i18n'
 
 type ProductType = 'premium' | 'stars'
@@ -753,7 +753,7 @@ function HomePageInner() {
           </div>
 
           <div className="hero-mode hero-step hero-step-4">
-            <ThemeSwitcher />
+            <ThemeToggle />
           </div>
         </section>
 
@@ -774,26 +774,33 @@ function HomePageInner() {
           </button>
         </div>
 
-        {configError ? (
-          <div className="status-box-error page-error-box">{configError}</div>
-        ) : null}
+        {configError ? <div className="status-box-error page-error-box">{configError}</div> : null}
 
         {tab === 'premium' ? (
           <>
             <p className="section-caption">{t.home.premiumPlans}</p>
 
             <div className="plan-grid">
-              <div className={`card plan-card ${duration === '3m' ? 'active' : ''}`} onClick={() => setDuration('3m')}>
+              <div
+                className={`card plan-card ${duration === '3m' ? 'active' : ''}`}
+                onClick={() => setDuration('3m')}
+              >
                 <div className="plan-title">{t.home.months3}</div>
                 <div className="plan-price">${Number(config.premium_3m_price)}</div>
               </div>
 
-              <div className={`card plan-card ${duration === '6m' ? 'active' : ''}`} onClick={() => setDuration('6m')}>
+              <div
+                className={`card plan-card ${duration === '6m' ? 'active' : ''}`}
+                onClick={() => setDuration('6m')}
+              >
                 <div className="plan-title">{t.home.months6}</div>
                 <div className="plan-price">${Number(config.premium_6m_price)}</div>
               </div>
 
-              <div className={`card plan-card ${duration === '12m' ? 'active' : ''}`} onClick={() => setDuration('12m')}>
+              <div
+                className={`card plan-card ${duration === '12m' ? 'active' : ''}`}
+                onClick={() => setDuration('12m')}
+              >
                 <div className="plan-title">{t.home.months12}</div>
                 <div className="plan-price">${Number(config.premium_12m_price)}</div>
               </div>
@@ -827,9 +834,7 @@ function HomePageInner() {
           <div className="summary-title">{selectedTitle}</div>
           <div className="summary-price">${selectedPrice}</div>
 
-          {configLoading ? (
-            <div className="small-muted summary-loading">{t.common.loading}</div>
-          ) : null}
+          {configLoading ? <div className="small-muted summary-loading">{t.common.loading}</div> : null}
         </div>
 
         <div className="form-stack">
@@ -900,107 +905,34 @@ function HomePageInner() {
       ) : null}
 
       <style jsx global>{`
-        :root {
-          --bg-main: linear-gradient(180deg, #f7f8fb 0%, #eef2f8 100%);
-          --bg-card: rgba(255, 255, 255, 0.92);
-          --bg-card-soft: rgba(255, 255, 255, 0.88);
-          --bg-input: #ffffff;
-          --bg-muted: rgba(15, 23, 42, 0.035);
-          --text-main: #111827;
-          --text-strong: #0f172a;
-          --text-soft: #64748b;
-          --border-soft: rgba(15, 23, 42, 0.08);
-          --shadow-soft: 0 18px 50px rgba(15, 23, 42, 0.06);
-          --brand: #071b57;
-          --brand-contrast: #ffffff;
-        }
-
-        html[data-theme='dark'] {
-          --bg-main: linear-gradient(180deg, #07111f 0%, #0b1324 100%);
-          --bg-card: rgba(15, 23, 42, 0.86);
-          --bg-card-soft: rgba(15, 23, 42, 0.82);
-          --bg-input: rgba(15, 23, 42, 0.92);
-          --bg-muted: rgba(255, 255, 255, 0.04);
-          --text-main: #e5e7eb;
-          --text-strong: #f8fafc;
-          --text-soft: #94a3b8;
-          --border-soft: rgba(255, 255, 255, 0.08);
-          --shadow-soft: 0 18px 50px rgba(0, 0, 0, 0.28);
-          --brand: #1d4ed8;
-          --brand-contrast: #ffffff;
-        }
-
-        * {
-          box-sizing: border-box;
-        }
-
-        html,
-        body {
-          margin: 0;
-          padding: 0;
-          background: var(--bg-main);
-          color: var(--text-main);
-          font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-        }
-
-        .site-shell {
-          min-height: 100vh;
-          background: var(--bg-main);
-          padding: 18px 12px 36px;
-        }
-
         .site-container {
-          max-width: 860px;
-          margin: 0 auto;
+          max-width: 820px;
         }
 
         .hero-center {
           text-align: center;
-          margin-bottom: 18px;
+          margin-bottom: 14px;
         }
 
         .hero-stack {
           display: flex;
           flex-direction: column;
           align-items: center;
-          gap: 6px;
-        }
-
-        .brand-title {
-          margin: 0;
-          font-size: clamp(62px, 11vw, 108px);
-          line-height: 0.95;
-          font-weight: 900;
-          color: var(--text-strong);
-          letter-spacing: -0.04em;
-        }
-
-        .brand-slogan {
-          margin: 0;
-          font-size: clamp(18px, 2.3vw, 22px);
-          color: var(--text-soft);
-        }
-
-        .hero-tools {
-          margin-top: 4px;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 6px;
+          gap: 4px;
         }
 
         .hero-stair-wrap {
           width: 100%;
+          max-width: 700px;
+          margin-left: auto;
+          margin-right: auto;
         }
 
         .hero-step {
           width: 100%;
         }
 
-        .hero-step-1 {
-          text-align: center;
-        }
-
+        .hero-step-1,
         .hero-step-2 {
           text-align: center;
         }
@@ -1011,120 +943,90 @@ function HomePageInner() {
           justify-content: center;
         }
 
-        .hero-mode {
-          margin-top: 8px;
+        .hero-tools {
+          margin-top: 2px;
         }
 
-        @media (min-width: 768px) {
-          .hero-stair-wrap {
-            max-width: 760px;
-            margin-left: auto;
-            margin-right: auto;
-          }
+        .hero-mode {
+          margin-top: 4px;
+        }
 
-          .hero-step-1 {
-            text-align: left;
-          }
+        .brand-title {
+          margin: 0;
+          font-size: clamp(48px, 9vw, 86px);
+          line-height: 0.95;
+          font-weight: 900;
+          color: var(--text-strong);
+          letter-spacing: -0.04em;
+        }
 
-          .hero-step-2 {
-            padding-left: 28px;
-            text-align: left;
-          }
-
-          .hero-step-3 {
-            justify-content: flex-start;
-            padding-left: 56px;
-          }
-
-          .hero-step-4 {
-            justify-content: flex-start;
-            padding-left: 92px;
-          }
+        .brand-slogan {
+          margin: 6px 0 0;
+          font-size: clamp(15px, 1.9vw, 18px);
+          color: var(--text-soft);
         }
 
         .segment-tabs {
           display: grid;
           grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: 12px;
-          margin: 18px auto 12px;
-          max-width: 760px;
+          gap: 10px;
+          margin: 14px auto 10px;
+          max-width: 700px;
         }
 
         .segment-btn {
-          min-height: 84px;
-          border-radius: 24px;
-          border: 1px solid var(--border-soft);
-          background: var(--bg-card-soft);
-          color: var(--text-main);
-          font-size: clamp(22px, 3vw, 24px);
+          min-height: 72px;
+          border-radius: 20px;
+          font-size: clamp(18px, 2.6vw, 21px);
           font-weight: 900;
-          box-shadow: var(--shadow-soft);
-          transition: all 0.16s ease;
-        }
-
-        .segment-btn.active {
-          background: var(--brand);
-          color: var(--brand-contrast);
         }
 
         .page-error-box {
-          max-width: 760px;
-          margin: 0 auto 14px;
+          max-width: 700px;
+          margin: 0 auto 12px;
         }
 
         .section-caption {
           text-align: center;
           color: var(--text-soft);
-          font-size: clamp(18px, 2.6vw, 26px);
-          margin: 18px 0 16px;
+          font-size: clamp(16px, 2.2vw, 22px);
+          margin: 14px 0 12px;
         }
 
         .plan-grid {
           display: grid;
-          gap: 22px;
-          max-width: 760px;
+          gap: 16px;
+          max-width: 700px;
           margin: 0 auto;
         }
 
-        .card,
-        .card-soft {
-          border-radius: 28px;
-          background: var(--bg-card);
-          border: 1px solid var(--border-soft);
-          box-shadow: var(--shadow-soft);
-        }
-
         .plan-card {
-          padding: 30px 24px;
+          padding: 22px 20px;
+          border-radius: 22px;
           cursor: pointer;
           transition: all 0.16s ease;
         }
 
-        .plan-card.active {
-          background: var(--brand);
-          color: var(--brand-contrast);
-        }
-
         .plan-title {
-          font-size: clamp(24px, 3.4vw, 32px);
+          font-size: clamp(20px, 2.8vw, 28px);
           font-weight: 900;
         }
 
         .plan-price {
-          margin-top: 18px;
-          font-size: clamp(34px, 5vw, 52px);
+          margin-top: 14px;
+          font-size: clamp(30px, 4.6vw, 44px);
           font-weight: 900;
           line-height: 1;
         }
 
         .single-box {
-          max-width: 760px;
+          max-width: 700px;
           margin: 0 auto;
-          padding: 22px;
+          padding: 20px;
         }
 
         .field-title {
-          font-size: 18px;
+          font-size: 16px;
           font-weight: 900;
           margin-bottom: 10px;
           color: var(--text-strong);
@@ -1133,14 +1035,14 @@ function HomePageInner() {
         .field-hint {
           margin-top: 8px;
           color: var(--text-soft);
-          font-size: 13px;
+          font-size: 12px;
           line-height: 1.6;
         }
 
         .summary-box {
-          max-width: 760px;
-          margin: 22px auto 0;
-          padding: 26px 24px;
+          max-width: 700px;
+          margin: 18px auto 0;
+          padding: 20px 20px;
         }
 
         .summary-label {
@@ -1148,14 +1050,14 @@ function HomePageInner() {
         }
 
         .summary-title {
-          font-size: clamp(20px, 3vw, 28px);
+          font-size: clamp(18px, 2.5vw, 24px);
           font-weight: 900;
           color: var(--text-strong);
         }
 
         .summary-price {
-          margin-top: 10px;
-          font-size: clamp(48px, 8vw, 66px);
+          margin-top: 8px;
+          font-size: clamp(38px, 6vw, 56px);
           font-weight: 900;
           line-height: 1;
           color: var(--text-strong);
@@ -1166,21 +1068,21 @@ function HomePageInner() {
         }
 
         .form-stack {
-          max-width: 760px;
-          margin: 18px auto 0;
+          max-width: 700px;
+          margin: 14px auto 0;
           display: grid;
-          gap: 14px;
+          gap: 12px;
         }
 
         .input {
           width: 100%;
-          min-height: 62px;
-          border-radius: 22px;
+          min-height: 56px;
+          border-radius: 18px;
           border: 1px solid var(--border-soft);
           background: var(--bg-input);
           color: var(--text-main);
-          padding: 0 20px;
-          font-size: 18px;
+          padding: 0 18px;
+          font-size: 16px;
           outline: none;
           transition: border-color 0.16s ease, box-shadow 0.16s ease;
         }
@@ -1193,39 +1095,26 @@ function HomePageInner() {
         .btn-primary,
         .btn-secondary {
           width: 100%;
-          min-height: 62px;
-          border-radius: 22px;
-          font-size: 20px;
+          min-height: 56px;
+          border-radius: 18px;
+          font-size: 18px;
           font-weight: 900;
           transition: all 0.16s ease;
         }
 
-        .btn-primary {
-          border: none;
-          background: var(--brand);
-          color: var(--brand-contrast);
-          box-shadow: 0 18px 32px rgba(7, 27, 87, 0.2);
-        }
-
-        .btn-secondary {
-          border: 1px solid var(--border-soft);
-          background: var(--bg-card-soft);
-          color: var(--text-main);
-        }
-
         .lookup-section {
-          margin-top: 30px;
+          margin-top: 26px;
         }
 
         .lookup-wrap {
-          max-width: 760px;
+          max-width: 700px;
           margin: 0 auto;
           width: 100%;
-          padding: 20px;
+          padding: 18px;
         }
 
         .lookup-title {
-          font-size: clamp(22px, 3vw, 28px);
+          font-size: clamp(20px, 3vw, 26px);
           font-weight: 900;
           color: var(--text-strong);
           margin-bottom: 6px;
@@ -1247,8 +1136,8 @@ function HomePageInner() {
         }
 
         .lookup-item-card {
-          padding: 16px;
-          border-radius: 20px;
+          padding: 15px;
+          border-radius: 18px;
           background: var(--bg-muted);
           border: 1px solid var(--border-soft);
           display: grid;
@@ -1281,60 +1170,12 @@ function HomePageInner() {
           gap: 10px;
         }
 
-        .small-muted {
-          color: var(--text-soft);
-        }
-
-        .status-box-success,
-        .status-box-error {
-          margin-top: 12px;
-          border-radius: 16px;
-          padding: 12px 14px;
-          font-size: 14px;
-          line-height: 1.6;
-          font-weight: 700;
-        }
-
-        .status-box-success {
-          background: rgba(22, 163, 74, 0.12);
-          color: #166534;
-          border: 1px solid rgba(34, 197, 94, 0.2);
-        }
-
-        .status-box-error {
-          background: rgba(220, 38, 38, 0.1);
-          color: #b91c1c;
-          border: 1px solid rgba(239, 68, 68, 0.2);
-        }
-
-        .footer {
-          max-width: 760px;
-          margin: 34px auto 0;
-          text-align: center;
-          color: var(--text-soft);
-          font-size: 14px;
-          line-height: 1.8;
-        }
-
         .footer-email {
           margin-top: 4px;
         }
 
         .footer-email-label {
           margin-right: 6px;
-        }
-
-        .footer-links {
-          margin-top: 10px;
-          display: flex;
-          justify-content: center;
-          gap: 14px;
-          flex-wrap: wrap;
-        }
-
-        .footer a {
-          color: inherit;
-          text-decoration: none;
         }
 
         .route-overlay {
@@ -1382,6 +1223,57 @@ function HomePageInner() {
           color: var(--text-soft);
         }
 
+        @media (min-width: 768px) {
+          .hero-step-1 {
+            text-align: left;
+          }
+
+          .hero-step-2 {
+            padding-left: 20px;
+            text-align: left;
+          }
+
+          .hero-step-3 {
+            justify-content: flex-start;
+            padding-left: 40px;
+          }
+
+          .hero-step-4 {
+            justify-content: flex-start;
+            padding-left: 64px;
+          }
+        }
+
+        @media (max-width: 640px) {
+          .site-shell {
+            padding: 16px 12px 28px;
+          }
+
+          .segment-btn {
+            min-height: 66px;
+            font-size: 17px;
+          }
+
+          .plan-card {
+            padding: 20px 18px;
+          }
+
+          .input,
+          .btn-primary,
+          .btn-secondary {
+            min-height: 54px;
+            font-size: 17px;
+          }
+
+          .summary-box {
+            padding: 18px;
+          }
+
+          .lookup-wrap {
+            padding: 16px;
+          }
+        }
+
         @keyframes spin {
           to {
             transform: rotate(360deg);
@@ -1394,40 +1286,6 @@ function HomePageInner() {
           }
           to {
             opacity: 1;
-          }
-        }
-
-        @media (max-width: 640px) {
-          .site-shell {
-            padding: 18px 12px 30px;
-          }
-
-          .segment-btn {
-            min-height: 72px;
-            font-size: 18px;
-          }
-
-          .plan-card {
-            padding: 24px 20px;
-          }
-
-          .input,
-          .btn-primary,
-          .btn-secondary {
-            min-height: 58px;
-            font-size: 18px;
-          }
-
-          .summary-box {
-            padding: 22px 20px;
-          }
-
-          .lookup-wrap {
-            padding: 16px;
-          }
-
-          .footer-links {
-            gap: 10px;
           }
         }
       `}</style>
