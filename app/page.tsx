@@ -3,7 +3,6 @@
 import { Suspense, useEffect, useMemo, useState, type ChangeEvent } from 'react'
 import { useI18n } from '../components/language-provider'
 import LanguageSwitcher from '../components/language-switcher'
-import ThemeToggle from '../components/theme-toggle'
 import { withLang } from '../lib/i18n'
 
 type ProductType = 'premium' | 'stars'
@@ -402,15 +401,6 @@ function OrderLookupSection() {
     }
   }
 
-  function handleOpenResubmit(orderNo: string) {
-    setActiveOrderNo(orderNo)
-    setResubmitHash('')
-    setResubmitProofName('')
-    setResubmitProofBase64('')
-    setResubmitMessage('')
-    setResubmitError('')
-  }
-
   function handleResubmitFileChange(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0]
     if (!file) return
@@ -463,41 +453,18 @@ function OrderLookupSection() {
   }
 
   return (
-    <section
-      className="card-soft"
-      style={{
-        maxWidth: 760,
-        margin: '0 auto',
-        width: '100%',
-        minWidth: 0,
-        boxSizing: 'border-box',
-        overflow: 'hidden',
-      }}
-    >
-      <div
-        style={{
-          fontSize: 'clamp(18px, 2.2vw, 22px)',
-          fontWeight: 800,
-          color: 'var(--text-strong)',
-          marginBottom: 6,
-        }}
-      >
-        {ui.title}
-      </div>
-
-      <div className="small-muted" style={{ marginBottom: 12 }}>
-        {ui.subtitle}
-      </div>
+    <section className="card-soft lookup-wrap">
+      <div className="lookup-title">{ui.title}</div>
+      <div className="small-muted lookup-subtitle">{ui.subtitle}</div>
 
       <input
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         placeholder={ui.placeholder}
         className="input"
-        style={{ width: '100%', minWidth: 0, boxSizing: 'border-box' }}
       />
 
-      <button onClick={handleLookup} className="btn-primary" style={{ marginTop: 12, width: '100%' }}>
+      <button onClick={handleLookup} className="btn-primary lookup-btn">
         {loading ? ui.loading : ui.button}
       </button>
 
@@ -506,78 +473,29 @@ function OrderLookupSection() {
       {resubmitError ? <div className="status-box-error">{resubmitError}</div> : null}
 
       {results.length > 0 ? (
-        <div style={{ marginTop: 14, display: 'grid', gap: 12 }}>
+        <div className="lookup-result-grid">
           {results.map((item) => {
             const allowResubmit =
               Boolean(item.public_note) && String(item.status || '').toLowerCase() !== 'completed'
 
             return (
-              <div
-                key={item.order_no}
-                style={{
-                  padding: 16,
-                  borderRadius: 16,
-                  background: 'var(--bg-muted)',
-                  border: '1px solid var(--border-soft)',
-                  display: 'grid',
-                  gap: 8,
-                  width: '100%',
-                  minWidth: 0,
-                  boxSizing: 'border-box',
-                  overflow: 'hidden',
-                }}
-              >
-                <div style={{ wordBreak: 'break-word' }}>
-                  <strong>{ui.orderNo}:</strong> {item.order_no}
-                </div>
-                <div style={{ wordBreak: 'break-word' }}>
-                  <strong>{ui.email}:</strong> {email}
-                </div>
-                <div>
-                  <strong>{ui.status}:</strong> {getStatusLabel(item.status)}
-                </div>
-                <div style={{ wordBreak: 'break-word' }}>
-                  <strong>{ui.product}:</strong> {getProductLabel(item)}
-                </div>
-                <div>
-                  <strong>{ui.amount}:</strong> ${item.price_usd ?? item.amount ?? 0}
-                </div>
-                <div style={{ wordBreak: 'break-word' }}>
-                  <strong>{ui.network}:</strong> {item.payment_network || '-'}
-                </div>
-                <div style={{ wordBreak: 'break-word' }}>
-                  <strong>{ui.createdAt}:</strong> {formatBostonTime(item.created_at)}
-                </div>
+              <div key={item.order_no} className="lookup-item-card">
+                <div><strong>{ui.orderNo}:</strong> {item.order_no}</div>
+                <div><strong>{ui.email}:</strong> {email}</div>
+                <div><strong>{ui.status}:</strong> {getStatusLabel(item.status)}</div>
+                <div><strong>{ui.product}:</strong> {getProductLabel(item)}</div>
+                <div><strong>{ui.amount}:</strong> ${item.price_usd ?? item.amount ?? 0}</div>
+                <div><strong>{ui.network}:</strong> {item.payment_network || '-'}</div>
+                <div><strong>{ui.createdAt}:</strong> {formatBostonTime(item.created_at)}</div>
 
                 {item.tx_hash ? (
-                  <div
-                    style={{
-                      wordBreak: 'break-all',
-                      overflowWrap: 'anywhere',
-                      whiteSpace: 'pre-wrap',
-                      width: '100%',
-                      minWidth: 0,
-                    }}
-                  >
+                  <div className="lookup-break-all">
                     <strong>{ui.txHash}:</strong> {item.tx_hash}
                   </div>
                 ) : null}
 
                 {item.public_note ? (
-                  <div
-                    style={{
-                      padding: 12,
-                      borderRadius: 12,
-                      background: 'rgba(255, 236, 179, 0.45)',
-                      border: '1px solid rgba(245, 158, 11, 0.25)',
-                      color: '#7c2d12',
-                      lineHeight: 1.7,
-                      width: '100%',
-                      minWidth: 0,
-                      boxSizing: 'border-box',
-                      wordBreak: 'break-word',
-                    }}
-                  >
+                  <div className="lookup-note-box">
                     <strong>{ui.note}:</strong> {item.public_note}
                   </div>
                 ) : null}
@@ -586,41 +504,25 @@ function OrderLookupSection() {
                   <>
                     <button
                       type="button"
-                      className="btn-secondary"
-                      onClick={() => handleOpenResubmit(item.order_no)}
-                      style={{ width: '100%' }}
+                      className="btn-secondary lookup-btn"
+                      onClick={() => {
+                        setActiveOrderNo(item.order_no)
+                        setResubmitHash('')
+                        setResubmitProofName('')
+                        setResubmitProofBase64('')
+                        setResubmitMessage('')
+                        setResubmitError('')
+                      }}
                     >
                       {ui.resubmit}
                     </button>
 
                     {activeOrderNo === item.order_no ? (
-                      <div
-                        style={{
-                          marginTop: 6,
-                          padding: 12,
-                          borderRadius: 14,
-                          border: '1px dashed var(--border-soft)',
-                          background: 'var(--bg-card-soft)',
-                          display: 'grid',
-                          gap: 10,
-                          width: '100%',
-                          minWidth: 0,
-                          boxSizing: 'border-box',
-                          overflow: 'hidden',
-                        }}
-                      >
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={handleResubmitFileChange}
-                          style={{ width: '100%', minWidth: 0, boxSizing: 'border-box', maxWidth: '100%' }}
-                        />
+                      <div className="lookup-resubmit-box">
+                        <input type="file" accept="image/*" onChange={handleResubmitFileChange} />
 
                         {resubmitProofName ? (
-                          <div
-                            className="small-muted"
-                            style={{ width: '100%', minWidth: 0, wordBreak: 'break-all', overflowWrap: 'anywhere' }}
-                          >
+                          <div className="small-muted lookup-break-all">
                             {ui.proofReady} {resubmitProofName}
                           </div>
                         ) : null}
@@ -630,14 +532,12 @@ function OrderLookupSection() {
                           onChange={(e) => setResubmitHash(e.target.value)}
                           placeholder={ui.hashPlaceholder}
                           className="input"
-                          style={{ width: '100%', minWidth: 0, boxSizing: 'border-box' }}
                         />
 
                         <button
                           type="button"
-                          className="btn-primary"
+                          className="btn-primary lookup-btn"
                           onClick={() => handleResubmit(item.order_no)}
-                          style={{ width: '100%' }}
                         >
                           {resubmitLoading ? ui.resubmitting : ui.resubmitButton}
                         </button>
@@ -776,7 +676,6 @@ function HomePageInner() {
 
           <div className="hero-tools">
             <LanguageSwitcher size="compact" />
-            <ThemeToggle size="compact" />
           </div>
         </section>
 
@@ -798,9 +697,7 @@ function HomePageInner() {
         </div>
 
         {configError ? (
-          <div className="status-box-error" style={{ maxWidth: 760, margin: '0 auto 14px' }}>
-            {configError}
-          </div>
+          <div className="status-box-error page-error-box">{configError}</div>
         ) : null}
 
         {tab === 'premium' ? (
@@ -809,24 +706,18 @@ function HomePageInner() {
 
             <div className="plan-grid">
               <div className={`card plan-card ${duration === '3m' ? 'active' : ''}`} onClick={() => setDuration('3m')}>
-                <div style={{ fontSize: 18, fontWeight: 800 }}>{t.home.months3}</div>
-                <div style={{ marginTop: 10, fontSize: 22, fontWeight: 900 }}>
-                  ${Number(config.premium_3m_price)}
-                </div>
+                <div className="plan-title">{t.home.months3}</div>
+                <div className="plan-price">${Number(config.premium_3m_price)}</div>
               </div>
 
               <div className={`card plan-card ${duration === '6m' ? 'active' : ''}`} onClick={() => setDuration('6m')}>
-                <div style={{ fontSize: 18, fontWeight: 800 }}>{t.home.months6}</div>
-                <div style={{ marginTop: 10, fontSize: 22, fontWeight: 900 }}>
-                  ${Number(config.premium_6m_price)}
-                </div>
+                <div className="plan-title">{t.home.months6}</div>
+                <div className="plan-price">${Number(config.premium_6m_price)}</div>
               </div>
 
               <div className={`card plan-card ${duration === '12m' ? 'active' : ''}`} onClick={() => setDuration('12m')}>
-                <div style={{ fontSize: 18, fontWeight: 800 }}>{t.home.months12}</div>
-                <div style={{ marginTop: 10, fontSize: 22, fontWeight: 900 }}>
-                  ${Number(config.premium_12m_price)}
-                </div>
+                <div className="plan-title">{t.home.months12}</div>
+                <div className="plan-price">${Number(config.premium_12m_price)}</div>
               </div>
             </div>
           </>
@@ -834,10 +725,8 @@ function HomePageInner() {
           <>
             <p className="section-caption">{t.home.starsPackage}</p>
 
-            <div className="card" style={{ maxWidth: 720, margin: '0 auto' }}>
-              <div style={{ fontSize: 17, fontWeight: 800, marginBottom: 10, color: 'var(--text-strong)' }}>
-                {t.home.starsAmount}
-              </div>
+            <div className="card single-box">
+              <div className="field-title">{t.home.starsAmount}</div>
 
               <input
                 type="number"
@@ -849,47 +738,19 @@ function HomePageInner() {
                 className="input"
               />
 
-              <div style={{ marginTop: 10, fontSize: 13, color: 'var(--text-soft)' }}>
-                {t.home.starsMinHint}
-              </div>
-              <div style={{ marginTop: 4, fontSize: 13, color: 'var(--text-soft)' }}>
-                {t.home.autoPriceHint}
-              </div>
+              <div className="field-hint">{t.home.starsMinHint}</div>
+              <div className="field-hint">{t.home.autoPriceHint}</div>
             </div>
           </>
         )}
 
         <div className="summary-box card-soft">
-          <div style={{ fontSize: 14, color: 'var(--text-soft)', marginBottom: 8 }}>
-            {t.home.currentSelection}
-          </div>
-
-          <div
-            style={{
-              fontSize: 'clamp(19px, 3vw, 26px)',
-              fontWeight: 800,
-              color: 'var(--text-strong)',
-            }}
-          >
-            {selectedTitle}
-          </div>
-
-          <div
-            style={{
-              marginTop: 8,
-              fontSize: 'clamp(32px, 5vw, 44px)',
-              fontWeight: 900,
-              color: 'var(--text-strong)',
-              lineHeight: 1,
-            }}
-          >
-            ${selectedPrice}
-          </div>
+          <div className="small-muted summary-label">{t.home.currentSelection}</div>
+          <div className="summary-title">{selectedTitle}</div>
+          <div className="summary-price">${selectedPrice}</div>
 
           {configLoading ? (
-            <div style={{ marginTop: 10, fontSize: 13, color: 'var(--text-soft)' }}>
-              {t.common.loading}
-            </div>
+            <div className="small-muted summary-loading">{t.common.loading}</div>
           ) : null}
         </div>
 
@@ -899,7 +760,6 @@ function HomePageInner() {
             onChange={(e) => setUsername(e.target.value)}
             placeholder={t.home.usernamePlaceholder}
             className="input"
-            style={{ marginTop: 18 }}
           />
 
           <input
@@ -907,23 +767,22 @@ function HomePageInner() {
             onChange={(e) => setEmail(e.target.value)}
             placeholder={t.home.emailPlaceholder}
             className="input"
-            style={{ marginTop: 14 }}
           />
 
-          <button onClick={goPay} className="btn-primary" style={{ marginTop: 16 }}>
+          <button onClick={goPay} className="btn-primary">
             {t.home.createOrder}
           </button>
         </div>
 
-        <div style={{ marginTop: 28 }}>
+        <div className="lookup-section">
           <OrderLookupSection />
         </div>
 
         <footer className="footer">
           <p>{copyrightText}</p>
 
-          <p style={{ marginTop: 4 }}>
-            <span style={{ marginRight: 6 }}>{t.common.officialEmail}:</span>
+          <p className="footer-email">
+            <span className="footer-email-label">{t.common.officialEmail}:</span>
             <a href="mailto:hello@agnopol.com">hello@agnopol.com</a>
           </p>
 
@@ -945,7 +804,66 @@ function HomePageInner() {
         </div>
       ) : null}
 
-      <style jsx>{`
+      <style jsx global>{`
+        :root {
+          --bg-main: linear-gradient(180deg, #f7f8fb 0%, #eef2f8 100%);
+          --bg-card: rgba(255, 255, 255, 0.92);
+          --bg-card-soft: rgba(255, 255, 255, 0.88);
+          --bg-input: #ffffff;
+          --bg-muted: rgba(15, 23, 42, 0.035);
+          --text-main: #111827;
+          --text-strong: #0f172a;
+          --text-soft: #64748b;
+          --border-soft: rgba(15, 23, 42, 0.08);
+          --shadow-soft: 0 18px 50px rgba(15, 23, 42, 0.06);
+          --brand: #071b57;
+          --brand-contrast: #ffffff;
+        }
+
+        html[data-theme='dark'] {
+          --bg-main: linear-gradient(180deg, #07111f 0%, #0b1324 100%);
+          --bg-card: rgba(15, 23, 42, 0.86);
+          --bg-card-soft: rgba(15, 23, 42, 0.82);
+          --bg-input: rgba(15, 23, 42, 0.92);
+          --bg-muted: rgba(255, 255, 255, 0.04);
+          --text-main: #e5e7eb;
+          --text-strong: #f8fafc;
+          --text-soft: #94a3b8;
+          --border-soft: rgba(255, 255, 255, 0.08);
+          --shadow-soft: 0 18px 50px rgba(0, 0, 0, 0.28);
+          --brand: #1d4ed8;
+          --brand-contrast: #ffffff;
+        }
+
+        * {
+          box-sizing: border-box;
+        }
+
+        html,
+        body {
+          margin: 0;
+          padding: 0;
+          background: var(--bg-main);
+          color: var(--text-main);
+          font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        .site-shell {
+          min-height: 100vh;
+          background: var(--bg-main);
+          padding: 18px 12px 36px;
+        }
+
+        .site-container {
+          max-width: 860px;
+          margin: 0 auto;
+        }
+
+        .hero-center {
+          text-align: center;
+          margin-bottom: 18px;
+        }
+
         .hero-stack {
           display: flex;
           flex-direction: column;
@@ -953,23 +871,322 @@ function HomePageInner() {
           gap: 6px;
         }
 
-        .hero-tools {
-          margin-top: 2px;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 8px;
-        }
-
         .brand-title {
-          margin-bottom: 0;
+          margin: 0;
+          font-size: clamp(62px, 11vw, 108px);
+          line-height: 0.95;
+          font-weight: 900;
+          color: var(--text-strong);
+          letter-spacing: -0.04em;
         }
 
         .brand-slogan {
-          margin-top: 0;
-          margin-bottom: 0;
+          margin: 0;
           font-size: clamp(18px, 2.3vw, 22px);
           color: var(--text-soft);
+        }
+
+        .hero-tools {
+          margin-top: 4px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 6px;
+        }
+
+        .segment-tabs {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 12px;
+          margin: 18px auto 12px;
+          max-width: 760px;
+        }
+
+        .segment-btn {
+          min-height: 84px;
+          border-radius: 24px;
+          border: 1px solid var(--border-soft);
+          background: var(--bg-card-soft);
+          color: var(--text-main);
+          font-size: clamp(22px, 3vw, 24px);
+          font-weight: 900;
+          box-shadow: var(--shadow-soft);
+          transition: all 0.16s ease;
+        }
+
+        .segment-btn.active {
+          background: var(--brand);
+          color: var(--brand-contrast);
+        }
+
+        .page-error-box {
+          max-width: 760px;
+          margin: 0 auto 14px;
+        }
+
+        .section-caption {
+          text-align: center;
+          color: var(--text-soft);
+          font-size: clamp(18px, 2.6vw, 26px);
+          margin: 18px 0 16px;
+        }
+
+        .plan-grid {
+          display: grid;
+          gap: 22px;
+          max-width: 760px;
+          margin: 0 auto;
+        }
+
+        .card,
+        .card-soft {
+          border-radius: 28px;
+          background: var(--bg-card);
+          border: 1px solid var(--border-soft);
+          box-shadow: var(--shadow-soft);
+        }
+
+        .plan-card {
+          padding: 30px 24px;
+          cursor: pointer;
+          transition: all 0.16s ease;
+        }
+
+        .plan-card.active {
+          background: var(--brand);
+          color: var(--brand-contrast);
+        }
+
+        .plan-title {
+          font-size: clamp(24px, 3.4vw, 32px);
+          font-weight: 900;
+        }
+
+        .plan-price {
+          margin-top: 18px;
+          font-size: clamp(34px, 5vw, 52px);
+          font-weight: 900;
+          line-height: 1;
+        }
+
+        .single-box {
+          max-width: 760px;
+          margin: 0 auto;
+          padding: 22px;
+        }
+
+        .field-title {
+          font-size: 18px;
+          font-weight: 900;
+          margin-bottom: 10px;
+          color: var(--text-strong);
+        }
+
+        .field-hint {
+          margin-top: 8px;
+          color: var(--text-soft);
+          font-size: 13px;
+          line-height: 1.6;
+        }
+
+        .summary-box {
+          max-width: 760px;
+          margin: 22px auto 0;
+          padding: 26px 24px;
+        }
+
+        .summary-label {
+          margin-bottom: 8px;
+        }
+
+        .summary-title {
+          font-size: clamp(20px, 3vw, 28px);
+          font-weight: 900;
+          color: var(--text-strong);
+        }
+
+        .summary-price {
+          margin-top: 10px;
+          font-size: clamp(48px, 8vw, 66px);
+          font-weight: 900;
+          line-height: 1;
+          color: var(--text-strong);
+        }
+
+        .summary-loading {
+          margin-top: 10px;
+        }
+
+        .form-stack {
+          max-width: 760px;
+          margin: 18px auto 0;
+          display: grid;
+          gap: 14px;
+        }
+
+        .input {
+          width: 100%;
+          min-height: 62px;
+          border-radius: 22px;
+          border: 1px solid var(--border-soft);
+          background: var(--bg-input);
+          color: var(--text-main);
+          padding: 0 20px;
+          font-size: 18px;
+          outline: none;
+          transition: border-color 0.16s ease, box-shadow 0.16s ease;
+        }
+
+        .input:focus {
+          border-color: rgba(245, 158, 11, 0.9);
+          box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.12);
+        }
+
+        .btn-primary,
+        .btn-secondary {
+          width: 100%;
+          min-height: 62px;
+          border-radius: 22px;
+          font-size: 20px;
+          font-weight: 900;
+          transition: all 0.16s ease;
+        }
+
+        .btn-primary {
+          border: none;
+          background: var(--brand);
+          color: var(--brand-contrast);
+          box-shadow: 0 18px 32px rgba(7, 27, 87, 0.2);
+        }
+
+        .btn-secondary {
+          border: 1px solid var(--border-soft);
+          background: var(--bg-card-soft);
+          color: var(--text-main);
+        }
+
+        .lookup-section {
+          margin-top: 30px;
+        }
+
+        .lookup-wrap {
+          max-width: 760px;
+          margin: 0 auto;
+          width: 100%;
+          padding: 20px;
+        }
+
+        .lookup-title {
+          font-size: clamp(22px, 3vw, 28px);
+          font-weight: 900;
+          color: var(--text-strong);
+          margin-bottom: 6px;
+        }
+
+        .lookup-subtitle {
+          margin-bottom: 12px;
+          line-height: 1.7;
+        }
+
+        .lookup-btn {
+          margin-top: 12px;
+        }
+
+        .lookup-result-grid {
+          margin-top: 14px;
+          display: grid;
+          gap: 12px;
+        }
+
+        .lookup-item-card {
+          padding: 16px;
+          border-radius: 20px;
+          background: var(--bg-muted);
+          border: 1px solid var(--border-soft);
+          display: grid;
+          gap: 8px;
+          line-height: 1.7;
+        }
+
+        .lookup-break-all {
+          word-break: break-all;
+          overflow-wrap: anywhere;
+          white-space: pre-wrap;
+        }
+
+        .lookup-note-box {
+          padding: 12px;
+          border-radius: 12px;
+          background: rgba(255, 236, 179, 0.45);
+          border: 1px solid rgba(245, 158, 11, 0.25);
+          color: #7c2d12;
+          line-height: 1.7;
+        }
+
+        .lookup-resubmit-box {
+          margin-top: 6px;
+          padding: 12px;
+          border-radius: 14px;
+          border: 1px dashed var(--border-soft);
+          background: var(--bg-card-soft);
+          display: grid;
+          gap: 10px;
+        }
+
+        .small-muted {
+          color: var(--text-soft);
+        }
+
+        .status-box-success,
+        .status-box-error {
+          margin-top: 12px;
+          border-radius: 16px;
+          padding: 12px 14px;
+          font-size: 14px;
+          line-height: 1.6;
+          font-weight: 700;
+        }
+
+        .status-box-success {
+          background: rgba(22, 163, 74, 0.12);
+          color: #166534;
+          border: 1px solid rgba(34, 197, 94, 0.2);
+        }
+
+        .status-box-error {
+          background: rgba(220, 38, 38, 0.1);
+          color: #b91c1c;
+          border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .footer {
+          max-width: 760px;
+          margin: 34px auto 0;
+          text-align: center;
+          color: var(--text-soft);
+          font-size: 14px;
+          line-height: 1.8;
+        }
+
+        .footer-email {
+          margin-top: 4px;
+        }
+
+        .footer-email-label {
+          margin-right: 6px;
+        }
+
+        .footer-links {
+          margin-top: 10px;
+          display: flex;
+          justify-content: center;
+          gap: 14px;
+          flex-wrap: wrap;
+        }
+
+        .footer a {
+          color: inherit;
+          text-decoration: none;
         }
 
         .route-overlay {
@@ -1033,8 +1250,36 @@ function HomePageInner() {
         }
 
         @media (max-width: 640px) {
-          .hero-tools {
-            gap: 6px;
+          .site-shell {
+            padding: 18px 12px 30px;
+          }
+
+          .segment-btn {
+            min-height: 72px;
+            font-size: 18px;
+          }
+
+          .plan-card {
+            padding: 24px 20px;
+          }
+
+          .input,
+          .btn-primary,
+          .btn-secondary {
+            min-height: 58px;
+            font-size: 18px;
+          }
+
+          .summary-box {
+            padding: 22px 20px;
+          }
+
+          .lookup-wrap {
+            padding: 16px;
+          }
+
+          .footer-links {
+            gap: 10px;
           }
         }
       `}</style>
