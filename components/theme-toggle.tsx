@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useI18n } from './language-provider'
 import { useThemeMode, type ThemeMode } from './theme-provider'
 
@@ -26,6 +26,8 @@ const LABELS: Record<
 export default function ThemeToggle() {
   const { lang } = useI18n()
   const { mode, setMode } = useThemeMode()
+  const [open, setOpen] = useState(false)
+  const wrapRef = useRef<HTMLDivElement | null>(null)
 
   const text = useMemo(() => LABELS[lang] || LABELS.en, [lang])
 
@@ -35,22 +37,144 @@ export default function ThemeToggle() {
     { value: 'dark', label: text.dark },
   ]
 
-  return (
-    <div className="theme-switcher">
-      <div className="theme-switcher-label">{text.title}</div>
+  const currentLabel =
+    items.find((item) => item.value === mode)?.label || text.auto
 
-      <div className="theme-switcher-tabs">
-        {items.map((item) => (
-          <button
-            key={item.value}
-            type="button"
-            onClick={() => setMode(item.value)}
-            className={`theme-switcher-btn ${mode === item.value ? 'active' : ''}`}
-          >
-            {item.label}
-          </button>
-        ))}
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (!wrapRef.current) return
+      if (!wrapRef.current.contains(event.target as Node)) {
+        setOpen(false)
+      }
+    }
+
+    function handleEscape(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        setOpen(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    document.addEventListener('keydown', handleEscape)
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('keydown', handleEscape)
+    }
+  }, [])
+
+  function handleSelect(nextMode: ThemeMode) {
+    setMode(nextMode)
+    setOpen(false)
+  }
+
+  return (
+    <div
+      ref={wrapRef}
+      style={{
+        width: 'min(100%, 280px)',
+        position: 'relative',
+      }}
+    >
+      <div
+        style={{
+          marginBottom: 8,
+          textAlign: 'center',
+          color: 'var(--text-soft)',
+          fontSize: 12,
+          fontWeight: 700,
+          letterSpacing: '0.04em',
+        }}
+      >
+        {text.title}
       </div>
+
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        aria-haspopup="menu"
+        style={{
+          width: '100%',
+          height: 50,
+          padding: '0 18px',
+          borderRadius: 999,
+          border: '1px solid var(--border-soft)',
+          background: 'var(--bg-card-soft)',
+          color: 'var(--text-main)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          fontSize: 16,
+          fontWeight: 800,
+          cursor: 'pointer',
+          boxShadow: 'var(--shadow-soft)',
+          backdropFilter: 'blur(10px)',
+        }}
+      >
+        <span>{currentLabel}</span>
+
+        <span
+          aria-hidden="true"
+          style={{
+            width: 0,
+            height: 0,
+            borderLeft: '7px solid transparent',
+            borderRight: '7px solid transparent',
+            borderTop: `9px solid var(--text-soft)`,
+            transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
+            transition: 'transform 0.16s ease',
+          }}
+        />
+      </button>
+
+      {open ? (
+        <div
+          role="menu"
+          style={{
+            position: 'absolute',
+            top: 'calc(100% + 10px)',
+            left: 0,
+            right: 0,
+            zIndex: 30,
+            padding: 8,
+            borderRadius: 18,
+            border: '1px solid var(--border-soft)',
+            background: 'var(--bg-card)',
+            boxShadow: 'var(--shadow-soft)',
+            backdropFilter: 'blur(12px)',
+            display: 'grid',
+            gap: 8,
+          }}
+        >
+          {items.map((item) => {
+            const active = item.value === mode
+
+            return (
+              <button
+                key={item.value}
+                type="button"
+                role="menuitem"
+                onClick={() => handleSelect(item.value)}
+                style={{
+                  minHeight: 46,
+                  borderRadius: 14,
+                  border: active
+                    ? '1px solid transparent'
+                    : '1px solid var(--border-soft)',
+                  background: active ? 'var(--brand)' : 'var(--bg-card-soft)',
+                  color: active ? 'var(--brand-contrast)' : 'var(--text-main)',
+                  fontSize: 15,
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                }}
+              >
+                {item.label}
+              </button>
+            )
+          })}
+        </div>
+      ) : null}
     </div>
   )
 }
