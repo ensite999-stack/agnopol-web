@@ -17,59 +17,91 @@ type ThemeContextValue = {
 
 const ThemeContext = createContext<ThemeContextValue | null>(null)
 
-function getSystemTheme(): EffectiveTheme {
-  if (typeof window === 'undefined') return 'light'
-  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
-}
-
 function getTimeBasedTheme(): EffectiveTheme {
-  if (typeof window === 'undefined') return 'light'
   const hour = new Date().getHours()
   return hour >= 7 && hour < 19 ? 'light' : 'dark'
 }
 
-function resolveAutoTheme(): EffectiveTheme {
-  if (typeof window === 'undefined') return 'light'
-
-  try {
-    if (window.matchMedia) {
-      return getSystemTheme()
-    }
-  } catch {
-    // ignore
+function getSystemTheme(): EffectiveTheme {
+  if (typeof window === 'undefined' || !window.matchMedia) {
+    return getTimeBasedTheme()
   }
 
-  return getTimeBasedTheme()
+  try {
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+  } catch {
+    return getTimeBasedTheme()
+  }
+}
+
+function resolveAutoTheme(): EffectiveTheme {
+  if (typeof document !== 'undefined') {
+    const current = document.documentElement.dataset.theme
+    if (current === 'light' || current === 'dark') {
+      return current
+    }
+  }
+
+  return getSystemTheme()
+}
+
+function applyTheme(theme: EffectiveTheme) {
+  const root = document.documentElement
+  root.dataset.theme = theme
+  root.dataset.themeMode = 'auto'
+  root.style.colorScheme = theme
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [effectiveTheme, setEffectiveTheme] = useState<EffectiveTheme>('light')
+  const [effectiveTheme, setEffectiveTheme] = useState<EffectiveTheme>(() => {
+    if (typeof window === 'undefined') return 'light'
+    return resolveAutoTheme()
+  })
 
   useEffect(() => {
     if (typeof window === 'undefined') return
 
-    const applyTheme = () => {
-      const nextTheme = resolveAutoTheme()
+    const syncTheme = () => {
+      const nextTheme = getSystemTheme()
+      applyTheme(nextTheme)
       setEffectiveTheme(nextTheme)
-      document.documentElement.dataset.theme = nextTheme
-      document.documentElement.dataset.themeMode = 'auto'
     }
 
-    applyTheme()
+    syncTheme()
 
-    const media = window.matchMedia('(prefers-color-scheme: dark)')
-    const handleSystemChange = () => {
-      applyTheme()
+    const media = window.matchMedia?.('(prefers-color-scheme: dark)')
+    const handleMediaChange = () => syncTheme()
+    const handlePageShow = () => syncTheme()
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        syncTheme()
+      }
     }
 
-    media.addEventListener?.('change', handleSystemChange)
+    if (media) {
+      if (typeof media.addEventListener === 'function') {
+        media.addEventListener('change', handleMediaChange)
+      } else if (typeof media.addListener === 'function') {
+        media.addListener(handleMediaChange)
+      }
+    }
 
-    const timer = window.setInterval(() => {
-      applyTheme()
-    }, 60 * 1000)
+    window.addEventListener('pageshow', handlePageShow)
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+
+    const timer = window.setInterval(syncTheme, 30000)
 
     return () => {
-      media.removeEventListener?.('change', handleSystemChange)
+      if (media) {
+        if (typeof media.removeEventListener === 'function') {
+          media.removeEventListener('change', handleMediaChange)
+        } else if (typeof media.removeListener === 'function') {
+          media.removeListener(handleMediaChange)
+        }
+      }
+
+      window.removeEventListener('pageshow', handlePageShow)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
       window.clearInterval(timer)
     }
   }, [])
