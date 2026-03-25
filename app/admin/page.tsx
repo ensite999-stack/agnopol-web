@@ -1294,8 +1294,7 @@ function AdminPageInner() {
       <main className="admin-shell">
         <div className="admin-panel small-panel">
           <div className="loading-card">{text.checking}</div>
-          <style jsx global>{globalThemeStyles}</style>
-          <style jsx>{styles}</style>
+          <style>{`${globalThemeStyles}\n${styles}`}</style>
         </div>
       </main>
     )
@@ -1587,7 +1586,10 @@ function AdminPageInner() {
                   step="0.01"
                   value={siteConfig.premium_3m_price}
                   onChange={(e) =>
-                    setSiteConfig((prev) => ({ ...prev, premium_3m_price: Number(e.target.value || 0) }))
+                    setSiteConfig((prev) => ({
+                      ...prev,
+                      premium_3m_price: Number(e.target.value || 0),
+                    }))
                   }
                 />
               </label>
@@ -1600,7 +1602,10 @@ function AdminPageInner() {
                   step="0.01"
                   value={siteConfig.premium_6m_price}
                   onChange={(e) =>
-                    setSiteConfig((prev) => ({ ...prev, premium_6m_price: Number(e.target.value || 0) }))
+                    setSiteConfig((prev) => ({
+                      ...prev,
+                      premium_6m_price: Number(e.target.value || 0),
+                    }))
                   }
                 />
               </label>
@@ -1613,7 +1618,10 @@ function AdminPageInner() {
                   step="0.01"
                   value={siteConfig.premium_12m_price}
                   onChange={(e) =>
-                    setSiteConfig((prev) => ({ ...prev, premium_12m_price: Number(e.target.value || 0) }))
+                    setSiteConfig((prev) => ({
+                      ...prev,
+                      premium_12m_price: Number(e.target.value || 0),
+                    }))
                   }
                 />
               </label>
@@ -1626,13 +1634,21 @@ function AdminPageInner() {
                   step="0.0001"
                   value={siteConfig.stars_rate}
                   onChange={(e) =>
-                    setSiteConfig((prev) => ({ ...prev, stars_rate: Number(e.target.value || 0) }))
+                    setSiteConfig((prev) => ({
+                      ...prev,
+                      stars_rate: Number(e.target.value || 0),
+                    }))
                   }
                 />
               </label>
             </div>
 
-            <button type="button" className="primary-btn" onClick={saveSiteConfig} disabled={configLoading}>
+            <button
+              type="button"
+              className="primary-btn"
+              onClick={saveSiteConfig}
+              disabled={configLoading}
+            >
               {configLoading ? text.configSaving : text.saveConfig}
             </button>
 
@@ -1679,7 +1695,9 @@ function AdminPageInner() {
                         <input
                           className="input"
                           value={item.display_name}
-                          onChange={(e) => updatePaymentMethod(index, { display_name: e.target.value })}
+                          onChange={(e) =>
+                            updatePaymentMethod(index, { display_name: e.target.value })
+                          }
                           placeholder={text.methodNamePlaceholder}
                         />
                       </label>
@@ -1689,7 +1707,9 @@ function AdminPageInner() {
                         <input
                           className="input"
                           value={item.chain_name}
-                          onChange={(e) => updatePaymentMethod(index, { chain_name: e.target.value })}
+                          onChange={(e) =>
+                            updatePaymentMethod(index, { chain_name: e.target.value })
+                          }
                           placeholder={text.methodChainPlaceholder}
                         />
                       </label>
@@ -1699,7 +1719,9 @@ function AdminPageInner() {
                         <input
                           className="input"
                           value={item.token_name}
-                          onChange={(e) => updatePaymentMethod(index, { token_name: e.target.value })}
+                          onChange={(e) =>
+                            updatePaymentMethod(index, { token_name: e.target.value })
+                          }
                           placeholder={text.methodTokenPlaceholder}
                         />
                       </label>
@@ -1711,7 +1733,9 @@ function AdminPageInner() {
                           type="number"
                           value={item.sort_order}
                           onChange={(e) =>
-                            updatePaymentMethod(index, { sort_order: Number(e.target.value || 0) })
+                            updatePaymentMethod(index, {
+                              sort_order: Number(e.target.value || 0),
+                            })
                           }
                         />
                       </label>
@@ -1722,7 +1746,9 @@ function AdminPageInner() {
                       <textarea
                         className="textarea mono"
                         value={item.address}
-                        onChange={(e) => updatePaymentMethod(index, { address: e.target.value })}
+                        onChange={(e) =>
+                          updatePaymentMethod(index, { address: e.target.value })
+                        }
                         rows={3}
                       />
                     </label>
@@ -1732,7 +1758,9 @@ function AdminPageInner() {
                         <input
                           type="checkbox"
                           checked={item.is_enabled}
-                          onChange={(e) => updatePaymentMethod(index, { is_enabled: e.target.checked })}
+                          onChange={(e) =>
+                            updatePaymentMethod(index, { is_enabled: e.target.checked })
+                          }
                         />
                         <span>{text.enabled}</span>
                       </label>
@@ -1760,13 +1788,16 @@ function AdminPageInner() {
             <button type="button" className="image-close" onClick={() => setPreviewImage('')}>
               {text.closeImage}
             </button>
-            <img src={previewImage} alt="payment proof large preview" className="image-modal-view" />
+            <img
+              src={previewImage}
+              alt="payment proof large preview"
+              className="image-modal-view"
+            />
           </div>
         </div>
       ) : null}
 
-      <style jsx global>{globalThemeStyles}</style>
-      <style jsx>{styles}</style>
+      <style>{`${globalThemeStyles}\n${styles}`}</style>
     </main>
   )
 }
@@ -1777,8 +1808,7 @@ function PageFallback() {
       <div className="admin-panel small-panel">
         <div className="loading-card">Loading...</div>
       </div>
-      <style jsx global>{globalThemeStyles}</style>
-      <style jsx>{styles}</style>
+      <style>{`${globalThemeStyles}\n${styles}`}</style>
     </main>
   )
 }
