@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useMemo, useState, type ChangeEvent } from 'react'
 import { useI18n } from '../components/language-provider'
 import LanguageSwitcher from '../components/language-switcher'
+import ThemeToggle from '../components/theme-toggle'
 import { withLang } from '../lib/i18n'
 
 type ProductType = 'premium' | 'stars'
@@ -32,6 +33,35 @@ type PublicConfig = {
   updated_at?: string
 }
 
+type LookupUi = {
+  title: string
+  subtitle: string
+  placeholder: string
+  button: string
+  loading: string
+  orderNo: string
+  email: string
+  status: string
+  product: string
+  amount: string
+  network: string
+  createdAt: string
+  note: string
+  txHash: string
+  resubmit: string
+  proofReady: string
+  hashPlaceholder: string
+  resubmitButton: string
+  resubmitting: string
+  noOrders: string
+  pending: string
+  paid: string
+  completed: string
+  cancelled: string
+  resubmitSuccess: string
+  resubmitError: string
+}
+
 const defaultConfig: PublicConfig = {
   premium_3m_price: 13.1,
   premium_6m_price: 17.1,
@@ -41,254 +71,38 @@ const defaultConfig: PublicConfig = {
   base_address: '0x21E43Ddaa992A0B5cfcCeFE98838239b9E91B40E',
 }
 
-function formatBostonTime(value: string | null) {
-  if (!value) return '-'
-
-  try {
-    return new Intl.DateTimeFormat('en-US', {
-      timeZone: 'America/New_York',
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      hour12: false,
-    }).format(new Date(value))
-  } catch {
-    return value
-  }
-}
-
-function buildLookupUi(lang: string) {
-  if (lang === 'de') {
-    return {
-      title: 'Bestellabfrage',
-      subtitle:
-        'Geben Sie Ihre Bestell-E-Mail ein, um den Status, Systemhinweise und gegebenenfalls neue Zahlungsnachweise gemäß Admin-Hinweis einzureichen.',
-      placeholder: 'Bestell-E-Mail eingeben',
-      button: 'Bestellung prüfen',
-      loading: 'Wird geprüft...',
-      orderNo: 'Bestellnummer',
-      email: 'E-Mail',
-      status: 'Status',
-      product: 'Produkt',
-      amount: 'Betrag',
-      network: 'Zahlungsnetzwerk',
-      createdAt: 'Erstellt am',
-      note: 'Systemhinweis',
-      txHash: 'Transaktions-Hash',
-      resubmit: 'Nachweis erneut hochladen',
-      proofReady: 'Neuer Nachweis ist bereit:',
-      hashPlaceholder: 'Transaktions-Hash erneut eingeben (optional)',
-      resubmitButton: 'Neuen Nachweis senden',
-      resubmitting: 'Wird gesendet...',
-      noOrders: 'Keine passenden Bestellungen gefunden.',
-      pending: 'Ausstehende Zahlung',
-      paid: 'Bezahlt',
-      completed: 'Abgeschlossen',
-      cancelled: 'Storniert',
-      resubmitSuccess:
-        'Der neue Zahlungsnachweis wurde erfolgreich übermittelt. Bitte prüfen Sie den Bestellstatus später erneut.',
-      resubmitError: 'Der Zahlungsnachweis konnte nicht erneut übermittelt werden.',
-    }
-  }
-
-  if (lang === 'es') {
-    return {
-      title: 'Consulta de pedido',
-      subtitle:
-        'Introduzca el correo de su pedido para comprobar el estado, los avisos del sistema y volver a enviar el comprobante de pago cuando el administrador lo indique.',
-      placeholder: 'Introduzca el correo del pedido',
-      button: 'Consultar pedido',
-      loading: 'Consultando...',
-      orderNo: 'Número de pedido',
-      email: 'Correo electrónico',
-      status: 'Estado',
-      product: 'Producto',
-      amount: 'Importe',
-      network: 'Red de pago',
-      createdAt: 'Fecha de creación',
-      note: 'Aviso del sistema',
-      txHash: 'Hash de transacción',
-      resubmit: 'Volver a subir comprobante',
-      proofReady: 'El nuevo comprobante está listo:',
-      hashPlaceholder: 'Volver a escribir el hash de transacción (opcional)',
-      resubmitButton: 'Enviar nuevo comprobante',
-      resubmitting: 'Enviando...',
-      noOrders: 'No se encontraron pedidos relacionados.',
-      pending: 'Pago pendiente',
-      paid: 'Pagado',
-      completed: 'Completado',
-      cancelled: 'Cancelado',
-      resubmitSuccess:
-        'El nuevo comprobante de pago se ha enviado correctamente. Vuelva a consultar el estado del pedido más tarde.',
-      resubmitError: 'No se pudo reenviar el comprobante de pago.',
-    }
-  }
-
-  if (lang === 'fr') {
-    return {
-      title: 'Recherche de commande',
-      subtitle:
-        "Entrez l'e-mail de votre commande pour consulter le statut, les avis du système et renvoyer la preuve de paiement si l'administrateur le demande.",
-      placeholder: "Entrez l'e-mail de commande",
-      button: 'Rechercher la commande',
-      loading: 'Recherche en cours...',
-      orderNo: 'N° de commande',
-      email: 'E-mail',
-      status: 'Statut',
-      product: 'Produit',
-      amount: 'Montant',
-      network: 'Réseau de paiement',
-      createdAt: 'Créé le',
-      note: 'Avis du système',
-      txHash: 'Hash de transaction',
-      resubmit: 'Téléverser à nouveau la preuve',
-      proofReady: 'La nouvelle preuve est prête :',
-      hashPlaceholder: 'Saisir à nouveau le hash de transaction (facultatif)',
-      resubmitButton: 'Envoyer la nouvelle preuve',
-      resubmitting: 'Envoi...',
-      noOrders: 'Aucune commande correspondante trouvée.',
-      pending: 'Paiement en attente',
-      paid: 'Payé',
-      completed: 'Terminé',
-      cancelled: 'Annulé',
-      resubmitSuccess:
-        'La nouvelle preuve de paiement a été envoyée avec succès. Veuillez consulter à nouveau le statut plus tard.',
-      resubmitError: "Échec de l'envoi de la nouvelle preuve de paiement.",
-    }
-  }
-
-  if (lang === 'ja') {
-    return {
-      title: '注文照会',
-      subtitle:
-        '注文時のメールアドレスを入力すると、注文状況、システム案内、管理者の案内に従った支払い証明の再提出を確認できます。',
-      placeholder: '注文メールアドレスを入力',
-      button: '注文を確認',
-      loading: '照会中...',
-      orderNo: '注文番号',
-      email: 'メール',
-      status: '状態',
-      product: '商品',
-      amount: '金額',
-      network: '支払いネットワーク',
-      createdAt: '作成時間',
-      note: 'システム案内',
-      txHash: 'トランザクションハッシュ',
-      resubmit: '証明を再アップロード',
-      proofReady: '新しい証明の準備ができました：',
-      hashPlaceholder: 'トランザクションハッシュを再入力（任意）',
-      resubmitButton: '新しい証明を送信',
-      resubmitting: '送信中...',
-      noOrders: '関連する注文が見つかりませんでした。',
-      pending: '未払い',
-      paid: '支払い済み',
-      completed: '完了',
-      cancelled: 'キャンセル済み',
-      resubmitSuccess:
-        '新しい支払い証明が正常に送信されました。しばらくしてから注文状況を再度ご確認ください。',
-      resubmitError: '支払い証明の再送信に失敗しました。',
-    }
-  }
-
-  if (lang === 'ko') {
-    return {
-      title: '주문 조회',
-      subtitle:
-        '주문 이메일을 입력하면 주문 상태, 시스템 안내, 그리고 관리자 안내에 따른 결제 증빙 재제출 여부를 확인할 수 있습니다.',
-      placeholder: '주문 이메일 입력',
-      button: '주문 조회',
-      loading: '조회 중...',
-      orderNo: '주문번호',
-      email: '이메일',
-      status: '상태',
-      product: '상품',
-      amount: '금액',
-      network: '결제 네트워크',
-      createdAt: '생성 시간',
-      note: '시스템 안내',
-      txHash: '거래 해시',
-      resubmit: '증빙 다시 업로드',
-      proofReady: '새 증빙이 준비되었습니다:',
-      hashPlaceholder: '거래 해시 다시 입력 (선택)',
-      resubmitButton: '새 증빙 제출',
-      resubmitting: '제출 중...',
-      noOrders: '관련 주문을 찾지 못했습니다.',
-      pending: '미결제',
-      paid: '결제됨',
-      completed: '완료됨',
-      cancelled: '취소됨',
-      resubmitSuccess:
-        '새 결제 증빙이 성공적으로 제출되었습니다. 잠시 후 주문 상태를 다시 조회하세요.',
-      resubmitError: '결제 증빙 재제출에 실패했습니다.',
-    }
-  }
-
-  if (lang === 'zh-cn') {
-    return {
-      title: '订单查询',
-      subtitle: '输入下单邮箱查询订单状态、系统提示，并可按后台提示重新补交付款凭证。',
-      placeholder: '输入下单邮箱',
-      button: '查询订单',
-      loading: '查询中...',
-      orderNo: '订单号',
-      email: '邮箱',
-      status: '状态',
-      product: '产品',
-      amount: '金额',
-      network: '支付网络',
-      createdAt: '创建时间',
-      note: '系统提示',
-      txHash: '交易哈希',
-      resubmit: '重新上传凭证',
-      proofReady: '新凭证已就绪：',
-      hashPlaceholder: '重新填写交易哈希（可选）',
-      resubmitButton: '提交新的凭证',
-      resubmitting: '提交中...',
-      noOrders: '未找到相关订单。',
-      pending: '待支付',
-      paid: '已支付',
-      completed: '已完成',
-      cancelled: '已取消',
-      resubmitSuccess: '新的付款凭证已提交成功，请稍后重新查询订单状态。',
-      resubmitError: '重新提交付款凭证失败。',
-    }
-  }
-
-  if (lang === 'zh-tw') {
-    return {
-      title: '訂單查詢',
-      subtitle: '輸入下單電子郵件查詢訂單狀態、系統提示，並可按後台提示重新補交付款憑證。',
-      placeholder: '輸入下單電子郵件',
-      button: '查詢訂單',
-      loading: '查詢中...',
-      orderNo: '訂單號',
-      email: '電子郵件',
-      status: '狀態',
-      product: '產品',
-      amount: '金額',
-      network: '支付網路',
-      createdAt: '建立時間',
-      note: '系統提示',
-      txHash: '交易哈希',
-      resubmit: '重新上傳憑證',
-      proofReady: '新憑證已就緒：',
-      hashPlaceholder: '重新填寫交易哈希（可選）',
-      resubmitButton: '提交新的憑證',
-      resubmitting: '提交中...',
-      noOrders: '未找到相關訂單。',
-      pending: '待支付',
-      paid: '已支付',
-      completed: '已完成',
-      cancelled: '已取消',
-      resubmitSuccess: '新的付款憑證已提交成功，請稍後重新查詢訂單狀態。',
-      resubmitError: '重新提交付款憑證失敗。',
-    }
-  }
-
-  return {
+const LOOKUP_UI: Record<string, LookupUi> = {
+  de: {
+    title: 'Bestellabfrage',
+    subtitle:
+      'Geben Sie Ihre Bestell-E-Mail ein, um Status, Systemhinweise und eine erneute Einreichung des Zahlungsnachweises nach Admin-Hinweis zu prüfen.',
+    placeholder: 'Bestell-E-Mail eingeben',
+    button: 'Bestellung prüfen',
+    loading: 'Wird geprüft...',
+    orderNo: 'Bestellnummer',
+    email: 'E-Mail',
+    status: 'Status',
+    product: 'Produkt',
+    amount: 'Betrag',
+    network: 'Zahlungsnetzwerk',
+    createdAt: 'Erstellt am',
+    note: 'Systemhinweis',
+    txHash: 'Transaktions-Hash',
+    resubmit: 'Nachweis erneut hochladen',
+    proofReady: 'Neuer Nachweis ist bereit:',
+    hashPlaceholder: 'Transaktions-Hash erneut eingeben (optional)',
+    resubmitButton: 'Neuen Nachweis senden',
+    resubmitting: 'Wird gesendet...',
+    noOrders: 'Keine passenden Bestellungen gefunden.',
+    pending: 'Ausstehende Zahlung',
+    paid: 'Bezahlt',
+    completed: 'Abgeschlossen',
+    cancelled: 'Storniert',
+    resubmitSuccess:
+      'Der neue Zahlungsnachweis wurde erfolgreich übermittelt. Bitte prüfen Sie den Bestellstatus später erneut.',
+    resubmitError: 'Der Zahlungsnachweis konnte nicht erneut übermittelt werden.',
+  },
+  en: {
     title: 'Order Lookup',
     subtitle:
       'Enter your order email to check status, system notices, and resubmit payment proof only when instructed by admin.',
@@ -316,12 +130,217 @@ function buildLookupUi(lang: string) {
     cancelled: 'Cancelled',
     resubmitSuccess: 'Updated payment proof submitted successfully. Please check the order again later.',
     resubmitError: 'Failed to resubmit payment proof.',
+  },
+  es: {
+    title: 'Consulta de pedido',
+    subtitle:
+      'Introduzca el correo de su pedido para comprobar el estado, los avisos del sistema y volver a enviar el comprobante de pago cuando el administrador lo indique.',
+    placeholder: 'Introduzca el correo del pedido',
+    button: 'Consultar pedido',
+    loading: 'Consultando...',
+    orderNo: 'Número de pedido',
+    email: 'Correo electrónico',
+    status: 'Estado',
+    product: 'Producto',
+    amount: 'Importe',
+    network: 'Red de pago',
+    createdAt: 'Fecha de creación',
+    note: 'Aviso del sistema',
+    txHash: 'Hash de transacción',
+    resubmit: 'Volver a subir comprobante',
+    proofReady: 'El nuevo comprobante está listo:',
+    hashPlaceholder: 'Volver a escribir el hash de transacción (opcional)',
+    resubmitButton: 'Enviar nuevo comprobante',
+    resubmitting: 'Enviando...',
+    noOrders: 'No se encontraron pedidos relacionados.',
+    pending: 'Pago pendiente',
+    paid: 'Pagado',
+    completed: 'Completado',
+    cancelled: 'Cancelado',
+    resubmitSuccess:
+      'El nuevo comprobante de pago se ha enviado correctamente. Vuelva a consultar el estado del pedido más tarde.',
+    resubmitError: 'No se pudo reenviar el comprobante de pago.',
+  },
+  fr: {
+    title: 'Recherche de commande',
+    subtitle:
+      "Entrez l'e-mail de votre commande pour consulter le statut, les avis du système et renvoyer la preuve de paiement si l'administrateur le demande.",
+    placeholder: "Entrez l'e-mail de commande",
+    button: 'Rechercher la commande',
+    loading: 'Recherche en cours...',
+    orderNo: 'N° de commande',
+    email: 'E-mail',
+    status: 'Statut',
+    product: 'Produit',
+    amount: 'Montant',
+    network: 'Réseau de paiement',
+    createdAt: 'Créé le',
+    note: 'Avis du système',
+    txHash: 'Hash de transaction',
+    resubmit: 'Téléverser à nouveau la preuve',
+    proofReady: 'La nouvelle preuve est prête :',
+    hashPlaceholder: 'Saisir à nouveau le hash de transaction (facultatif)',
+    resubmitButton: 'Envoyer la nouvelle preuve',
+    resubmitting: 'Envoi...',
+    noOrders: 'Aucune commande correspondante trouvée.',
+    pending: 'Paiement en attente',
+    paid: 'Payé',
+    completed: 'Terminé',
+    cancelled: 'Annulé',
+    resubmitSuccess:
+      'La nouvelle preuve de paiement a été envoyée avec succès. Veuillez consulter à nouveau le statut plus tard.',
+    resubmitError: "Échec de l'envoi de la nouvelle preuve de paiement.",
+  },
+  ja: {
+    title: '注文照会',
+    subtitle:
+      '注文時のメールアドレスを入力すると、注文状況、システム案内、管理者の案内に従った支払い証明の再提出を確認できます。',
+    placeholder: '注文メールアドレスを入力',
+    button: '注文を確認',
+    loading: '照会中...',
+    orderNo: '注文番号',
+    email: 'メール',
+    status: '状態',
+    product: '商品',
+    amount: '金額',
+    network: '支払いネットワーク',
+    createdAt: '作成時間',
+    note: 'システム案内',
+    txHash: 'トランザクションハッシュ',
+    resubmit: '証明を再アップロード',
+    proofReady: '新しい証明の準備ができました：',
+    hashPlaceholder: 'トランザクションハッシュを再入力（任意）',
+    resubmitButton: '新しい証明を送信',
+    resubmitting: '送信中...',
+    noOrders: '関連する注文が見つかりませんでした。',
+    pending: '未払い',
+    paid: '支払い済み',
+    completed: '完了',
+    cancelled: 'キャンセル済み',
+    resubmitSuccess:
+      '新しい支払い証明が正常に送信されました。しばらくしてから注文状況を再度ご確認ください。',
+    resubmitError: '支払い証明の再送信に失敗しました。',
+  },
+  ko: {
+    title: '주문 조회',
+    subtitle:
+      '주문 이메일을 입력하면 주문 상태, 시스템 안내, 그리고 관리자 안내에 따른 결제 증빙 재제출 여부를 확인할 수 있습니다.',
+    placeholder: '주문 이메일 입력',
+    button: '주문 조회',
+    loading: '조회 중...',
+    orderNo: '주문번호',
+    email: '이메일',
+    status: '상태',
+    product: '상품',
+    amount: '금액',
+    network: '결제 네트워크',
+    createdAt: '생성 시간',
+    note: '시스템 안내',
+    txHash: '거래 해시',
+    resubmit: '증빙 다시 업로드',
+    proofReady: '새 증빙이 준비되었습니다:',
+    hashPlaceholder: '거래 해시 다시 입력 (선택)',
+    resubmitButton: '새 증빙 제출',
+    resubmitting: '제출 중...',
+    noOrders: '관련 주문을 찾지 못했습니다.',
+    pending: '미결제',
+    paid: '결제됨',
+    completed: '완료됨',
+    cancelled: '취소됨',
+    resubmitSuccess:
+      '새 결제 증빙이 성공적으로 제출되었습니다. 잠시 후 주문 상태를 다시 조회하세요.',
+    resubmitError: '결제 증빙 재제출에 실패했습니다.',
+  },
+  'zh-cn': {
+    title: '订单查询',
+    subtitle: '输入下单邮箱查询订单状态、系统提示，并可按后台提示重新补交付款凭证。',
+    placeholder: '输入下单邮箱',
+    button: '查询订单',
+    loading: '查询中...',
+    orderNo: '订单号',
+    email: '邮箱',
+    status: '状态',
+    product: '产品',
+    amount: '金额',
+    network: '支付网络',
+    createdAt: '创建时间',
+    note: '系统提示',
+    txHash: '交易哈希',
+    resubmit: '重新上传凭证',
+    proofReady: '新凭证已就绪：',
+    hashPlaceholder: '重新填写交易哈希（可选）',
+    resubmitButton: '提交新的凭证',
+    resubmitting: '提交中...',
+    noOrders: '未找到相关订单。',
+    pending: '待支付',
+    paid: '已支付',
+    completed: '已完成',
+    cancelled: '已取消',
+    resubmitSuccess: '新的付款凭证已提交成功，请稍后重新查询订单状态。',
+    resubmitError: '重新提交付款凭证失败。',
+  },
+  'zh-tw': {
+    title: '訂單查詢',
+    subtitle: '輸入下單電子郵件查詢訂單狀態、系統提示，並可按後台提示重新補交付款憑證。',
+    placeholder: '輸入下單電子郵件',
+    button: '查詢訂單',
+    loading: '查詢中...',
+    orderNo: '訂單號',
+    email: '電子郵件',
+    status: '狀態',
+    product: '產品',
+    amount: '金額',
+    network: '支付網路',
+    createdAt: '建立時間',
+    note: '系統提示',
+    txHash: '交易哈希',
+    resubmit: '重新上傳憑證',
+    proofReady: '新憑證已就緒：',
+    hashPlaceholder: '重新填寫交易哈希（可選）',
+    resubmitButton: '提交新的憑證',
+    resubmitting: '提交中...',
+    noOrders: '未找到相關訂單。',
+    pending: '待支付',
+    paid: '已支付',
+    completed: '已完成',
+    cancelled: '已取消',
+    resubmitSuccess: '新的付款憑證已提交成功，請稍後重新查詢訂單狀態。',
+    resubmitError: '重新提交付款憑證失敗。',
+  },
+}
+
+const NAV_UI: Record<string, { preparing: string; redirecting: string }> = {
+  de: { preparing: 'Bestellung wird vorbereitet...', redirecting: 'Weiter zur Zahlungsseite' },
+  en: { preparing: 'Preparing your order...', redirecting: 'Redirecting to payment page' },
+  es: { preparing: 'Preparando su pedido...', redirecting: 'Redirigiendo a la página de pago' },
+  fr: { preparing: 'Préparation de votre commande...', redirecting: 'Redirection vers la page de paiement' },
+  ja: { preparing: 'ご注文を準備中...', redirecting: '支払いページへ移動しています' },
+  ko: { preparing: '주문을 준비하는 중...', redirecting: '결제 페이지로 이동 중' },
+  'zh-cn': { preparing: '正在准备订单...', redirecting: '正在跳转支付页' },
+  'zh-tw': { preparing: '正在準備訂單...', redirecting: '正在跳轉支付頁' },
+}
+
+function formatBostonTime(value: string | null) {
+  if (!value) return '-'
+  try {
+    return new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/New_York',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false,
+    }).format(new Date(value))
+  } catch {
+    return value
   }
 }
 
 function OrderLookupSection() {
   const { t, lang } = useI18n()
-  const ui = useMemo(() => buildLookupUi(lang), [lang])
+  const ui = LOOKUP_UI[lang] || LOOKUP_UI.en
 
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
@@ -347,12 +366,10 @@ function OrderLookupSection() {
 
   function getStatusLabel(status: string | null | undefined) {
     const value = String(status || '').toLowerCase()
-
     if (value === 'pending' || value === 'pending_payment') return ui.pending
     if (value === 'paid') return ui.paid
     if (value === 'completed') return ui.completed
     if (value === 'failed' || value === 'cancelled') return ui.cancelled
-
     return status || '-'
   }
 
@@ -367,9 +384,7 @@ function OrderLookupSection() {
       const response = await fetch('/api/queryOrder', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: email.trim(),
-        }),
+        body: JSON.stringify({ email: email.trim() }),
         cache: 'no-store',
       })
 
@@ -401,7 +416,6 @@ function OrderLookupSection() {
     if (!file) return
 
     setResubmitProofName(file.name)
-
     const reader = new FileReader()
     reader.onload = () => {
       const result = reader.result as string
@@ -464,7 +478,7 @@ function OrderLookupSection() {
         style={{
           fontSize: 'clamp(18px, 2.2vw, 22px)',
           fontWeight: 800,
-          color: '#111827',
+          color: 'var(--text-strong)',
           marginBottom: 6,
         }}
       >
@@ -503,8 +517,8 @@ function OrderLookupSection() {
                 style={{
                   padding: 16,
                   borderRadius: 16,
-                  background: 'rgba(15, 23, 42, 0.035)',
-                  border: '1px solid rgba(15, 23, 42, 0.06)',
+                  background: 'var(--bg-muted)',
+                  border: '1px solid var(--border-soft)',
                   display: 'grid',
                   gap: 8,
                   width: '100%',
@@ -585,8 +599,8 @@ function OrderLookupSection() {
                           marginTop: 6,
                           padding: 12,
                           borderRadius: 14,
-                          border: '1px dashed rgba(15, 23, 42, 0.18)',
-                          background: 'rgba(255,255,255,0.75)',
+                          border: '1px dashed var(--border-soft)',
+                          background: 'var(--bg-card-soft)',
                           display: 'grid',
                           gap: 10,
                           width: '100%',
@@ -599,23 +613,13 @@ function OrderLookupSection() {
                           type="file"
                           accept="image/*"
                           onChange={handleResubmitFileChange}
-                          style={{
-                            width: '100%',
-                            minWidth: 0,
-                            boxSizing: 'border-box',
-                            maxWidth: '100%',
-                          }}
+                          style={{ width: '100%', minWidth: 0, boxSizing: 'border-box', maxWidth: '100%' }}
                         />
 
                         {resubmitProofName ? (
                           <div
                             className="small-muted"
-                            style={{
-                              width: '100%',
-                              minWidth: 0,
-                              wordBreak: 'break-all',
-                              overflowWrap: 'anywhere',
-                            }}
+                            style={{ width: '100%', minWidth: 0, wordBreak: 'break-all', overflowWrap: 'anywhere' }}
                           >
                             {ui.proofReady} {resubmitProofName}
                           </div>
@@ -652,6 +656,8 @@ function OrderLookupSection() {
 
 function HomePageInner() {
   const { lang, t } = useI18n()
+  const navUi = NAV_UI[lang] || NAV_UI.en
+
   const [tab, setTab] = useState<ProductType>('premium')
   const [duration, setDuration] = useState<DurationType>('12m')
   const [stars, setStars] = useState(50)
@@ -660,6 +666,7 @@ function HomePageInner() {
   const [config, setConfig] = useState<PublicConfig>(defaultConfig)
   const [configError, setConfigError] = useState('')
   const [configLoading, setConfigLoading] = useState(true)
+  const [routingToPay, setRoutingToPay] = useState(false)
 
   const startYear = 2026
   const currentYear = new Date().getFullYear()
@@ -727,7 +734,6 @@ function HomePageInner() {
       if (duration === '6m') return Number(config.premium_6m_price)
       return Number(config.premium_12m_price)
     }
-
     return Number((safeStars * Number(config.stars_rate)).toFixed(2))
   }, [tab, duration, safeStars, config])
 
@@ -737,7 +743,6 @@ function HomePageInner() {
         duration === '3m' ? t.home.months3 : duration === '6m' ? t.home.months6 : t.home.months12
       return `${t.home.tgPremium} ${durationText}`
     }
-
     return `${t.home.tgStars} ${safeStars}`
   }, [tab, duration, safeStars, t])
 
@@ -756,16 +761,23 @@ function HomePageInner() {
       params.set('stars_amount', String(safeStars))
     }
 
-    window.location.href = `/pay?${params.toString()}`
+    setRoutingToPay(true)
+    window.setTimeout(() => {
+      window.location.href = `/pay?${params.toString()}`
+    }, 420)
   }
 
   return (
     <main className="site-shell">
       <div className="site-container">
-        <section className="hero-center">
+        <section className="hero-center hero-stack">
           <h1 className="brand-title">{t.common.brand}</h1>
           <p className="brand-slogan">{t.common.slogan}</p>
-          <LanguageSwitcher />
+
+          <div className="hero-tools">
+            <LanguageSwitcher size="compact" />
+            <ThemeToggle size="compact" />
+          </div>
         </section>
 
         <div className="segment-tabs">
@@ -796,30 +808,21 @@ function HomePageInner() {
             <p className="section-caption">{t.home.premiumPlans}</p>
 
             <div className="plan-grid">
-              <div
-                className={`card plan-card ${duration === '3m' ? 'active' : ''}`}
-                onClick={() => setDuration('3m')}
-              >
+              <div className={`card plan-card ${duration === '3m' ? 'active' : ''}`} onClick={() => setDuration('3m')}>
                 <div style={{ fontSize: 18, fontWeight: 800 }}>{t.home.months3}</div>
                 <div style={{ marginTop: 10, fontSize: 22, fontWeight: 900 }}>
                   ${Number(config.premium_3m_price)}
                 </div>
               </div>
 
-              <div
-                className={`card plan-card ${duration === '6m' ? 'active' : ''}`}
-                onClick={() => setDuration('6m')}
-              >
+              <div className={`card plan-card ${duration === '6m' ? 'active' : ''}`} onClick={() => setDuration('6m')}>
                 <div style={{ fontSize: 18, fontWeight: 800 }}>{t.home.months6}</div>
                 <div style={{ marginTop: 10, fontSize: 22, fontWeight: 900 }}>
                   ${Number(config.premium_6m_price)}
                 </div>
               </div>
 
-              <div
-                className={`card plan-card ${duration === '12m' ? 'active' : ''}`}
-                onClick={() => setDuration('12m')}
-              >
+              <div className={`card plan-card ${duration === '12m' ? 'active' : ''}`} onClick={() => setDuration('12m')}>
                 <div style={{ fontSize: 18, fontWeight: 800 }}>{t.home.months12}</div>
                 <div style={{ marginTop: 10, fontSize: 22, fontWeight: 900 }}>
                   ${Number(config.premium_12m_price)}
@@ -832,7 +835,7 @@ function HomePageInner() {
             <p className="section-caption">{t.home.starsPackage}</p>
 
             <div className="card" style={{ maxWidth: 720, margin: '0 auto' }}>
-              <div style={{ fontSize: 17, fontWeight: 800, marginBottom: 10, color: '#111827' }}>
+              <div style={{ fontSize: 17, fontWeight: 800, marginBottom: 10, color: 'var(--text-strong)' }}>
                 {t.home.starsAmount}
               </div>
 
@@ -846,10 +849,10 @@ function HomePageInner() {
                 className="input"
               />
 
-              <div style={{ marginTop: 10, fontSize: 13, color: '#6b7280' }}>
+              <div style={{ marginTop: 10, fontSize: 13, color: 'var(--text-soft)' }}>
                 {t.home.starsMinHint}
               </div>
-              <div style={{ marginTop: 4, fontSize: 13, color: '#6b7280' }}>
+              <div style={{ marginTop: 4, fontSize: 13, color: 'var(--text-soft)' }}>
                 {t.home.autoPriceHint}
               </div>
             </div>
@@ -857,7 +860,7 @@ function HomePageInner() {
         )}
 
         <div className="summary-box card-soft">
-          <div style={{ fontSize: 14, color: '#6b7280', marginBottom: 8 }}>
+          <div style={{ fontSize: 14, color: 'var(--text-soft)', marginBottom: 8 }}>
             {t.home.currentSelection}
           </div>
 
@@ -865,7 +868,7 @@ function HomePageInner() {
             style={{
               fontSize: 'clamp(19px, 3vw, 26px)',
               fontWeight: 800,
-              color: '#111827',
+              color: 'var(--text-strong)',
             }}
           >
             {selectedTitle}
@@ -876,7 +879,7 @@ function HomePageInner() {
               marginTop: 8,
               fontSize: 'clamp(32px, 5vw, 44px)',
               fontWeight: 900,
-              color: '#111827',
+              color: 'var(--text-strong)',
               lineHeight: 1,
             }}
           >
@@ -884,7 +887,7 @@ function HomePageInner() {
           </div>
 
           {configLoading ? (
-            <div style={{ marginTop: 10, fontSize: 13, color: '#6b7280' }}>
+            <div style={{ marginTop: 10, fontSize: 13, color: 'var(--text-soft)' }}>
               {t.common.loading}
             </div>
           ) : null}
@@ -931,6 +934,110 @@ function HomePageInner() {
           </div>
         </footer>
       </div>
+
+      {routingToPay ? (
+        <div className="route-overlay">
+          <div className="route-card">
+            <div className="route-spinner" />
+            <div className="route-title">{navUi.preparing}</div>
+            <div className="route-subtitle">{navUi.redirecting}</div>
+          </div>
+        </div>
+      ) : null}
+
+      <style jsx>{`
+        .hero-stack {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 6px;
+        }
+
+        .hero-tools {
+          margin-top: 2px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .brand-title {
+          margin-bottom: 0;
+        }
+
+        .brand-slogan {
+          margin-top: 0;
+          margin-bottom: 0;
+          font-size: clamp(18px, 2.3vw, 22px);
+          color: var(--text-soft);
+        }
+
+        .route-overlay {
+          position: fixed;
+          inset: 0;
+          z-index: 90;
+          background: rgba(2, 6, 23, 0.42);
+          backdrop-filter: blur(8px);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 20px;
+          animation: fadeIn 0.2s ease;
+        }
+
+        .route-card {
+          width: min(420px, 100%);
+          border-radius: 28px;
+          padding: 28px 22px;
+          background: var(--bg-card);
+          border: 1px solid var(--border-soft);
+          box-shadow: var(--shadow-soft);
+          text-align: center;
+        }
+
+        .route-spinner {
+          width: 44px;
+          height: 44px;
+          margin: 0 auto 14px;
+          border-radius: 999px;
+          border: 3px solid rgba(255, 255, 255, 0.24);
+          border-top-color: var(--brand);
+          animation: spin 0.8s linear infinite;
+        }
+
+        .route-title {
+          font-size: 18px;
+          font-weight: 900;
+          color: var(--text-strong);
+        }
+
+        .route-subtitle {
+          margin-top: 8px;
+          font-size: 14px;
+          color: var(--text-soft);
+        }
+
+        @keyframes spin {
+          to {
+            transform: rotate(360deg);
+          }
+        }
+
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
+        }
+
+        @media (max-width: 640px) {
+          .hero-tools {
+            gap: 6px;
+          }
+        }
+      `}</style>
     </main>
   )
 }
