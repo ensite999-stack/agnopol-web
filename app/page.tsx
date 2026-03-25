@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useMemo, useState, type ChangeEvent } from 'react'
 import { useI18n } from '../components/language-provider'
 import LanguageSwitcher from '../components/language-switcher'
+import ThemeSwitcher from '../components/theme-switcher'
 import { withLang } from '../lib/i18n'
 
 type ProductType = 'premium' | 'stars'
@@ -743,12 +744,16 @@ function HomePageInner() {
   return (
     <main className="site-shell">
       <div className="site-container">
-        <section className="hero-center hero-stack">
-          <h1 className="brand-title">{t.common.brand}</h1>
-          <p className="brand-slogan">{t.common.slogan}</p>
+        <section className="hero-center hero-stack hero-stair-wrap">
+          <h1 className="brand-title hero-step hero-step-1">{t.common.brand}</h1>
+          <p className="brand-slogan hero-step hero-step-2">{t.common.slogan}</p>
 
-          <div className="hero-tools">
+          <div className="hero-tools hero-step hero-step-3">
             <LanguageSwitcher size="compact" />
+          </div>
+
+          <div className="hero-mode hero-step hero-step-4">
+            <ThemeSwitcher />
           </div>
         </section>
 
@@ -982,6 +987,59 @@ function HomePageInner() {
           flex-direction: column;
           align-items: center;
           gap: 6px;
+        }
+
+        .hero-stair-wrap {
+          width: 100%;
+        }
+
+        .hero-step {
+          width: 100%;
+        }
+
+        .hero-step-1 {
+          text-align: center;
+        }
+
+        .hero-step-2 {
+          text-align: center;
+        }
+
+        .hero-step-3,
+        .hero-step-4 {
+          display: flex;
+          justify-content: center;
+        }
+
+        .hero-mode {
+          margin-top: 8px;
+        }
+
+        @media (min-width: 768px) {
+          .hero-stair-wrap {
+            max-width: 760px;
+            margin-left: auto;
+            margin-right: auto;
+          }
+
+          .hero-step-1 {
+            text-align: left;
+          }
+
+          .hero-step-2 {
+            padding-left: 28px;
+            text-align: left;
+          }
+
+          .hero-step-3 {
+            justify-content: flex-start;
+            padding-left: 56px;
+          }
+
+          .hero-step-4 {
+            justify-content: flex-start;
+            padding-left: 92px;
+          }
         }
 
         .segment-tabs {
