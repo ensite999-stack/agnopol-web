@@ -56,9 +56,9 @@ export default function LanguageSwitcher({ size = 'compact', fullWidth = false }
           min-width: 0;
           box-sizing: border-box;
           border-radius: 999px;
-          border: 1px solid rgba(15, 23, 42, 0.12);
-          background: rgba(255, 255, 255, 0.92);
-          color: #334155;
+          border: 1px solid var(--border-soft);
+          background: var(--bg-card-soft);
+          color: var(--text-main);
           font-weight: 800;
           outline: none;
           appearance: none;
@@ -67,8 +67,8 @@ export default function LanguageSwitcher({ size = 'compact', fullWidth = false }
           box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
           transition: all 0.16s ease;
           background-image:
-            linear-gradient(45deg, transparent 50%, #475569 50%),
-            linear-gradient(135deg, #475569 50%, transparent 50%);
+            linear-gradient(45deg, transparent 50%, var(--text-soft) 50%),
+            linear-gradient(135deg, var(--text-soft) 50%, transparent 50%);
           background-position:
             calc(100% - 18px) calc(50% - 3px),
             calc(100% - 13px) calc(50% - 3px);
@@ -89,7 +89,6 @@ export default function LanguageSwitcher({ size = 'compact', fullWidth = false }
         }
 
         .language-switcher select:hover {
-          background-color: #ffffff;
           border-color: rgba(15, 23, 42, 0.18);
         }
 
