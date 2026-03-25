@@ -57,8 +57,8 @@ function getQueryParams(): PayParams {
   const searchParams = new URLSearchParams(window.location.search)
 
   return {
-    username: searchParams.get('username') || '',
-    email: searchParams.get('email') || '',
+    username: (searchParams.get('username') || '').trim(),
+    email: (searchParams.get('email') || '').trim().toLowerCase(),
     productType: searchParams.get('product_type') || 'tg_premium',
     duration: searchParams.get('duration') || '12m',
     starsAmount: searchParams.get('stars_amount') || '50',
@@ -402,6 +402,54 @@ function buildUi(lang: string) {
   }
 }
 
+function isValidEmail(value: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
+}
+
+function getMissingUsernameMessage(lang: string) {
+  if (lang === 'de') return 'Bitte geben Sie Ihren Telegram-Benutzernamen ein.'
+  if (lang === 'es') return 'Por favor, introduzca su nombre de usuario de Telegram.'
+  if (lang === 'fr') return "Veuillez saisir votre nom d'utilisateur Telegram."
+  if (lang === 'ja') return 'Telegramユーザー名を入力してください。'
+  if (lang === 'ko') return 'Telegram 사용자명을 입력하세요.'
+  if (lang === 'zh-cn') return '请输入 TG 用户名。'
+  if (lang === 'zh-tw') return '請輸入 TG 用戶名。'
+  return 'Please enter your Telegram username.'
+}
+
+function getMissingEmailMessage(lang: string) {
+  if (lang === 'de') return 'Bitte geben Sie Ihre E-Mail-Adresse ein.'
+  if (lang === 'es') return 'Por favor, introduzca su correo electrónico.'
+  if (lang === 'fr') return 'Veuillez saisir votre e-mail.'
+  if (lang === 'ja') return 'メールアドレスを入力してください。'
+  if (lang === 'ko') return '이메일을 입력하세요.'
+  if (lang === 'zh-cn') return '请输入邮箱地址。'
+  if (lang === 'zh-tw') return '請輸入電子郵件地址。'
+  return 'Please enter your email address.'
+}
+
+function getInvalidEmailMessage(lang: string) {
+  if (lang === 'de') return 'Bitte geben Sie eine gültige E-Mail-Adresse ein.'
+  if (lang === 'es') return 'Por favor, introduzca un correo electrónico válido.'
+  if (lang === 'fr') return 'Veuillez saisir une adresse e-mail valide.'
+  if (lang === 'ja') return '有効なメールアドレスを入力してください。'
+  if (lang === 'ko') return '올바른 이메일 주소를 입력하세요.'
+  if (lang === 'zh-cn') return '请输入有效的邮箱地址。'
+  if (lang === 'zh-tw') return '請輸入有效的電子郵件地址。'
+  return 'Please enter a valid email address.'
+}
+
+function getNoPaymentMethodMessage(lang: string) {
+  if (lang === 'zh-cn') return '当前没有可用的支付方式。'
+  if (lang === 'zh-tw') return '目前沒有可用的支付方式。'
+  if (lang === 'ja') return '現在利用可能な支払い方法がありません。'
+  if (lang === 'ko') return '현재 사용 가능한 결제 방식이 없습니다.'
+  if (lang === 'de') return 'Derzeit sind keine Zahlungsmethoden verfügbar.'
+  if (lang === 'es') return 'Actualmente no hay métodos de pago disponibles.'
+  if (lang === 'fr') return "Aucun mode de paiement n'est actuellement disponible."
+  return 'No enabled payment methods are available.'
+}
+
 export default function PayPage() {
   const { lang, t } = useI18n()
   const ui = useMemo(() => buildUi(lang), [lang])
@@ -568,23 +616,31 @@ export default function PayPage() {
   async function handleSubmit() {
     setErrorText('')
 
-    if (!params.email || !params.priceUsd || Number(params.priceUsd) <= 0) {
+    const trimmedUsername = params.username.trim()
+    const trimmedEmail = params.email.trim().toLowerCase()
+
+    if (!trimmedUsername) {
+      setErrorText(getMissingUsernameMessage(lang))
+      return
+    }
+
+    if (!trimmedEmail) {
+      setErrorText(getMissingEmailMessage(lang))
+      return
+    }
+
+    if (!isValidEmail(trimmedEmail)) {
+      setErrorText(getInvalidEmailMessage(lang))
+      return
+    }
+
+    if (!params.priceUsd || Number(params.priceUsd) <= 0) {
       setErrorText(ui.invalidOrder)
       return
     }
 
     if (!selectedMethod) {
-      setErrorText(
-        lang === 'zh-cn'
-          ? '当前没有可用的支付方式。'
-          : lang === 'zh-tw'
-            ? '目前沒有可用的支付方式。'
-            : lang === 'ja'
-              ? '現在利用可能な支払い方法がありません。'
-              : lang === 'ko'
-                ? '현재 사용 가능한 결제 방식이 없습니다.'
-                : 'No enabled payment methods are available.'
-      )
+      setErrorText(getNoPaymentMethodMessage(lang))
       return
     }
 
@@ -592,8 +648,8 @@ export default function PayPage() {
       setSubmitting(true)
 
       const payload = {
-        username: params.username,
-        email: params.email,
+        username: trimmedUsername,
+        email: trimmedEmail,
         product_type: params.productType,
         duration: params.productType === 'tg_premium' ? params.duration : null,
         stars_amount: params.productType === 'tg_stars' ? Number(params.starsAmount) : null,
@@ -905,9 +961,25 @@ export default function PayPage() {
               <button
                 type="button"
                 onClick={handleSubmit}
-                disabled={submitting}
+                disabled={
+                  submitting ||
+                  !params.username.trim() ||
+                  !params.email.trim() ||
+                  !isValidEmail(params.email) ||
+                  !selectedMethod
+                }
                 className="btn-primary"
-                style={{ marginTop: 16, opacity: submitting ? 0.8 : 1 }}
+                style={{
+                  marginTop: 16,
+                  opacity:
+                    submitting ||
+                    !params.username.trim() ||
+                    !params.email.trim() ||
+                    !isValidEmail(params.email) ||
+                    !selectedMethod
+                      ? 0.8
+                      : 1,
+                }}
               >
                 {submitting ? ui.submitting : ui.submit}
               </button>
