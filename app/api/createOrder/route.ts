@@ -38,6 +38,10 @@ function getDeviceId(req: Request, body: any) {
   return `${forwarded}__${ua}`.slice(0, 240)
 }
 
+function isValidEmail(value: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
+}
+
 export async function POST(req: Request) {
   try {
     const supabase = getSupabase()
@@ -59,8 +63,16 @@ export async function POST(req: Request) {
       : null
     const deviceId = getDeviceId(req, body)
 
+    if (!username) {
+      return noStoreJson({ error: 'Telegram username is required' }, { status: 400 })
+    }
+
     if (!email) {
       return noStoreJson({ error: 'Email is required' }, { status: 400 })
+    }
+
+    if (!isValidEmail(email)) {
+      return noStoreJson({ error: 'Invalid email address' }, { status: 400 })
     }
 
     if (!productType) {
@@ -97,7 +109,7 @@ export async function POST(req: Request) {
 
     const insertData: Record<string, any> = {
       order_no: orderNo,
-      username: username || null,
+      username,
       email,
       device_id: deviceId,
       product_type: productType,
