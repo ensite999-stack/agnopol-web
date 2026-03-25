@@ -32,7 +32,11 @@ export default function LanguageSwitcher({ size = 'compact', fullWidth = false }
   }
 
   return (
-    <div className={`language-switcher ${size === 'hero' ? 'hero' : 'compact'} ${fullWidth ? 'full' : ''}`}>
+    <div
+      className={`language-switcher ${size === 'hero' ? 'hero' : 'compact'} ${
+        fullWidth ? 'full' : ''
+      }`}
+    >
       <select value={currentLang} onChange={handleChange} aria-label="Language selector">
         {LANGUAGE_OPTIONS.map((item) => (
           <option key={item.value} value={item.value}>
