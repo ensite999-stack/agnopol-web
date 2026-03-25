@@ -128,7 +128,8 @@ const LOOKUP_UI: Record<string, LookupUi> = {
     paid: 'Paid',
     completed: 'Completed',
     cancelled: 'Cancelled',
-    resubmitSuccess: 'Updated payment proof submitted successfully. Please check the order again later.',
+    resubmitSuccess:
+      'Updated payment proof submitted successfully. Please check the order again later.',
     resubmitError: 'Failed to resubmit payment proof.',
   },
   es: {
@@ -949,6 +950,7 @@ function HomePageInner() {
 
         .hero-mode {
           margin-top: 4px;
+          margin-bottom: 10px;
         }
 
         .brand-title {
