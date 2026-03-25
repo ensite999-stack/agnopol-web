@@ -1,55 +1,104 @@
 'use client'
 
-import { useMemo } from 'react'
+import { ChangeEvent, useMemo } from 'react'
 import { useI18n } from './language-provider'
-import { useThemeMode, type ThemeMode } from './theme-provider'
+import { type LangCode } from '../lib/i18n'
 
-const LABELS: Record<
-  string,
-  {
-    title: string
-    auto: string
-    light: string
-    dark: string
-  }
-> = {
-  de: { title: 'Modus', auto: 'Auto', light: 'Hell', dark: 'Dunkel' },
-  en: { title: 'Mode', auto: 'Auto', light: 'Light', dark: 'Dark' },
-  es: { title: 'Modo', auto: 'Auto', light: 'Claro', dark: 'Oscuro' },
-  fr: { title: 'Mode', auto: 'Auto', light: 'Clair', dark: 'Sombre' },
-  ja: { title: 'モード', auto: '自動', light: 'ライト', dark: 'ダーク' },
-  ko: { title: '모드', auto: '자동', light: '라이트', dark: '다크' },
-  'zh-cn': { title: '模式', auto: '自动', light: '浅色', dark: '深色' },
-  'zh-tw': { title: '模式', auto: '自動', light: '淺色', dark: '深色' },
+type Props = {
+  size?: 'compact' | 'hero'
+  fullWidth?: boolean
 }
 
-export default function ThemeSwitcher() {
-  const { lang } = useI18n()
-  const { mode, setMode } = useThemeMode()
+const LANGUAGE_OPTIONS: Array<{ value: LangCode; label: string }> = [
+  { value: 'de', label: 'Deutsch' },
+  { value: 'en', label: 'English' },
+  { value: 'es', label: 'Español' },
+  { value: 'fr', label: 'Français' },
+  { value: 'ja', label: '日本語' },
+  { value: 'ko', label: '한국어' },
+  { value: 'zh-cn', label: '简体中文' },
+  { value: 'zh-tw', label: '繁體中文' },
+]
 
-  const text = useMemo(() => LABELS[lang] || LABELS.en, [lang])
+export default function LanguageSwitcher({
+  size = 'compact',
+  fullWidth = false,
+}: Props) {
+  const { lang, setLang } = useI18n()
 
-  const items: Array<{ value: ThemeMode; label: string }> = [
-    { value: 'auto', label: text.auto },
-    { value: 'light', label: text.light },
-    { value: 'dark', label: text.dark },
-  ]
+  const currentLang = useMemo<LangCode>(() => {
+    return LANGUAGE_OPTIONS.some((item) => item.value === lang)
+      ? (lang as LangCode)
+      : 'en'
+  }, [lang])
+
+  function handleChange(event: ChangeEvent<HTMLSelectElement>) {
+    setLang(event.target.value as LangCode)
+  }
+
+  const isHero = size === 'hero'
 
   return (
-    <div className="theme-switcher">
-      <div className="theme-switcher-label">{text.title}</div>
+    <div
+      style={{
+        width: fullWidth ? '100%' : isHero ? 'min(100%, 320px)' : 'auto',
+        display: 'flex',
+        justifyContent: 'center',
+      }}
+    >
+      <div
+        style={{
+          position: 'relative',
+          width: fullWidth ? '100%' : isHero ? '100%' : 'auto',
+          minWidth: isHero ? undefined : 108,
+        }}
+      >
+        <select
+          value={currentLang}
+          onChange={handleChange}
+          aria-label="Language"
+          style={{
+            width: '100%',
+            height: isHero ? 52 : 36,
+            padding: isHero ? '0 44px 0 18px' : '0 34px 0 12px',
+            borderRadius: 999,
+            border: '1px solid var(--border-soft)',
+            background: 'var(--bg-card-soft)',
+            color: 'var(--text-main)',
+            fontSize: isHero ? 16 : 11,
+            fontWeight: 800,
+            outline: 'none',
+            appearance: 'none',
+            WebkitAppearance: 'none',
+            boxShadow: 'var(--shadow-soft)',
+            backdropFilter: 'blur(10px)',
+            cursor: 'pointer',
+          }}
+        >
+          {LANGUAGE_OPTIONS.map((item) => (
+            <option key={item.value} value={item.value}>
+              {item.label}
+            </option>
+          ))}
+        </select>
 
-      <div className="theme-switcher-tabs">
-        {items.map((item) => (
-          <button
-            key={item.value}
-            type="button"
-            onClick={() => setMode(item.value)}
-            className={`theme-switcher-btn ${mode === item.value ? 'active' : ''}`}
-          >
-            {item.label}
-          </button>
-        ))}
+        <span
+          aria-hidden="true"
+          style={{
+            position: 'absolute',
+            right: isHero ? 18 : 12,
+            top: '50%',
+            width: 0,
+            height: 0,
+            borderLeft: isHero ? '8px solid transparent' : '6px solid transparent',
+            borderRight: isHero ? '8px solid transparent' : '6px solid transparent',
+            borderTop: isHero
+              ? '10px solid var(--text-soft)'
+              : '8px solid var(--text-soft)',
+            transform: 'translateY(-20%)',
+            pointerEvents: 'none',
+          }}
+        />
       </div>
     </div>
   )
