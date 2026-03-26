@@ -11,16 +11,17 @@ html[data-theme='light'] {
   --border-soft: rgba(15, 23, 42, 0.1);
   --shadow-soft: 0 18px 40px rgba(15, 23, 42, 0.08);
 
-  --brand: #1b2230;
+  /* 主品牌色：柔和石墨灰，不刺眼 */
+  --brand: #2f3a4c;
   --brand-contrast: #ffffff;
 
   --segmented-bg: rgba(17, 24, 39, 0.06);
-  --segment-active-bg: #1b2230;
+  --segment-active-bg: #2f3a4c;
   --segment-active-text: #ffffff;
   --segment-active-shadow: 0 6px 14px rgba(15, 23, 42, 0.12);
 
-  --notice-bg: rgba(27, 34, 48, 0.06);
-  --notice-border: rgba(27, 34, 48, 0.12);
+  --notice-bg: rgba(47, 58, 76, 0.06);
+  --notice-border: rgba(47, 58, 76, 0.12);
 
   --overlay-bg: rgba(15, 23, 42, 0.2);
 }
@@ -37,11 +38,12 @@ html[data-theme='dark'] {
   --border-soft: rgba(255, 255, 255, 0.08);
   --shadow-soft: 0 18px 40px rgba(0, 0, 0, 0.34);
 
-  --brand: #5b6472;
+  /* 深色模式主色：偏浅石板灰，保证层次和可读性 */
+  --brand: #6b7482;
   --brand-contrast: #ffffff;
 
   --segmented-bg: rgba(255, 255, 255, 0.08);
-  --segment-active-bg: #5b6472;
+  --segment-active-bg: #6b7482;
   --segment-active-text: #ffffff;
   --segment-active-shadow: none;
 
@@ -83,13 +85,13 @@ body,
 
 .site-shell {
   background:
-    radial-gradient(circle at top, rgba(27, 34, 48, 0.05), transparent 34%),
+    radial-gradient(circle at top, rgba(47, 58, 76, 0.05), transparent 34%),
     var(--bg-page) !important;
 }
 
 html[data-theme='dark'] .site-shell {
   background:
-    radial-gradient(circle at top, rgba(91, 100, 114, 0.12), transparent 30%),
+    radial-gradient(circle at top, rgba(107, 116, 130, 0.12), transparent 30%),
     var(--bg-page) !important;
 }
 
@@ -113,8 +115,6 @@ html[data-theme='dark'] .site-shell {
 .summary-price,
 .lookup-title,
 .field-title,
-.plan-title,
-.plan-price,
 .lookup-item-card,
 .footer-email-label,
 .footer-email a,
@@ -164,7 +164,7 @@ html[data-theme='dark'] .site-shell {
   background: var(--brand) !important;
   color: var(--brand-contrast) !important;
   border-color: transparent !important;
-  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.16) !important;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.14) !important;
 }
 
 html[data-theme='dark'] .segment-btn.active,
@@ -173,8 +173,26 @@ html[data-theme='dark'] .btn-primary {
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.24) !important;
 }
 
-.plan-card:not(.active) {
+/* 非激活套餐卡片文字 */
+.plan-card:not(.active) .plan-title,
+.plan-card:not(.active) .plan-price {
   color: var(--text-main) !important;
+}
+
+/* 激活套餐卡片文字，强制白色，防止看不清 */
+.plan-card.active .plan-title,
+.plan-card.active .plan-price {
+  color: var(--brand-contrast) !important;
+}
+
+/* 激活 tabs 文字 */
+.segment-btn.active {
+  color: var(--brand-contrast) !important;
+}
+
+/* 主按钮文字 */
+.btn-primary {
+  color: var(--brand-contrast) !important;
 }
 
 .lookup-note-box {
