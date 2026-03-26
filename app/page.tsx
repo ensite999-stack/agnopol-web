@@ -1127,7 +1127,7 @@ function HomePageInner() {
         .hero-mode {
           max-width: clamp(148px, 34vw, 164px);
           margin-top: -2px;
-          margin-bottom: 14px;
+          margin-bottom: 10px;
         }
 
         .brand-title {
@@ -1460,7 +1460,7 @@ function HomePageInner() {
 
           .hero-mode {
             max-width: min(100%, 156px);
-            margin-bottom: 12px;
+            margin-bottom: 10px;
             transform: none;
           }
 
