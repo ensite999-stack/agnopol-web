@@ -10,109 +10,96 @@ type Props = {
 }
 
 const LANGUAGE_OPTIONS: Array<{ value: LangCode; label: string }> = [
-  { value: 'de', label: 'Deutsch' },
   { value: 'en', label: 'English' },
+  { value: 'zh-tw', label: '繁體中文' },
+  { value: 'de', label: 'Deutsch' },
   { value: 'es', label: 'Español' },
   { value: 'fr', label: 'Français' },
   { value: 'ja', label: '日本語' },
   { value: 'ko', label: '한국어' },
   { value: 'zh-cn', label: '简体中文' },
-  { value: 'zh-tw', label: '繁體中文' },
 ]
 
-export default function LanguageSwitcher({
-  size = 'compact',
-  fullWidth = false,
-}: Props) {
+export default function LanguageSwitcher({ size = 'compact', fullWidth = false }: Props) {
   const { lang, setLang } = useI18n()
 
-  const currentLang = useMemo<LangCode>(() => {
-    return LANGUAGE_OPTIONS.some((item) => item.value === lang)
-      ? (lang as LangCode)
-      : 'en'
+  const currentLang = useMemo(() => {
+    return LANGUAGE_OPTIONS.some((item) => item.value === lang) ? lang : 'en'
   }, [lang])
 
   function handleChange(event: ChangeEvent<HTMLSelectElement>) {
     setLang(event.target.value as LangCode)
   }
 
-  const isHero = size === 'hero'
-  const wrapperWidth = fullWidth
-    ? '100%'
-    : isHero
-      ? 'min(100%, 320px)'
-      : 'min(100%, 196px)'
-
-  const controlHeight = isHero ? 52 : 40
-  const padding = isHero ? '0 44px 0 18px' : '0 38px 0 14px'
-  const fontSize = isHero ? 16 : 14
-
   return (
     <div
-      style={{
-        width: wrapperWidth,
-        maxWidth: '100%',
-        display: 'flex',
-        justifyContent: 'center',
-      }}
+      className={`language-switcher ${size === 'hero' ? 'hero' : 'compact'} ${
+        fullWidth ? 'full' : ''
+      }`}
     >
-      <div
-        style={{
-          position: 'relative',
-          width: '100%',
-          minWidth: 0,
-        }}
-      >
-        <select
-          value={currentLang}
-          onChange={handleChange}
-          aria-label="Language"
-          style={{
-            width: '100%',
-            height: controlHeight,
-            padding,
-            borderRadius: 999,
-            border: '1px solid var(--border-soft)',
-            background: 'var(--bg-card-soft)',
-            color: 'var(--text-main)',
-            fontSize,
-            fontWeight: 800,
-            outline: 'none',
-            appearance: 'none',
-            WebkitAppearance: 'none',
-            boxShadow: 'var(--shadow-soft)',
-            backdropFilter: 'blur(10px)',
-            cursor: 'pointer',
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-          }}
-        >
-          {LANGUAGE_OPTIONS.map((item) => (
-            <option key={item.value} value={item.value}>
-              {item.label}
-            </option>
-          ))}
-        </select>
+      <select value={currentLang} onChange={handleChange} aria-label="Language selector">
+        {LANGUAGE_OPTIONS.map((item) => (
+          <option key={item.value} value={item.value}>
+            {item.label}
+          </option>
+        ))}
+      </select>
 
-        <span
-          aria-hidden="true"
-          style={{
-            position: 'absolute',
-            right: isHero ? 18 : 14,
-            top: '50%',
-            width: 0,
-            height: 0,
-            borderLeft: isHero ? '8px solid transparent' : '6px solid transparent',
-            borderRight: isHero ? '8px solid transparent' : '6px solid transparent',
-            borderTop: isHero
-              ? '10px solid var(--text-soft)'
-              : '8px solid var(--text-soft)',
-            transform: 'translateY(-28%)',
-            pointerEvents: 'none',
-          }}
-        />
-      </div>
+      <style jsx>{`
+        .language-switcher {
+          width: ${fullWidth ? '100%' : size === 'hero' ? '100%' : '132px'};
+          min-width: 0;
+        }
+
+        .language-switcher select {
+          width: 100%;
+          min-width: 0;
+          box-sizing: border-box;
+          border-radius: 999px;
+          border: 1px solid rgba(15, 23, 42, 0.12);
+          background: rgba(255, 255, 255, 0.92);
+          color: #334155;
+          font-weight: 800;
+          outline: none;
+          appearance: none;
+          -webkit-appearance: none;
+          -moz-appearance: none;
+          box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
+          transition: all 0.16s ease;
+          background-image:
+            linear-gradient(45deg, transparent 50%, #475569 50%),
+            linear-gradient(135deg, #475569 50%, transparent 50%);
+          background-position:
+            calc(100% - 18px) calc(50% - 3px),
+            calc(100% - 13px) calc(50% - 3px);
+          background-size: 6px 6px, 6px 6px;
+          background-repeat: no-repeat;
+        }
+
+        .language-switcher.compact select {
+          height: 38px;
+          padding: 0 32px 0 12px;
+          font-size: 12px;
+        }
+
+        .language-switcher.hero select {
+          height: 52px;
+          padding: 0 36px 0 16px;
+          font-size: 15px;
+        }
+
+        .language-switcher select:hover {
+          background-color: #ffffff;
+          border-color: rgba(15, 23, 42, 0.18);
+        }
+
+        .language-switcher select:focus {
+          border-color: rgba(7, 27, 87, 0.22);
+          box-shadow:
+            0 8px 20px rgba(15, 23, 42, 0.06),
+            0 0 0 4px rgba(7, 27, 87, 0.08);
+        }
+      `}</style>
     </div>
   )
 }
