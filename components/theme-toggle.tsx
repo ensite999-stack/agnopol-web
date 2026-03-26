@@ -72,8 +72,10 @@ export default function ThemeToggle() {
     <div
       ref={wrapRef}
       style={{
-        width: 'min(100%, 188px)',
+        width: '100%',
         position: 'relative',
+        paddingBottom: open ? 138 : 0,
+        transition: 'padding-bottom 0.18s ease',
       }}
     >
       <div
@@ -96,8 +98,8 @@ export default function ThemeToggle() {
         aria-haspopup="menu"
         style={{
           width: '100%',
-          height: 42,
-          padding: '0 14px',
+          height: 38,
+          padding: '0 12px',
           borderRadius: 999,
           border: '1px solid var(--border-soft)',
           background: 'var(--bg-card-soft)',
@@ -154,10 +156,11 @@ export default function ThemeToggle() {
               <button
                 key={item.value}
                 type="button"
-                role="menuitem"
+                role="menuitemradio"
+                aria-checked={active}
                 onClick={() => handleSelect(item.value)}
                 style={{
-                  minHeight: 38,
+                  minHeight: 36,
                   borderRadius: 12,
                   border: active
                     ? '1px solid transparent'
