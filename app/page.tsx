@@ -249,26 +249,26 @@ const LOOKUP_UI: Record<string, LookupUi> = {
     completed: '완료됨',
     cancelled: '취소됨',
     resubmitSuccess:
-      '새 결제 증빙이 성공적으로 제출되었습니다. 잠시 후 주문 상태를 다시 조회하세요.',
+      '새 결제 증빙이 성공적으로 제출되었습니다. 잠시 후 주문 상태를 다시 확인하세요.',
     resubmitError: '결제 증빙 재제출에 실패했습니다.',
   },
   'zh-cn': {
-    title: '订单查询',
-    subtitle: '输入下单邮箱查询订单状态、系统提示，并可按后台提示重新补交付款凭证。',
-    placeholder: '输入下单邮箱',
+    title: '查询订单',
+    subtitle: '输入下单邮箱，可查询订单状态、系统备注，并在管理员要求时重新提交付款凭证。',
+    placeholder: '请输入下单邮箱',
     button: '查询订单',
     loading: '查询中...',
     orderNo: '订单号',
     email: '邮箱',
     status: '状态',
-    product: '产品',
+    product: '商品',
     amount: '金额',
     network: '支付网络',
     createdAt: '创建时间',
-    note: '系统提示',
+    note: '系统备注',
     txHash: '交易哈希',
     resubmit: '重新上传凭证',
-    proofReady: '新凭证已就绪：',
+    proofReady: '新的凭证已准备：',
     hashPlaceholder: '重新填写交易哈希（可选）',
     resubmitButton: '提交新的凭证',
     resubmitting: '提交中...',
@@ -277,27 +277,27 @@ const LOOKUP_UI: Record<string, LookupUi> = {
     paid: '已支付',
     completed: '已完成',
     cancelled: '已取消',
-    resubmitSuccess: '新的付款凭证已提交成功，请稍后重新查询订单状态。',
+    resubmitSuccess: '新的付款凭证已成功提交，请稍后再次查询订单状态。',
     resubmitError: '重新提交付款凭证失败。',
   },
   'zh-tw': {
-    title: '訂單查詢',
-    subtitle: '輸入下單電子郵件查詢訂單狀態、系統提示，並可按後台提示重新補交付款憑證。',
-    placeholder: '輸入下單電子郵件',
+    title: '查詢訂單',
+    subtitle: '輸入下單電子郵件，可查詢訂單狀態、系統備註，並在管理員要求時重新提交付款憑證。',
+    placeholder: '請輸入下單電子郵件',
     button: '查詢訂單',
     loading: '查詢中...',
     orderNo: '訂單號',
     email: '電子郵件',
     status: '狀態',
-    product: '產品',
+    product: '商品',
     amount: '金額',
     network: '支付網路',
     createdAt: '建立時間',
-    note: '系統提示',
-    txHash: '交易哈希',
+    note: '系統備註',
+    txHash: '交易雜湊',
     resubmit: '重新上傳憑證',
-    proofReady: '新憑證已就緒：',
-    hashPlaceholder: '重新填寫交易哈希（可選）',
+    proofReady: '新的憑證已準備：',
+    hashPlaceholder: '重新填寫交易雜湊（可選）',
     resubmitButton: '提交新的憑證',
     resubmitting: '提交中...',
     noOrders: '未找到相關訂單。',
@@ -305,23 +305,36 @@ const LOOKUP_UI: Record<string, LookupUi> = {
     paid: '已支付',
     completed: '已完成',
     cancelled: '已取消',
-    resubmitSuccess: '新的付款憑證已提交成功，請稍後重新查詢訂單狀態。',
+    resubmitSuccess: '新的付款憑證已成功提交，請稍後再次查詢訂單狀態。',
     resubmitError: '重新提交付款憑證失敗。',
   },
 }
 
-const NAV_UI: Record<string, { preparing: string; redirecting: string }> = {
-  de: { preparing: 'Bestellung wird vorbereitet...', redirecting: 'Weiter zur Zahlungsseite' },
-  en: { preparing: 'Preparing your order...', redirecting: 'Redirecting to payment page' },
-  es: { preparing: 'Preparando su pedido...', redirecting: 'Redirigiendo a la página de pago' },
-  fr: { preparing: 'Préparation de votre commande...', redirecting: 'Redirection vers la page de paiement' },
-  ja: { preparing: 'ご注文を準備中...', redirecting: '支払いページへ移動しています' },
-  ko: { preparing: '주문을 준비하는 중...', redirecting: '결제 페이지로 이동 중' },
-  'zh-cn': { preparing: '正在准备订单...', redirecting: '正在跳转支付页' },
-  'zh-tw': { preparing: '正在準備訂單...', redirecting: '正在跳轉支付頁' },
+const NAV_UI: Record<
+  string,
+  {
+    preparing: string
+    redirecting: string
+  }
+> = {
+  de: { preparing: 'Weiterleitung wird vorbereitet', redirecting: 'Weiterleitung zur Zahlungsseite...' },
+  en: { preparing: 'Preparing your order', redirecting: 'Redirecting to payment page...' },
+  es: { preparing: 'Preparando su pedido', redirecting: 'Redirigiendo a la página de pago...' },
+  fr: { preparing: 'Préparation de votre commande', redirecting: 'Redirection vers la page de paiement...' },
+  ja: { preparing: '注文を準備しています', redirecting: '支払いページへ移動中...' },
+  ko: { preparing: '주문을 준비하는 중', redirecting: '결제 페이지로 이동 중...' },
+  'zh-cn': { preparing: '正在准备订单', redirecting: '正在跳转到支付页...' },
+  'zh-tw': { preparing: '正在準備訂單', redirecting: '正在跳轉到支付頁...' },
 }
 
-const HOME_FORM_ERRORS: Record<string, { username: string; email: string; emailInvalid: string }> = {
+const HOME_FORM_ERRORS: Record<
+  string,
+  {
+    username: string
+    email: string
+    emailInvalid: string
+  }
+> = {
   de: {
     username: 'Bitte geben Sie Ihren Telegram-Benutzernamen ein.',
     email: 'Bitte geben Sie Ihre E-Mail-Adresse ein.',
@@ -338,7 +351,7 @@ const HOME_FORM_ERRORS: Record<string, { username: string; email: string; emailI
     emailInvalid: 'Por favor, introduzca un correo electrónico válido.',
   },
   fr: {
-    username: "Veuillez saisir votre nom d'utilisateur Telegram.",
+    username: 'Veuillez saisir votre nom d’utilisateur Telegram.',
     email: 'Veuillez saisir votre e-mail.',
     emailInvalid: 'Veuillez saisir une adresse e-mail valide.',
   },
@@ -375,6 +388,7 @@ function getHomeFormError(lang: string, key: 'username' | 'email' | 'emailInvali
 
 function formatBostonTime(value: string | null) {
   if (!value) return '-'
+
   try {
     return new Intl.DateTimeFormat('en-US', {
       timeZone: 'America/New_York',
@@ -391,8 +405,13 @@ function formatBostonTime(value: string | null) {
   }
 }
 
+function formatMoney(value: number) {
+  const fixed = Number(value.toFixed(2))
+  return Number.isInteger(fixed) ? String(fixed) : fixed.toFixed(2).replace(/\.?0+$/, '')
+}
+
 function OrderLookupSection() {
-  const { t, lang } = useI18n()
+  const { lang, t } = useI18n()
   const ui = LOOKUP_UI[lang] || LOOKUP_UI.en
 
   const [email, setEmail] = useState('')
@@ -409,20 +428,37 @@ function OrderLookupSection() {
   const [resubmitError, setResubmitError] = useState('')
 
   function getProductLabel(item: OrderResult) {
-    if (item.product_type === 'tg_stars') {
-      return `${t.home.tgStars} ${item.stars_amount ?? 0}`
+    const productType = String(item.product_type || '').toLowerCase()
+
+    if (productType.includes('premium')) {
+      const durationText =
+        item.duration === '3m'
+          ? t.home.months3
+          : item.duration === '6m'
+            ? t.home.months6
+            : item.duration === '12m'
+              ? t.home.months12
+              : item.duration || ''
+
+      return `${t.home.tgPremium}${durationText ? ` ${durationText}` : ''}`
     }
-    if (item.duration === '3m') return `${t.home.tgPremium} ${t.home.months3}`
-    if (item.duration === '6m') return `${t.home.tgPremium} ${t.home.months6}`
-    return `${t.home.tgPremium} ${t.home.months12}`
+
+    if (productType.includes('stars')) {
+      const amount = Number(item.stars_amount || item.amount || 0)
+      return `${t.home.tgStars} ${amount || ''}`.trim()
+    }
+
+    return item.product_type || '-'
   }
 
-  function getStatusLabel(status: string | null | undefined) {
+  function getStatusLabel(status: string) {
     const value = String(status || '').toLowerCase()
+
     if (value === 'pending' || value === 'pending_payment') return ui.pending
     if (value === 'paid') return ui.paid
     if (value === 'completed') return ui.completed
     if (value === 'failed' || value === 'cancelled') return ui.cancelled
+
     return status || '-'
   }
 
@@ -460,10 +496,10 @@ function OrderLookupSection() {
     if (!file) return
 
     setResubmitProofName(file.name)
+
     const reader = new FileReader()
     reader.onload = () => {
-      const result = reader.result as string
-      setResubmitProofBase64(result)
+      setResubmitProofBase64(reader.result as string)
     }
     reader.readAsDataURL(file)
   }
@@ -511,16 +547,20 @@ function OrderLookupSection() {
       <div className="lookup-title">{ui.title}</div>
       <div className="small-muted lookup-subtitle">{ui.subtitle}</div>
 
-      <input
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        placeholder={ui.placeholder}
-        className="input"
-      />
-
-      <button onClick={handleLookup} className="btn-primary lookup-btn">
-        {loading ? ui.loading : ui.button}
-      </button>
+      <div className="lookup-form">
+        <input
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder={ui.placeholder}
+          className="input"
+          type="email"
+          inputMode="email"
+          autoComplete="email"
+        />
+        <button onClick={handleLookup} className="btn-primary lookup-btn" type="button">
+          {loading ? ui.loading : ui.button}
+        </button>
+      </div>
 
       {errorText ? <div className="status-box-error">{errorText}</div> : null}
       {resubmitMessage ? <div className="status-box-success">{resubmitMessage}</div> : null}
@@ -534,13 +574,27 @@ function OrderLookupSection() {
 
             return (
               <div key={item.order_no} className="lookup-item-card">
-                <div><strong>{ui.orderNo}:</strong> {item.order_no}</div>
-                <div><strong>{ui.email}:</strong> {email}</div>
-                <div><strong>{ui.status}:</strong> {getStatusLabel(item.status)}</div>
-                <div><strong>{ui.product}:</strong> {getProductLabel(item)}</div>
-                <div><strong>{ui.amount}:</strong> ${item.price_usd ?? item.amount ?? 0}</div>
-                <div><strong>{ui.network}:</strong> {item.payment_network || '-'}</div>
-                <div><strong>{ui.createdAt}:</strong> {formatBostonTime(item.created_at)}</div>
+                <div>
+                  <strong>{ui.orderNo}:</strong> {item.order_no}
+                </div>
+                <div>
+                  <strong>{ui.email}:</strong> {email}
+                </div>
+                <div>
+                  <strong>{ui.status}:</strong> {getStatusLabel(item.status)}
+                </div>
+                <div>
+                  <strong>{ui.product}:</strong> {getProductLabel(item)}
+                </div>
+                <div>
+                  <strong>{ui.amount}:</strong> ${item.price_usd ?? item.amount ?? 0}
+                </div>
+                <div>
+                  <strong>{ui.network}:</strong> {item.payment_network || '-'}
+                </div>
+                <div>
+                  <strong>{ui.createdAt}:</strong> {formatBostonTime(item.created_at)}
+                </div>
 
                 {item.tx_hash ? (
                   <div className="lookup-break-all">
@@ -574,20 +628,17 @@ function OrderLookupSection() {
                     {activeOrderNo === item.order_no ? (
                       <div className="lookup-resubmit-box">
                         <input type="file" accept="image/*" onChange={handleResubmitFileChange} />
-
                         {resubmitProofName ? (
                           <div className="small-muted lookup-break-all">
                             {ui.proofReady} {resubmitProofName}
                           </div>
                         ) : null}
-
                         <input
                           value={resubmitHash}
                           onChange={(e) => setResubmitHash(e.target.value)}
                           placeholder={ui.hashPlaceholder}
                           className="input"
                         />
-
                         <button
                           type="button"
                           className="btn-primary lookup-btn"
@@ -617,9 +668,11 @@ function HomePageInner() {
   const [stars, setStars] = useState(50)
   const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
+
   const [config, setConfig] = useState<PublicConfig>(defaultConfig)
   const [configError, setConfigError] = useState('')
   const [configLoading, setConfigLoading] = useState(true)
+
   const [routingToPay, setRoutingToPay] = useState(false)
   const [formError, setFormError] = useState('')
 
@@ -689,6 +742,7 @@ function HomePageInner() {
       if (duration === '6m') return Number(config.premium_6m_price)
       return Number(config.premium_12m_price)
     }
+
     return Number((safeStars * Number(config.stars_rate)).toFixed(2))
   }, [tab, duration, safeStars, config])
 
@@ -698,6 +752,7 @@ function HomePageInner() {
         duration === '3m' ? t.home.months3 : duration === '6m' ? t.home.months6 : t.home.months12
       return `${t.home.tgPremium} ${durationText}`
     }
+
     return `${t.home.tgStars} ${safeStars}`
   }, [tab, duration, safeStars, t])
 
@@ -737,6 +792,7 @@ function HomePageInner() {
     }
 
     setRoutingToPay(true)
+
     window.setTimeout(() => {
       window.location.href = `/pay?${params.toString()}`
     }, 420)
@@ -749,12 +805,14 @@ function HomePageInner() {
           <h1 className="brand-title hero-step hero-step-1">{t.common.brand}</h1>
           <p className="brand-slogan hero-step hero-step-2">{t.common.slogan}</p>
 
-          <div className="hero-tools hero-step hero-step-3">
-            <LanguageSwitcher size="compact" />
-          </div>
+          <div className="hero-stair hero-step hero-step-3">
+            <div className="hero-tools">
+              <LanguageSwitcher size="compact" />
+            </div>
 
-          <div className="hero-mode hero-step hero-step-4">
-            <ThemeToggle />
+            <div className="hero-mode">
+              <ThemeToggle />
+            </div>
           </div>
         </section>
 
@@ -766,6 +824,7 @@ function HomePageInner() {
           >
             {t.home.premiumTab}
           </button>
+
           <button
             type="button"
             onClick={() => setTab('stars')}
@@ -787,7 +846,7 @@ function HomePageInner() {
                 onClick={() => setDuration('3m')}
               >
                 <div className="plan-title">{t.home.months3}</div>
-                <div className="plan-price">${Number(config.premium_3m_price)}</div>
+                <div className="plan-price">${formatMoney(Number(config.premium_3m_price))}</div>
               </div>
 
               <div
@@ -795,7 +854,7 @@ function HomePageInner() {
                 onClick={() => setDuration('6m')}
               >
                 <div className="plan-title">{t.home.months6}</div>
-                <div className="plan-price">${Number(config.premium_6m_price)}</div>
+                <div className="plan-price">${formatMoney(Number(config.premium_6m_price))}</div>
               </div>
 
               <div
@@ -803,7 +862,7 @@ function HomePageInner() {
                 onClick={() => setDuration('12m')}
               >
                 <div className="plan-title">{t.home.months12}</div>
-                <div className="plan-price">${Number(config.premium_12m_price)}</div>
+                <div className="plan-price">${formatMoney(Number(config.premium_12m_price))}</div>
               </div>
             </div>
           </>
@@ -813,7 +872,6 @@ function HomePageInner() {
 
             <div className="card single-box">
               <div className="field-title">{t.home.starsAmount}</div>
-
               <input
                 type="number"
                 min={50}
@@ -823,7 +881,6 @@ function HomePageInner() {
                 placeholder={t.home.starsPlaceholder}
                 className="input"
               />
-
               <div className="field-hint">{t.home.starsMinHint}</div>
               <div className="field-hint">{t.home.autoPriceHint}</div>
             </div>
@@ -833,11 +890,8 @@ function HomePageInner() {
         <div className="summary-box card-soft">
           <div className="small-muted summary-label">{t.home.currentSelection}</div>
           <div className="summary-title">{selectedTitle}</div>
-          <div className="summary-price">${selectedPrice}</div>
-
-          {configLoading ? (
-            <div className="small-muted summary-loading">{t.common.loading}</div>
-          ) : null}
+          <div className="summary-price">${formatMoney(selectedPrice)}</div>
+          {configLoading ? <div className="small-muted summary-loading">{t.common.loading}</div> : null}
         </div>
 
         <div className="form-stack">
@@ -885,7 +939,7 @@ function HomePageInner() {
           <p>{copyrightText}</p>
 
           <p className="footer-email">
-            <span className="footer-email-label">{t.common.officialEmail}:</span>
+            <span className="footer-email-label">{t.common.officialEmail}:</span>{' '}
             <a href="mailto:hello@agnopol.com">hello@agnopol.com</a>
           </p>
 
@@ -908,13 +962,123 @@ function HomePageInner() {
       ) : null}
 
       <style jsx global>{`
+        .site-shell {
+          min-height: 100vh;
+          padding: clamp(16px, 3vw, 28px) clamp(14px, 4vw, 24px) 36px;
+          background:
+            radial-gradient(circle at top, rgba(82, 110, 255, 0.07), transparent 36%),
+            var(--bg-page, #f6f8fc);
+        }
+
         .site-container {
+          width: 100%;
           max-width: 820px;
+          margin: 0 auto;
+        }
+
+        .card,
+        .card-soft {
+          border-radius: 28px;
+          border: 1px solid var(--border-soft, rgba(10, 23, 54, 0.08));
+          background: var(--bg-card, rgba(255, 255, 255, 0.96));
+          box-shadow: var(--shadow-soft, 0 18px 40px rgba(10, 23, 54, 0.08));
+          backdrop-filter: blur(14px);
+        }
+
+        .card-soft {
+          background: var(--bg-card-soft, rgba(255, 255, 255, 0.88));
+        }
+
+        .input {
+          width: 100%;
+          min-height: 50px;
+          border-radius: 18px;
+          border: 1px solid var(--border-soft, rgba(10, 23, 54, 0.08));
+          background: var(--bg-card, #fff);
+          color: var(--text-main, #0a1736);
+          padding: 0 16px;
+          font-size: 15px;
+          outline: none;
+          box-sizing: border-box;
+        }
+
+        .input::placeholder {
+          color: var(--text-soft, #7b8798);
+        }
+
+        .btn-primary,
+        .btn-secondary,
+        .segment-btn {
+          appearance: none;
+          border: 0;
+          cursor: pointer;
+          transition:
+            transform 0.16s ease,
+            box-shadow 0.16s ease,
+            opacity 0.16s ease,
+            background 0.16s ease,
+            color 0.16s ease;
+        }
+
+        .btn-primary:hover,
+        .btn-secondary:hover,
+        .segment-btn:hover,
+        .plan-card:hover {
+          transform: translateY(-1px);
+        }
+
+        .btn-primary {
+          width: 100%;
+          min-height: 52px;
+          border-radius: 18px;
+          background: var(--brand, #0b2570);
+          color: var(--brand-contrast, #fff);
+          font-size: 15px;
+          font-weight: 800;
+          box-shadow: 0 16px 36px rgba(11, 37, 112, 0.2);
+        }
+
+        .btn-secondary {
+          width: 100%;
+          min-height: 46px;
+          border-radius: 16px;
+          background: var(--bg-card-soft, rgba(255, 255, 255, 0.88));
+          color: var(--text-main, #0a1736);
+          border: 1px solid var(--border-soft, rgba(10, 23, 54, 0.08));
+          font-size: 14px;
+          font-weight: 800;
+        }
+
+        .small-muted {
+          color: var(--text-soft, #7b8798);
+          font-size: 13px;
+          line-height: 1.55;
+        }
+
+        .status-box-error,
+        .status-box-success {
+          border-radius: 16px;
+          padding: 12px 14px;
+          font-size: 14px;
+          line-height: 1.6;
+          margin-top: 10px;
+        }
+
+        .status-box-error {
+          background: rgba(220, 53, 69, 0.08);
+          border: 1px solid rgba(220, 53, 69, 0.18);
+          color: #b42318;
+        }
+
+        .status-box-success {
+          background: rgba(18, 183, 106, 0.08);
+          border: 1px solid rgba(18, 183, 106, 0.18);
+          color: #067647;
         }
 
         .hero-center {
           text-align: center;
-          margin-bottom: 14px;
+          margin-bottom: 12px;
         }
 
         .hero-stack {
@@ -926,7 +1090,7 @@ function HomePageInner() {
 
         .hero-stair-wrap {
           width: 100%;
-          max-width: 700px;
+          max-width: min(100%, 560px);
           margin-left: auto;
           margin-right: auto;
         }
@@ -940,21 +1104,30 @@ function HomePageInner() {
           text-align: center;
         }
 
-        .hero-step-3,
-        .hero-step-4 {
+        .hero-stair {
+          width: 100%;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 10px;
+          margin-top: 14px;
+        }
+
+        .hero-tools,
+        .hero-mode {
+          width: 100%;
           display: flex;
           justify-content: center;
         }
 
         .hero-tools {
-          margin-top: 2px;
-          transform: translateX(-10px);
+          max-width: clamp(176px, 42vw, 196px);
         }
 
         .hero-mode {
-          margin-top: 2px;
-          margin-bottom: 10px;
-          transform: translateX(16px);
+          max-width: clamp(148px, 34vw, 164px);
+          margin-top: -2px;
+          margin-bottom: 14px;
         }
 
         .brand-title {
@@ -962,29 +1135,39 @@ function HomePageInner() {
           font-size: clamp(48px, 9vw, 86px);
           line-height: 0.95;
           font-weight: 900;
-          color: var(--text-strong);
+          color: var(--text-strong, #08142f);
           letter-spacing: -0.04em;
         }
 
         .brand-slogan {
           margin: 6px 0 0;
+          padding: 0 10px;
+          max-width: 100%;
           font-size: clamp(15px, 1.9vw, 18px);
-          color: var(--text-soft);
+          color: var(--text-soft, #7b8798);
         }
 
         .segment-tabs {
           display: grid;
           grid-template-columns: repeat(2, minmax(0, 1fr));
           gap: 10px;
-          margin: 14px auto 10px;
-          max-width: 700px;
+          margin: 12px auto 10px;
+          max-width: min(100%, 700px);
         }
 
         .segment-btn {
           min-height: 72px;
-          border-radius: 20px;
+          border-radius: 22px;
+          background: var(--bg-card-soft, rgba(255, 255, 255, 0.88));
+          color: var(--text-main, #0a1736);
           font-size: clamp(18px, 2.6vw, 21px);
           font-weight: 900;
+          box-shadow: var(--shadow-soft, 0 18px 40px rgba(10, 23, 54, 0.08));
+        }
+
+        .segment-btn.active {
+          background: var(--brand, #0b2570);
+          color: var(--brand-contrast, #fff);
         }
 
         .page-error-box {
@@ -994,312 +1177,333 @@ function HomePageInner() {
 
         .section-caption {
           text-align: center;
-          color: var(--text-soft);
+          color: var(--text-soft, #7b8798);
           font-size: clamp(16px, 2.2vw, 22px);
           margin: 14px 0 12px;
         }
 
         .plan-grid {
           display: grid;
-          gap: 16px;
-          max-width: 700px;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 14px;
           margin: 0 auto;
+          max-width: 700px;
         }
 
         .plan-card {
-          padding: 22px 20px;
-          border-radius: 22px;
+          min-height: 168px;
+          padding: 22px;
           cursor: pointer;
-          transition: all 0.16s ease;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          transition:
+            transform 0.16s ease,
+            box-shadow 0.16s ease,
+            background 0.16s ease,
+            color 0.16s ease;
+        }
+
+        .plan-card.active {
+          background: var(--brand, #0b2570);
+          color: var(--brand-contrast, #fff);
         }
 
         .plan-title {
-          font-size: clamp(20px, 2.8vw, 28px);
+          font-size: clamp(20px, 2.5vw, 24px);
           font-weight: 900;
+          line-height: 1.2;
         }
 
         .plan-price {
-          margin-top: 14px;
-          font-size: clamp(30px, 4.6vw, 44px);
+          font-size: clamp(28px, 4vw, 40px);
           font-weight: 900;
           line-height: 1;
+          letter-spacing: -0.03em;
         }
 
         .single-box {
           max-width: 700px;
           margin: 0 auto;
-          padding: 20px;
+          padding: 22px;
         }
 
         .field-title {
-          font-size: 16px;
-          font-weight: 900;
-          margin-bottom: 10px;
-          color: var(--text-strong);
+          font-size: 18px;
+          font-weight: 800;
+          margin-bottom: 12px;
+          color: var(--text-main, #0a1736);
         }
 
         .field-hint {
-          margin-top: 8px;
-          color: var(--text-soft);
-          font-size: 12px;
+          margin-top: 10px;
+          color: var(--text-soft, #7b8798);
+          font-size: 13px;
           line-height: 1.6;
         }
 
         .summary-box {
           max-width: 700px;
           margin: 18px auto 0;
-          padding: 20px 20px;
+          padding: 18px 20px;
+          text-align: center;
         }
 
         .summary-label {
-          margin-bottom: 8px;
+          margin-bottom: 6px;
         }
 
         .summary-title {
-          font-size: clamp(18px, 2.5vw, 24px);
+          font-size: clamp(20px, 2.8vw, 26px);
           font-weight: 900;
-          color: var(--text-strong);
+          color: var(--text-main, #0a1736);
         }
 
         .summary-price {
-          margin-top: 8px;
-          font-size: clamp(38px, 6vw, 56px);
+          margin-top: 6px;
+          font-size: clamp(32px, 4.5vw, 44px);
           font-weight: 900;
-          line-height: 1;
-          color: var(--text-strong);
+          color: var(--text-strong, #08142f);
+          letter-spacing: -0.04em;
         }
 
         .summary-loading {
-          margin-top: 10px;
+          margin-top: 8px;
         }
 
         .form-stack {
           max-width: 700px;
-          margin: 14px auto 0;
+          margin: 18px auto 0;
           display: grid;
           gap: 12px;
         }
 
-        .input {
-          width: 100%;
-          min-height: 56px;
-          border-radius: 18px;
-          border: 1px solid var(--border-soft);
-          background: var(--bg-input);
-          color: var(--text-main);
-          padding: 0 18px;
-          font-size: 16px;
-          outline: none;
-          transition: border-color 0.16s ease, box-shadow 0.16s ease;
-        }
-
-        .input:focus {
-          border-color: rgba(245, 158, 11, 0.9);
-          box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.12);
-        }
-
-        .btn-primary,
-        .btn-secondary {
-          width: 100%;
-          min-height: 56px;
-          border-radius: 18px;
-          font-size: 18px;
-          font-weight: 900;
-          transition: all 0.16s ease;
-        }
-
         .lookup-section {
-          margin-top: 26px;
+          margin-top: 22px;
         }
 
         .lookup-wrap {
           max-width: 700px;
           margin: 0 auto;
-          width: 100%;
-          padding: 18px;
+          padding: 20px;
         }
 
         .lookup-title {
-          font-size: clamp(20px, 3vw, 26px);
+          font-size: 20px;
           font-weight: 900;
-          color: var(--text-strong);
-          margin-bottom: 6px;
+          color: var(--text-main, #0a1736);
         }
 
         .lookup-subtitle {
-          margin-bottom: 12px;
-          line-height: 1.7;
+          margin-top: 8px;
+          margin-bottom: 14px;
         }
 
-        .lookup-btn {
-          margin-top: 12px;
-        }
-
-        .lookup-result-grid {
-          margin-top: 14px;
-          display: grid;
-          gap: 12px;
-        }
-
-        .lookup-item-card {
-          padding: 15px;
-          border-radius: 18px;
-          background: var(--bg-muted);
-          border: 1px solid var(--border-soft);
-          display: grid;
-          gap: 8px;
-          line-height: 1.7;
-        }
-
-        .lookup-break-all {
-          word-break: break-all;
-          overflow-wrap: anywhere;
-          white-space: pre-wrap;
-        }
-
-        .lookup-note-box {
-          padding: 12px;
-          border-radius: 12px;
-          background: rgba(255, 236, 179, 0.45);
-          border: 1px solid rgba(245, 158, 11, 0.25);
-          color: #7c2d12;
-          line-height: 1.7;
-        }
-
-        .lookup-resubmit-box {
-          margin-top: 6px;
-          padding: 12px;
-          border-radius: 14px;
-          border: 1px dashed var(--border-soft);
-          background: var(--bg-card-soft);
+        .lookup-form {
           display: grid;
           gap: 10px;
         }
 
-        .footer-email {
-          margin-top: 4px;
+        .lookup-btn {
+          margin-top: 2px;
+        }
+
+        .lookup-result-grid {
+          display: grid;
+          gap: 12px;
+          margin-top: 14px;
+        }
+
+        .lookup-item-card {
+          border-radius: 20px;
+          border: 1px solid var(--border-soft, rgba(10, 23, 54, 0.08));
+          background: var(--bg-card, rgba(255, 255, 255, 0.96));
+          padding: 16px;
+          display: grid;
+          gap: 8px;
+        }
+
+        .lookup-note-box {
+          border-radius: 14px;
+          padding: 12px;
+          background: rgba(82, 110, 255, 0.08);
+          border: 1px solid rgba(82, 110, 255, 0.14);
+          color: var(--text-main, #0a1736);
+          line-height: 1.6;
+        }
+
+        .lookup-resubmit-box {
+          display: grid;
+          gap: 10px;
+          padding-top: 4px;
+        }
+
+        .lookup-break-all {
+          word-break: break-all;
+        }
+
+        .footer {
+          text-align: center;
+          margin-top: 26px;
+          padding-top: 8px;
+          color: var(--text-soft, #7b8798);
+          font-size: 14px;
+        }
+
+        .footer p {
+          margin: 8px 0;
         }
 
         .footer-email-label {
-          margin-right: 6px;
+          color: var(--text-main, #0a1736);
+          font-weight: 700;
+        }
+
+        .footer-email a,
+        .footer-links a {
+          color: var(--text-main, #0a1736);
+          text-decoration: none;
+        }
+
+        .footer-links {
+          display: flex;
+          justify-content: center;
+          flex-wrap: wrap;
+          gap: 12px 18px;
+          margin-top: 10px;
         }
 
         .route-overlay {
           position: fixed;
           inset: 0;
-          z-index: 90;
-          background: rgba(2, 6, 23, 0.42);
+          z-index: 120;
+          display: grid;
+          place-items: center;
+          background: rgba(8, 20, 47, 0.18);
           backdrop-filter: blur(8px);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          padding: 20px;
-          animation: fadeIn 0.2s ease;
+          padding: 18px;
         }
 
         .route-card {
-          width: min(420px, 100%);
+          width: min(100%, 360px);
           border-radius: 28px;
-          padding: 28px 22px;
-          background: var(--bg-card);
-          border: 1px solid var(--border-soft);
-          box-shadow: var(--shadow-soft);
+          padding: 26px 22px;
+          background: rgba(255, 255, 255, 0.96);
+          border: 1px solid rgba(10, 23, 54, 0.08);
+          box-shadow: 0 22px 50px rgba(10, 23, 54, 0.16);
           text-align: center;
         }
 
         .route-spinner {
-          width: 44px;
-          height: 44px;
-          margin: 0 auto 14px;
+          width: 40px;
+          height: 40px;
+          margin: 0 auto 16px;
           border-radius: 999px;
-          border: 3px solid rgba(255, 255, 255, 0.24);
-          border-top-color: var(--brand);
-          animation: spin 0.8s linear infinite;
+          border: 3px solid rgba(11, 37, 112, 0.16);
+          border-top-color: var(--brand, #0b2570);
+          animation: agnopol-spin 0.9s linear infinite;
         }
 
         .route-title {
-          font-size: 18px;
+          font-size: 19px;
           font-weight: 900;
-          color: var(--text-strong);
+          color: var(--text-main, #0a1736);
         }
 
         .route-subtitle {
           margin-top: 8px;
+          color: var(--text-soft, #7b8798);
           font-size: 14px;
-          color: var(--text-soft);
+          line-height: 1.6;
         }
 
-        @media (min-width: 768px) {
-          .hero-step-1 {
-            text-align: left;
-          }
-
-          .hero-step-2 {
-            padding-left: 20px;
-            text-align: left;
-          }
-
-          .hero-step-3 {
-            justify-content: flex-start;
-            padding-left: 34px;
-          }
-
-          .hero-step-4 {
-            justify-content: flex-start;
-            padding-left: 72px;
-          }
-
-          .hero-tools {
-            transform: none;
-          }
-
-          .hero-mode {
-            transform: none;
-          }
-        }
-
-        @media (max-width: 640px) {
-          .site-shell {
-            padding: 16px 12px 28px;
-          }
-
-          .segment-btn {
-            min-height: 66px;
-            font-size: 17px;
-          }
-
-          .plan-card {
-            padding: 20px 18px;
-          }
-
-          .input,
-          .btn-primary,
-          .btn-secondary {
-            min-height: 54px;
-            font-size: 17px;
-          }
-
-          .summary-box {
-            padding: 18px;
-          }
-
-          .lookup-wrap {
-            padding: 16px;
-          }
-        }
-
-        @keyframes spin {
+        @keyframes agnopol-spin {
           to {
             transform: rotate(360deg);
           }
         }
 
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
+        @media (min-width: 768px) {
+          .hero-tools {
+            transform: translateX(-18px);
           }
-          to {
-            opacity: 1;
+
+          .hero-mode {
+            transform: translateX(18px);
+          }
+        }
+
+        @media (max-width: 767px) {
+          .plan-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .plan-card {
+            min-height: 138px;
+          }
+        }
+
+        @media (max-width: 640px) {
+          .site-shell {
+            padding: 14px 12px 30px;
+          }
+
+          .hero-stair {
+            gap: 9px;
+            margin-top: 12px;
+          }
+
+          .hero-tools {
+            max-width: min(100%, 190px);
+            transform: none;
+          }
+
+          .hero-mode {
+            max-width: min(100%, 156px);
+            margin-bottom: 12px;
+            transform: none;
+          }
+
+          .brand-slogan {
+            padding: 0 6px;
+          }
+
+          .segment-tabs {
+            gap: 8px;
+          }
+
+          .segment-btn {
+            min-height: 62px;
+            border-radius: 20px;
+          }
+
+          .single-box,
+          .summary-box,
+          .lookup-wrap {
+            padding: 16px;
+          }
+
+          .footer-links {
+            gap: 10px 14px;
+          }
+        }
+
+        @media (max-width: 420px) {
+          .site-shell {
+            padding-left: 10px;
+            padding-right: 10px;
+          }
+
+          .brand-title {
+            font-size: clamp(42px, 15vw, 60px);
+          }
+
+          .summary-price {
+            font-size: 34px;
+          }
+
+          .plan-price {
+            font-size: 34px;
           }
         }
       `}</style>
@@ -1307,23 +1511,9 @@ function HomePageInner() {
   )
 }
 
-function PageFallback() {
-  return (
-    <main className="site-shell">
-      <div className="site-container">
-        <section className="hero-center">
-          <p className="small-muted" style={{ margin: 0 }}>
-            Loading...
-          </p>
-        </section>
-      </div>
-    </main>
-  )
-}
-
 export default function HomePage() {
   return (
-    <Suspense fallback={<PageFallback />}>
+    <Suspense fallback={null}>
       <HomePageInner />
     </Suspense>
   )
