@@ -22,51 +22,34 @@ export const viewport: Viewport = {
 const themeInitScript = `
 (function () {
   try {
-    var STORAGE_KEY = 'agnopol-theme-mode-v2';
-    var LIGHT_COLOR = '#f6f8fc';
-    var DARK_COLOR = '#0b1020';
+    var STORAGE_KEY = 'agnopol-theme-mode-v4';
+    var LIGHT_COLOR = '#f5f5f7';
+    var DARK_COLOR = '#0b0d12';
 
     var root = document.documentElement;
     var meta = document.getElementById('agnopol-theme-color');
 
     function isMode(value) {
-      return value === 'auto' || value === 'light' || value === 'dark';
+      return value === 'light' || value === 'dark';
     }
 
     function readMode() {
       try {
         var stored = window.localStorage.getItem(STORAGE_KEY);
-        return isMode(stored) ? stored : 'auto';
-      } catch (e) {
-        return 'auto';
-      }
-    }
-
-    function getSystemTheme() {
-      try {
-        return window.matchMedia &&
-          window.matchMedia('(prefers-color-scheme: dark)').matches
-          ? 'dark'
-          : 'light';
+        return isMode(stored) ? stored : 'light';
       } catch (e) {
         return 'light';
       }
     }
 
     var mode = readMode();
-    var theme =
-      mode === 'light'
-        ? 'light'
-        : mode === 'dark'
-          ? 'dark'
-          : getSystemTheme();
 
     root.setAttribute('data-theme-mode', mode);
-    root.setAttribute('data-theme', theme);
-    root.style.colorScheme = theme;
+    root.setAttribute('data-theme', mode);
+    root.style.colorScheme = mode;
 
     if (meta) {
-      meta.setAttribute('content', theme === 'dark' ? DARK_COLOR : LIGHT_COLOR);
+      meta.setAttribute('content', mode === 'dark' ? DARK_COLOR : LIGHT_COLOR);
     }
   } catch (e) {}
 })();
@@ -80,7 +63,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <meta id="agnopol-theme-color" name="theme-color" content="#f6f8fc" />
+        <meta id="agnopol-theme-color" name="theme-color" content="#f5f5f7" />
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>
 
