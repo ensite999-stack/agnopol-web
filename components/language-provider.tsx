@@ -12,7 +12,6 @@ import {
 import { usePathname } from 'next/navigation'
 import {
   LANG_STORAGE_KEY,
-  detectBrowserLang,
   dictionaries,
   normalizeLang,
   type LangCode,
@@ -46,6 +45,7 @@ function setDocumentLang(lang: LangCode) {
 
 function syncUrlLang(lang: LangCode) {
   if (typeof window === 'undefined') return
+
   const url = new URL(window.location.href)
   url.searchParams.set('lang', lang)
   window.history.replaceState({}, '', url.toString())
@@ -80,7 +80,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
       ? normalizeLang(rawUrlLang)
       : storedLang
       ? normalizeLang(storedLang)
-      : detectBrowserLang()
+      : 'en'
 
     applyLang(resolved, true)
   }, [pathname, applyLang])
