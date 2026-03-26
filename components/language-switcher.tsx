@@ -9,22 +9,31 @@ type Props = {
   fullWidth?: boolean
 }
 
-const LANGUAGE_OPTIONS: Array<{ value: LangCode; label: string }> = [
-  { value: 'en', label: 'English' },
-  { value: 'zh-tw', label: '繁體中文' },
-  { value: 'de', label: 'Deutsch' },
-  { value: 'es', label: 'Español' },
-  { value: 'fr', label: 'Français' },
-  { value: 'ja', label: '日本語' },
-  { value: 'ko', label: '한국어' },
-  { value: 'zh-cn', label: '简体中文' },
+const LANGUAGE_OPTIONS: Array<{ value: LangCode; label: string; sortKey: string }> = [
+  { value: 'en', label: 'English', sortKey: '' },
+  { value: 'zh-tw', label: '繁體中文', sortKey: ' ' },
+
+  { value: 'de', label: 'Deutsch', sortKey: 'Deutsch' },
+  { value: 'es', label: 'Español', sortKey: 'Español' },
+  { value: 'fr', label: 'Français', sortKey: 'Français' },
+  { value: 'ja', label: '日本語', sortKey: 'Japanese' },
+  { value: 'ko', label: '한국어', sortKey: 'Korean' },
+  { value: 'zh-cn', label: '简体中文', sortKey: 'Simplified Chinese' },
+]
+
+const ORDERED_LANGUAGE_OPTIONS = [
+  LANGUAGE_OPTIONS[0],
+  LANGUAGE_OPTIONS[1],
+  ...LANGUAGE_OPTIONS.slice(2).sort((a, b) =>
+    a.sortKey.localeCompare(b.sortKey, 'en', { sensitivity: 'base' })
+  ),
 ]
 
 export default function LanguageSwitcher({ size = 'compact', fullWidth = false }: Props) {
   const { lang, setLang } = useI18n()
 
   const currentLang = useMemo(() => {
-    return LANGUAGE_OPTIONS.some((item) => item.value === lang) ? lang : 'en'
+    return ORDERED_LANGUAGE_OPTIONS.some((item) => item.value === lang) ? lang : 'en'
   }, [lang])
 
   function handleChange(event: ChangeEvent<HTMLSelectElement>) {
@@ -38,7 +47,7 @@ export default function LanguageSwitcher({ size = 'compact', fullWidth = false }
       }`}
     >
       <select value={currentLang} onChange={handleChange} aria-label="Language selector">
-        {LANGUAGE_OPTIONS.map((item) => (
+        {ORDERED_LANGUAGE_OPTIONS.map((item) => (
           <option key={item.value} value={item.value}>
             {item.label}
           </option>
