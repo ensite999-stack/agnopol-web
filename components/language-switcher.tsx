@@ -37,11 +37,21 @@ export default function LanguageSwitcher({
   }
 
   const isHero = size === 'hero'
+  const wrapperWidth = fullWidth
+    ? '100%'
+    : isHero
+      ? 'min(100%, 320px)'
+      : 'min(100%, 196px)'
+
+  const controlHeight = isHero ? 52 : 40
+  const padding = isHero ? '0 44px 0 18px' : '0 38px 0 14px'
+  const fontSize = isHero ? 16 : 14
 
   return (
     <div
       style={{
-        width: fullWidth ? '100%' : isHero ? 'min(100%, 320px)' : 'auto',
+        width: wrapperWidth,
+        maxWidth: '100%',
         display: 'flex',
         justifyContent: 'center',
       }}
@@ -49,8 +59,8 @@ export default function LanguageSwitcher({
       <div
         style={{
           position: 'relative',
-          width: fullWidth ? '100%' : isHero ? '100%' : 'auto',
-          minWidth: isHero ? undefined : 108,
+          width: '100%',
+          minWidth: 0,
         }}
       >
         <select
@@ -59,13 +69,13 @@ export default function LanguageSwitcher({
           aria-label="Language"
           style={{
             width: '100%',
-            height: isHero ? 52 : 36,
-            padding: isHero ? '0 44px 0 18px' : '0 34px 0 12px',
+            height: controlHeight,
+            padding,
             borderRadius: 999,
             border: '1px solid var(--border-soft)',
             background: 'var(--bg-card-soft)',
             color: 'var(--text-main)',
-            fontSize: isHero ? 16 : 11,
+            fontSize,
             fontWeight: 800,
             outline: 'none',
             appearance: 'none',
@@ -73,6 +83,9 @@ export default function LanguageSwitcher({
             boxShadow: 'var(--shadow-soft)',
             backdropFilter: 'blur(10px)',
             cursor: 'pointer',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
           }}
         >
           {LANGUAGE_OPTIONS.map((item) => (
@@ -86,7 +99,7 @@ export default function LanguageSwitcher({
           aria-hidden="true"
           style={{
             position: 'absolute',
-            right: isHero ? 18 : 12,
+            right: isHero ? 18 : 14,
             top: '50%',
             width: 0,
             height: 0,
@@ -95,7 +108,7 @@ export default function LanguageSwitcher({
             borderTop: isHero
               ? '10px solid var(--text-soft)'
               : '8px solid var(--text-soft)',
-            transform: 'translateY(-20%)',
+            transform: 'translateY(-28%)',
             pointerEvents: 'none',
           }}
         />
