@@ -110,46 +110,44 @@ const LOOKUP_ENTRY_UI: Record<
     button: 'Bestellung suchen',
   },
   en: {
-    title: 'Check existing order',
+    title: 'Track order status',
     subtitle:
-      'View order status, system notes, or resubmit payment proof from a dedicated lookup page.',
-    button: 'Order Lookup',
+      'Check the latest progress, system feedback, or submit additional payment proof.',
+    button: 'Track Order',
   },
   es: {
-    title: 'Consultar pedido existente',
+    title: 'Seguir estado del pedido',
     subtitle:
-      'Consulte el estado del pedido, las notas del sistema o vuelva a enviar el comprobante de pago.',
-    button: 'Consultar pedido',
+      'Consulte el progreso más reciente, los avisos del sistema o complete el comprobante de pago.',
+    button: 'Seguir pedido',
   },
   fr: {
-    title: 'Consulter une commande existante',
+    title: 'Suivre le statut de la commande',
     subtitle:
-      'Consultez le statut, les notes du système ou renvoyez la preuve de paiement depuis une page dédiée.',
-    button: 'Rechercher la commande',
+      'Consultez la progression, les retours du système ou complétez la preuve de paiement.',
+    button: 'Suivre la commande',
   },
   ja: {
-    title: '既存の注文を確認',
+    title: '注文状況を追跡',
     subtitle:
-      '専用ページで注文状況、システム案内、支払い証明の再提出を確認できます。',
-    button: '注文を照会',
+      '最新の進捗、システム案内、または支払い証明の補足を確認できます。',
+    button: '注文を追跡',
   },
   ko: {
-    title: '기존 주문 조회',
+    title: '주문 상태 추적',
     subtitle:
-      '전용 페이지에서 주문 상태, 시스템 안내, 결제 증빙 재제출을 확인하세요.',
-    button: '주문 조회',
+      '최신 진행 상황, 시스템 안내 또는 결제 증빙 보완을 확인하세요.',
+    button: '주문 추적',
   },
   'zh-cn': {
-    title: '查询已有订单',
-    subtitle:
-      '在独立页面中查看订单状态、系统备注，或重新提交付款凭证。',
-    button: '查询订单',
+    title: '追踪订单状态',
+    subtitle: '查看订单最新进度、系统反馈，或补充付款凭证。',
+    button: '追踪订单',
   },
   'zh-tw': {
-    title: '查詢已有訂單',
-    subtitle:
-      '在獨立頁面中查看訂單狀態、系統備註，或重新提交付款憑證。',
-    button: '查詢訂單',
+    title: '追蹤訂單狀態',
+    subtitle: '查看訂單最新進度、系統回饋，或補充付款憑證。',
+    button: '追蹤訂單',
   },
 }
 
@@ -537,10 +535,8 @@ function HomePageInner() {
         }
 
         .btn-primary:hover,
-        .btn-secondary:hover,
         .segment-btn:hover,
-        .plan-card:hover,
-        .link-button:hover {
+        .plan-card:hover {
           transform: translateY(-1px);
         }
 
@@ -560,17 +556,29 @@ function HomePageInner() {
           width: 100%;
           min-height: 50px;
           border-radius: 18px;
-          background: var(--bg-card-soft, rgba(255, 255, 255, 0.88));
-          color: var(--text-main, #0a1736);
-          border: 1px solid var(--border-soft, rgba(10, 23, 54, 0.08));
+          background: rgba(11, 37, 112, 0.04);
+          color: var(--brand, #0b2570);
+          border: 1.5px solid var(--brand, #0b2570);
           font-size: 14px;
           font-weight: 800;
-          box-shadow: var(--shadow-soft, 0 18px 40px rgba(10, 23, 54, 0.08));
+          box-shadow: none;
           text-decoration: none;
           display: flex;
           align-items: center;
           justify-content: center;
           box-sizing: border-box;
+          transition:
+            transform 0.16s ease,
+            background 0.16s ease,
+            color 0.16s ease,
+            border-color 0.16s ease,
+            opacity 0.16s ease;
+        }
+
+        .btn-secondary:hover,
+        .link-button:hover {
+          transform: translateY(-1px);
+          background: rgba(11, 37, 112, 0.08);
         }
 
         .small-muted {
