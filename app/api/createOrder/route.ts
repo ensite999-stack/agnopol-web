@@ -75,7 +75,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Invalid premium duration.' }, { status: 400 })
     }
 
-    if (productType === 'tg_stars' && (!(starsAmount && starsAmount >= 50) || !Number.isFinite(starsAmount))) {
+    if (
+      productType === 'tg_stars' &&
+      (!(starsAmount && starsAmount >= 50) || !Number.isFinite(starsAmount))
+    ) {
       return NextResponse.json({ error: 'Invalid stars amount.' }, { status: 400 })
     }
 
