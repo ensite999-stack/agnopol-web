@@ -8,6 +8,7 @@ import {
   useState,
   type ChangeEvent,
   type FocusEvent,
+  type PointerEvent,
 } from 'react'
 import { useI18n } from '../components/language-provider'
 import LanguageSwitcher from '../components/language-switcher'
@@ -426,9 +427,32 @@ function getKeyboardInset() {
 
   return inset > 120 ? inset : 0
 }
+function getFieldAnchor(target: HTMLInputElement) {
+  const anchor =
+    target.closest('.lookup-wrap') ||
+    target.closest('.form-stack') ||
+    target.closest('.single-box')
+
+  return (anchor as HTMLElement | null) ?? target
+}
+
+function scrollAnchorToTop(target: HTMLInputElement, offset = 14) {
+  if (typeof window === 'undefined') return
+
+  const anchor = getFieldAnchor(target)
+  const rect = anchor.getBoundingClientRect()
+  const top = rect.top + window.scrollY - offset
+
+  window.scrollTo({
+    top: Math.max(0, top),
+    behavior: 'auto',
+  })
+}
 
 function ensureFieldVisible(target: HTMLInputElement, bottomGap = 24) {
   if (typeof window === 'undefined') return
+
+  scrollAnchorToTop(target, 14)
 
   const rect = target.getBoundingClientRect()
   const viewport = window.visualViewport
@@ -449,7 +473,7 @@ function ensureFieldVisible(target: HTMLInputElement, bottomGap = 24) {
   if (Math.abs(delta) > 1) {
     window.scrollBy({
       top: delta,
-      behavior: 'smooth',
+      behavior: 'auto',
     })
   }
 }
@@ -457,7 +481,7 @@ function ensureFieldVisible(target: HTMLInputElement, bottomGap = 24) {
 function scheduleFieldIntoView(target: HTMLInputElement) {
   if (typeof window === 'undefined') return
 
-  ;[0, 120, 260, 420, 620].forEach((delay) => {
+  ;[0, 80, 180, 320, 520, 760, 980].forEach((delay) => {
     window.setTimeout(() => {
       ensureFieldVisible(target, 24)
     }, delay)
@@ -465,9 +489,11 @@ function scheduleFieldIntoView(target: HTMLInputElement) {
 }
 
 function OrderLookupSection({
+  onFieldPointerDown,
   onFieldFocus,
   onFieldBlur,
 }: {
+  onFieldPointerDown: (event: PointerEvent<HTMLInputElement>) => void
   onFieldFocus: (event: FocusEvent<HTMLInputElement>) => void
   onFieldBlur: () => void
 }) {
@@ -611,6 +637,7 @@ function OrderLookupSection({
         <input
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          onPointerDown={onFieldPointerDown}
           onFocus={onFieldFocus}
           onBlur={onFieldBlur}
           placeholder={ui.placeholder}
@@ -669,7 +696,6 @@ function OrderLookupSection({
                     <strong>{ui.note}:</strong> {item.public_note}
                   </div>
                 ) : null}
-
                 {allowResubmit ? (
                   <>
                     <button
@@ -698,6 +724,7 @@ function OrderLookupSection({
                         <input
                           value={resubmitHash}
                           onChange={(e) => setResubmitHash(e.target.value)}
+                          onPointerDown={onFieldPointerDown}
                           onFocus={onFieldFocus}
                           onBlur={onFieldBlur}
                           placeholder={ui.hashPlaceholder}
@@ -750,6 +777,11 @@ function HomePageInner() {
       ? `© ${startYear}–${currentYear} Agnopol. All rights reserved.`
       : `© ${startYear} Agnopol. All rights reserved.`
 
+  function handleTrackedFieldPointerDown(event: PointerEvent<HTMLInputElement>) {
+    activeFieldRef.current = event.currentTarget
+    scheduleFieldIntoView(event.currentTarget)
+  }
+
   function handleTrackedFieldFocus(event: FocusEvent<HTMLInputElement>) {
     activeFieldRef.current = event.currentTarget
     scheduleFieldIntoView(event.currentTarget)
@@ -782,6 +814,12 @@ function HomePageInner() {
     window.addEventListener('orientationchange', updateKeyboardInset)
     window.addEventListener('resize', updateKeyboardInset)
 
+    const interval = window.setInterval(() => {
+      if (activeFieldRef.current) {
+        ensureFieldVisible(activeFieldRef.current, 24)
+      }
+    }, 220)
+
     updateKeyboardInset()
 
     return () => {
@@ -789,6 +827,7 @@ function HomePageInner() {
       viewport.removeEventListener('scroll', updateKeyboardInset)
       window.removeEventListener('orientationchange', updateKeyboardInset)
       window.removeEventListener('resize', updateKeyboardInset)
+      window.clearInterval(interval)
     }
   }, [])
 
@@ -992,6 +1031,7 @@ function HomePageInner() {
                 step={1}
                 value={stars}
                 onChange={(e) => setStars(Number(e.target.value))}
+                onPointerDown={handleTrackedFieldPointerDown}
                 onFocus={handleTrackedFieldFocus}
                 onBlur={handleTrackedFieldBlur}
                 placeholder={t.home.starsPlaceholder}
@@ -1017,6 +1057,7 @@ function HomePageInner() {
               setUsername(e.target.value)
               if (formError) setFormError('')
             }}
+            onPointerDown={handleTrackedFieldPointerDown}
             onFocus={handleTrackedFieldFocus}
             onBlur={handleTrackedFieldBlur}
             placeholder={t.home.usernamePlaceholder}
@@ -1031,6 +1072,7 @@ function HomePageInner() {
               setEmail(e.target.value)
               if (formError) setFormError('')
             }}
+            onPointerDown={handleTrackedFieldPointerDown}
             onFocus={handleTrackedFieldFocus}
             onBlur={handleTrackedFieldBlur}
             placeholder={t.home.emailPlaceholder}
@@ -1053,6 +1095,7 @@ function HomePageInner() {
 
         <div className="lookup-section">
           <OrderLookupSection
+            onFieldPointerDown={handleTrackedFieldPointerDown}
             onFieldFocus={handleTrackedFieldFocus}
             onFieldBlur={handleTrackedFieldBlur}
           />
@@ -1123,8 +1166,8 @@ function HomePageInner() {
           font-size: 15px;
           outline: none;
           box-sizing: border-box;
-          scroll-margin-top: 96px;
-          scroll-margin-bottom: 340px;
+          scroll-margin-top: 120px;
+          scroll-margin-bottom: 420px;
         }
 
         .input::placeholder {
@@ -1352,7 +1395,6 @@ function HomePageInner() {
           margin: 0 auto;
           padding: 22px;
         }
-
         .field-title {
           font-size: 18px;
           font-weight: 800;
