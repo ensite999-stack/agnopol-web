@@ -1,7 +1,11 @@
 import './globals.css'
+import './theme-overrides.css'
+
+import type { Metadata, Viewport } from 'next'
+import type { ReactNode } from 'react'
+
 import { LanguageProvider } from '../components/language-provider'
 import { ThemeProvider } from '../components/theme-provider'
-import type { Metadata, Viewport } from 'next'
 
 export const metadata: Metadata = {
   title: 'Agnopol',
@@ -18,33 +22,52 @@ export const viewport: Viewport = {
 const themeInitScript = `
 (function () {
   try {
+    var STORAGE_KEY = 'agnopol-theme-mode-v2';
+    var LIGHT_COLOR = '#f6f8fc';
+    var DARK_COLOR = '#0b1020';
+
     var root = document.documentElement;
-    var savedMode = null;
+    var meta = document.getElementById('agnopol-theme-color');
 
-    try {
-      savedMode = localStorage.getItem('agnopol-theme-mode');
-    } catch (e) {}
-
-    var systemDark = false;
-    try {
-      systemDark = !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
-    } catch (e) {
-      systemDark = false;
+    function isMode(value) {
+      return value === 'auto' || value === 'light' || value === 'dark';
     }
 
-    var mode = savedMode === 'light' || savedMode === 'dark' || savedMode === 'auto'
-      ? savedMode
-      : 'auto';
+    function readMode() {
+      try {
+        var stored = window.localStorage.getItem(STORAGE_KEY);
+        return isMode(stored) ? stored : 'auto';
+      } catch (e) {
+        return 'auto';
+      }
+    }
 
-    var theme = mode === 'light'
-      ? 'light'
-      : mode === 'dark'
-        ? 'dark'
-        : (systemDark ? 'dark' : 'light');
+    function getSystemTheme() {
+      try {
+        return window.matchMedia &&
+          window.matchMedia('(prefers-color-scheme: dark)').matches
+          ? 'dark'
+          : 'light';
+      } catch (e) {
+        return 'light';
+      }
+    }
 
-    root.dataset.themeMode = mode;
-    root.dataset.theme = theme;
+    var mode = readMode();
+    var theme =
+      mode === 'light'
+        ? 'light'
+        : mode === 'dark'
+          ? 'dark'
+          : getSystemTheme();
+
+    root.setAttribute('data-theme-mode', mode);
+    root.setAttribute('data-theme', theme);
     root.style.colorScheme = theme;
+
+    if (meta) {
+      meta.setAttribute('content', theme === 'dark' ? DARK_COLOR : LIGHT_COLOR);
+    }
   } catch (e) {}
 })();
 `
@@ -52,15 +75,16 @@ const themeInitScript = `
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: ReactNode
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <meta name="color-scheme" content="light dark" />
-      </head>
-      <body>
+        <meta id="agnopol-theme-color" name="theme-color" content="#f6f8fc" />
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+      </head>
+
+      <body>
         <LanguageProvider>
           <ThemeProvider>{children}</ThemeProvider>
         </LanguageProvider>
