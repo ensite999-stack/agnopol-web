@@ -1,0 +1,193 @@
+:root,
+html[data-theme='light'] {
+  --bg-page: #f6f8fc;
+  --bg-card: rgba(255, 255, 255, 0.96);
+  --bg-card-soft: rgba(255, 255, 255, 0.88);
+
+  --text-main: #0a1736;
+  --text-strong: #08142f;
+  --text-soft: #6f7c90;
+
+  --border-soft: rgba(10, 23, 54, 0.08);
+  --shadow-soft: 0 18px 40px rgba(10, 23, 54, 0.08);
+
+  --brand: #0b51ff;
+  --brand-contrast: #ffffff;
+
+  --notice-bg: rgba(82, 110, 255, 0.08);
+  --notice-border: rgba(82, 110, 255, 0.14);
+
+  --overlay-bg: rgba(8, 20, 47, 0.18);
+}
+
+html[data-theme='dark'] {
+  --bg-page: #0b1020;
+  --bg-card: rgba(18, 24, 42, 0.96);
+  --bg-card-soft: rgba(23, 30, 52, 0.92);
+
+  --text-main: #e9eefb;
+  --text-strong: #ffffff;
+  --text-soft: #9aa6bd;
+
+  --border-soft: rgba(255, 255, 255, 0.08);
+  --shadow-soft: 0 18px 40px rgba(0, 0, 0, 0.34);
+
+  --brand: #2f6bff;
+  --brand-contrast: #ffffff;
+
+  --notice-bg: rgba(47, 107, 255, 0.14);
+  --notice-border: rgba(135, 166, 255, 0.18);
+
+  --overlay-bg: rgba(3, 7, 16, 0.48);
+}
+
+html {
+  background: var(--bg-page);
+}
+
+body {
+  background: var(--bg-page);
+  color: var(--text-main);
+}
+
+body,
+.site-shell,
+.card,
+.card-soft,
+.plan-card,
+.single-box,
+.summary-box,
+.lookup-wrap,
+.lookup-item-card,
+.route-card,
+.segment-btn,
+.btn-primary,
+.btn-secondary,
+.input {
+  transition:
+    background-color 0.18s ease,
+    color 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.site-shell {
+  background:
+    radial-gradient(circle at top, rgba(82, 110, 255, 0.07), transparent 36%),
+    var(--bg-page) !important;
+}
+
+html[data-theme='dark'] .site-shell {
+  background:
+    radial-gradient(circle at top, rgba(47, 107, 255, 0.18), transparent 34%),
+    var(--bg-page) !important;
+}
+
+.brand-title {
+  color: var(--text-strong) !important;
+  opacity: 1 !important;
+  text-shadow: none !important;
+}
+
+.brand-slogan,
+.section-caption,
+.small-muted,
+.summary-label,
+.summary-loading,
+.lookup-subtitle,
+.footer {
+  color: var(--text-soft) !important;
+}
+
+.summary-title,
+.summary-price,
+.lookup-title,
+.field-title,
+.plan-title,
+.plan-price,
+.lookup-item-card,
+.footer-email-label,
+.footer-email a,
+.footer-links a {
+  color: var(--text-main) !important;
+}
+
+.card,
+.plan-card,
+.single-box,
+.summary-box,
+.lookup-item-card,
+.route-card {
+  background: var(--bg-card) !important;
+  border-color: var(--border-soft) !important;
+  box-shadow: var(--shadow-soft) !important;
+}
+
+.card-soft,
+.lookup-wrap {
+  background: var(--bg-card-soft) !important;
+  border-color: var(--border-soft) !important;
+  box-shadow: var(--shadow-soft) !important;
+}
+
+.input {
+  background: var(--bg-card) !important;
+  color: var(--text-main) !important;
+  border: 1px solid var(--border-soft) !important;
+}
+
+.input::placeholder {
+  color: var(--text-soft) !important;
+}
+
+.segment-btn:not(.active),
+.btn-secondary {
+  background: var(--bg-card-soft) !important;
+  color: var(--text-main) !important;
+  border: 1px solid var(--border-soft) !important;
+  box-shadow: var(--shadow-soft) !important;
+}
+
+.segment-btn.active,
+.plan-card.active,
+.btn-primary {
+  background: var(--brand) !important;
+  color: var(--brand-contrast) !important;
+  border-color: transparent !important;
+}
+
+.plan-card:not(.active) {
+  color: var(--text-main) !important;
+}
+
+.lookup-note-box {
+  background: var(--notice-bg) !important;
+  border-color: var(--notice-border) !important;
+  color: var(--text-main) !important;
+}
+
+.route-overlay {
+  background: var(--overlay-bg) !important;
+}
+
+.route-card {
+  color: var(--text-main) !important;
+}
+
+.route-title {
+  color: var(--text-strong) !important;
+}
+
+.route-subtitle {
+  color: var(--text-soft) !important;
+}
+
+.footer-email a,
+.footer-links a {
+  text-decoration: none;
+}
+
+html[data-theme='dark'] ::selection {
+  background: rgba(47, 107, 255, 0.38);
+  color: #ffffff;
+}
