@@ -19,7 +19,11 @@ type ThemeModeContextValue = {
   setMode: (nextMode: ThemeMode) => void
 }
 
-const STORAGE_KEY = 'agnopol-theme-mode'
+const STORAGE_KEY = 'agnopol-theme-mode-v2'
+const THEME_COLOR = {
+  light: '#f6f8fc',
+  dark: '#0b1020',
+} as const
 
 const ThemeModeContext = createContext<ThemeModeContextValue | null>(null)
 
@@ -41,9 +45,13 @@ function getStoredMode(): ThemeMode {
 function getSystemTheme(): ResolvedTheme {
   if (typeof window === 'undefined') return 'light'
 
-  return window.matchMedia('(prefers-color-scheme: dark)').matches
-    ? 'dark'
-    : 'light'
+  try {
+    return window.matchMedia('(prefers-color-scheme: dark)').matches
+      ? 'dark'
+      : 'light'
+  } catch {
+    return 'light'
+  }
 }
 
 function resolveTheme(mode: ThemeMode): ResolvedTheme {
@@ -52,12 +60,18 @@ function resolveTheme(mode: ThemeMode): ResolvedTheme {
   return getSystemTheme()
 }
 
-function applyTheme(theme: ResolvedTheme) {
+function applyTheme(mode: ThemeMode, resolvedTheme: ResolvedTheme) {
   if (typeof document === 'undefined') return
 
   const root = document.documentElement
-  root.setAttribute('data-theme', theme)
-  root.style.colorScheme = theme
+  root.setAttribute('data-theme-mode', mode)
+  root.setAttribute('data-theme', resolvedTheme)
+  root.style.colorScheme = resolvedTheme
+
+  const meta = document.getElementById('agnopol-theme-color')
+  if (meta) {
+    meta.setAttribute('content', THEME_COLOR[resolvedTheme])
+  }
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
@@ -71,7 +85,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
     setModeState(initialMode)
     setResolvedTheme(initialResolvedTheme)
-    applyTheme(initialResolvedTheme)
+    applyTheme(initialMode, initialResolvedTheme)
     setHydrated(true)
   }, [])
 
@@ -80,32 +94,69 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
 
-    function handleSystemChange() {
-      setModeState((currentMode) => {
-        if (currentMode !== 'auto') return currentMode
+    const syncAutoTheme = () => {
+      if (mode !== 'auto') {
+        applyTheme(mode, resolveTheme(mode))
+        return
+      }
 
-        const nextResolvedTheme = mediaQuery.matches ? 'dark' : 'light'
-        setResolvedTheme(nextResolvedTheme)
-        applyTheme(nextResolvedTheme)
-        return currentMode
-      })
+      const nextResolvedTheme = mediaQuery.matches ? 'dark' : 'light'
+      setResolvedTheme((prev) =>
+        prev === nextResolvedTheme ? prev : nextResolvedTheme
+      )
+      applyTheme('auto', nextResolvedTheme)
+    }
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        syncAutoTheme()
+      }
+    }
+
+    const handleStorage = (event: StorageEvent) => {
+      if (event.key !== STORAGE_KEY) return
+
+      const nextMode = getStoredMode()
+      const nextResolvedTheme = resolveTheme(nextMode)
+
+      setModeState(nextMode)
+      setResolvedTheme(nextResolvedTheme)
+      applyTheme(nextMode, nextResolvedTheme)
     }
 
     if (typeof mediaQuery.addEventListener === 'function') {
-      mediaQuery.addEventListener('change', handleSystemChange)
-      return () => mediaQuery.removeEventListener('change', handleSystemChange)
+      mediaQuery.addEventListener('change', syncAutoTheme)
+    } else {
+      mediaQuery.addListener(syncAutoTheme)
     }
 
-    mediaQuery.addListener(handleSystemChange)
-    return () => mediaQuery.removeListener(handleSystemChange)
-  }, [hydrated])
+    window.addEventListener('pageshow', syncAutoTheme)
+    window.addEventListener('focus', syncAutoTheme)
+    window.addEventListener('storage', handleStorage)
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+
+    syncAutoTheme()
+
+    return () => {
+      if (typeof mediaQuery.removeEventListener === 'function') {
+        mediaQuery.removeEventListener('change', syncAutoTheme)
+      } else {
+        mediaQuery.removeListener(syncAutoTheme)
+      }
+
+      window.removeEventListener('pageshow', syncAutoTheme)
+      window.removeEventListener('focus', syncAutoTheme)
+      window.removeEventListener('storage', handleStorage)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+    }
+  }, [hydrated, mode])
 
   const setMode = useCallback((nextMode: ThemeMode) => {
     const nextResolvedTheme = resolveTheme(nextMode)
 
     setModeState(nextMode)
     setResolvedTheme(nextResolvedTheme)
-    applyTheme(nextResolvedTheme)
+    applyTheme(nextMode, nextResolvedTheme)
 
     try {
       window.localStorage.setItem(STORAGE_KEY, nextMode)
@@ -123,7 +174,11 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     [mode, resolvedTheme, setMode]
   )
 
-  return <ThemeModeContext.Provider value={value}>{children}</ThemeModeContext.Provider>
+  return (
+    <ThemeModeContext.Provider value={value}>
+      {children}
+    </ThemeModeContext.Provider>
+  )
 }
 
 export function useThemeMode() {
