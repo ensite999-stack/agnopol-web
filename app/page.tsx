@@ -49,47 +49,64 @@ const HOME_FORM_ERRORS: Record<
   string,
   {
     username: string
+    usernameInvalid: string
     email: string
     emailInvalid: string
   }
 > = {
   de: {
     username: 'Bitte geben Sie Ihren Telegram-Benutzernamen ein.',
+    usernameInvalid:
+      'Bitte geben Sie einen gültigen Telegram-Benutzernamen ein. Er muss mit @ beginnen, 5–32 Zeichen lang sein, nur Buchstaben, Zahlen und Unterstriche enthalten und mit einem Buchstaben beginnen.',
     email: 'Bitte geben Sie Ihre E-Mail-Adresse ein.',
     emailInvalid: 'Bitte geben Sie eine gültige E-Mail-Adresse ein.',
   },
   en: {
     username: 'Please enter your Telegram username.',
+    usernameInvalid:
+      'Please enter a valid Telegram username. It must start with @, contain 5–32 characters, use only letters, numbers, and underscores, and begin with a letter.',
     email: 'Please enter your email address.',
     emailInvalid: 'Please enter a valid email address.',
   },
   es: {
     username: 'Por favor, introduzca su nombre de usuario de Telegram.',
+    usernameInvalid:
+      'Introduzca un nombre de usuario de Telegram válido. Debe comenzar con @, tener entre 5 y 32 caracteres, usar solo letras, números y guiones bajos, y comenzar con una letra.',
     email: 'Por favor, introduzca su correo electrónico.',
     emailInvalid: 'Por favor, introduzca un correo electrónico válido.',
   },
   fr: {
     username: 'Veuillez saisir votre nom d’utilisateur Telegram.',
+    usernameInvalid:
+      'Veuillez saisir un nom d’utilisateur Telegram valide. Il doit commencer par @, contenir 5 à 32 caractères, utiliser uniquement des lettres, chiffres et underscores, et commencer par une lettre.',
     email: 'Veuillez saisir votre e-mail.',
     emailInvalid: 'Veuillez saisir une adresse e-mail valide.',
   },
   ja: {
-    username: 'Telegramユーザー名を入力してください。',
+    username: 'TGユーザー名を入力してください。',
+    usernameInvalid:
+      '有効なTGユーザー名を入力してください。@ で始まり、5〜32文字、使用できるのは英字・数字・アンダースコアのみ、先頭は英字である必要があります。',
     email: 'メールアドレスを入力してください。',
     emailInvalid: '有効なメールアドレスを入力してください。',
   },
   ko: {
-    username: 'Telegram 사용자명을 입력하세요.',
+    username: 'TG 사용자명을 입력하세요.',
+    usernameInvalid:
+      '올바른 TG 사용자명을 입력하세요. @로 시작해야 하며, 5~32자, 영문자/숫자/밑줄만 허용되고, 첫 글자는 영문자여야 합니다.',
     email: '이메일을 입력하세요.',
     emailInvalid: '올바른 이메일 주소를 입력하세요.',
   },
   'zh-cn': {
     username: '请输入 TG 用户名。',
+    usernameInvalid:
+      '请输入正确的 TG 用户名，格式需为 @ 开头，5-32 位，仅支持字母、数字和下划线，且必须以字母开头。',
     email: '请输入邮箱地址。',
     emailInvalid: '请输入有效的邮箱地址。',
   },
   'zh-tw': {
     username: '請輸入 TG 用戶名。',
+    usernameInvalid:
+      '請輸入正確的 TG 用戶名，格式需為 @ 開頭，5-32 位，僅支援字母、數字和底線，且必須以字母開頭。',
     email: '請輸入電子郵件地址。',
     emailInvalid: '請輸入有效的電子郵件地址。',
   },
@@ -104,39 +121,33 @@ const LOOKUP_ENTRY_UI: Record<
   }
 > = {
   de: {
-    title: 'Bestehende Bestellung prüfen',
-    subtitle:
-      'Status prüfen, Systemhinweise ansehen oder Zahlungsnachweis erneut einreichen.',
-    button: 'Bestellung suchen',
+    title: 'Bestellstatus verfolgen',
+    subtitle: 'Prüfen Sie den neuesten Fortschritt, Systemhinweise oder ergänzen Sie den Zahlungsnachweis.',
+    button: 'Bestellung verfolgen',
   },
   en: {
     title: 'Track order status',
-    subtitle:
-      'Check the latest progress, system feedback, or submit additional payment proof.',
+    subtitle: 'Check the latest progress, system feedback, or submit additional payment proof.',
     button: 'Track Order',
   },
   es: {
     title: 'Seguir estado del pedido',
-    subtitle:
-      'Consulte el progreso más reciente, los avisos del sistema o complete el comprobante de pago.',
+    subtitle: 'Consulte el progreso más reciente, los avisos del sistema o complete el comprobante de pago.',
     button: 'Seguir pedido',
   },
   fr: {
     title: 'Suivre le statut de la commande',
-    subtitle:
-      'Consultez la progression, les retours du système ou complétez la preuve de paiement.',
+    subtitle: 'Consultez la progression, les retours du système ou complétez la preuve de paiement.',
     button: 'Suivre la commande',
   },
   ja: {
     title: '注文状況を追跡',
-    subtitle:
-      '最新の進捗、システム案内、または支払い証明の補足を確認できます。',
+    subtitle: '最新の進捗、システム案内、または支払い証明の補足を確認できます。',
     button: '注文を追跡',
   },
   ko: {
     title: '주문 상태 추적',
-    subtitle:
-      '최신 진행 상황, 시스템 안내 또는 결제 증빙 보완을 확인하세요.',
+    subtitle: '최신 진행 상황, 시스템 안내 또는 결제 증빙 보완을 확인하세요.',
     button: '주문 추적',
   },
   'zh-cn': {
@@ -151,11 +162,24 @@ const LOOKUP_ENTRY_UI: Record<
   },
 }
 
-function isValidEmail(value: string) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
+const USERNAME_PLACEHOLDER: Record<string, string> = {
+  en: 'Telegram username (must start with @)',
+  'zh-cn': 'TG 用户名（必须以 @ 开头）',
+  'zh-tw': 'TG 用戶名（必須以 @ 開頭）',
 }
 
-function getHomeFormError(lang: string, key: 'username' | 'email' | 'emailInvalid') {
+function isValidEmail(value: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim())
+}
+
+function isValidTelegramUsername(value: string) {
+  return /^@[A-Za-z][A-Za-z0-9_]{4,31}$/.test(value.trim())
+}
+
+function getHomeFormError(
+  lang: string,
+  key: 'username' | 'usernameInvalid' | 'email' | 'emailInvalid'
+) {
   const messages = HOME_FORM_ERRORS[lang] || HOME_FORM_ERRORS.en
   return messages[key]
 }
@@ -169,6 +193,7 @@ function HomePageInner() {
   const { lang, t } = useI18n()
   const navUi = NAV_UI[lang] || NAV_UI.en
   const lookupEntryUi = LOOKUP_ENTRY_UI[lang] || LOOKUP_ENTRY_UI.en
+  const usernamePlaceholder = USERNAME_PLACEHOLDER[lang] || USERNAME_PLACEHOLDER.en
 
   const [tab, setTab] = useState<ProductType>('premium')
   const [duration, setDuration] = useState<DurationType>('12m')
@@ -269,6 +294,11 @@ function HomePageInner() {
 
     if (!trimmedUsername) {
       setFormError(getHomeFormError(lang, 'username'))
+      return
+    }
+
+    if (!isValidTelegramUsername(trimmedUsername)) {
+      setFormError(getHomeFormError(lang, 'usernameInvalid'))
       return
     }
 
@@ -408,7 +438,7 @@ function HomePageInner() {
               setUsername(e.target.value)
               if (formError) setFormError('')
             }}
-            placeholder={t.home.usernamePlaceholder}
+            placeholder={usernamePlaceholder}
             className="input"
             autoComplete="off"
           />
