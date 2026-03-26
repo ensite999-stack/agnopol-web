@@ -1,44 +1,54 @@
 :root,
 html[data-theme='light'] {
-  --bg-page: #f6f8fc;
-  --bg-card: rgba(255, 255, 255, 0.96);
-  --bg-card-soft: rgba(255, 255, 255, 0.88);
+  --bg-page: #f5f5f7;
+  --bg-card: rgba(255, 255, 255, 0.92);
+  --bg-card-soft: rgba(255, 255, 255, 0.82);
 
-  --text-main: #0a1736;
-  --text-strong: #08142f;
-  --text-soft: #6f7c90;
+  --text-main: #16181d;
+  --text-strong: #0b0d12;
+  --text-soft: #6b7280;
 
-  --border-soft: rgba(10, 23, 54, 0.08);
-  --shadow-soft: 0 18px 40px rgba(10, 23, 54, 0.08);
+  --border-soft: rgba(15, 23, 42, 0.1);
+  --shadow-soft: 0 18px 40px rgba(15, 23, 42, 0.08);
 
-  --brand: #0b51ff;
+  --brand: #1b2230;
   --brand-contrast: #ffffff;
 
-  --notice-bg: rgba(82, 110, 255, 0.08);
-  --notice-border: rgba(82, 110, 255, 0.14);
+  --segmented-bg: rgba(17, 24, 39, 0.06);
+  --segment-active-bg: #1b2230;
+  --segment-active-text: #ffffff;
+  --segment-active-shadow: 0 6px 14px rgba(15, 23, 42, 0.12);
 
-  --overlay-bg: rgba(8, 20, 47, 0.18);
+  --notice-bg: rgba(27, 34, 48, 0.06);
+  --notice-border: rgba(27, 34, 48, 0.12);
+
+  --overlay-bg: rgba(15, 23, 42, 0.2);
 }
 
 html[data-theme='dark'] {
-  --bg-page: #0b1020;
-  --bg-card: rgba(18, 24, 42, 0.96);
-  --bg-card-soft: rgba(23, 30, 52, 0.92);
+  --bg-page: #0b0d12;
+  --bg-card: rgba(24, 28, 35, 0.94);
+  --bg-card-soft: rgba(31, 36, 45, 0.9);
 
-  --text-main: #e9eefb;
+  --text-main: #f3f4f6;
   --text-strong: #ffffff;
-  --text-soft: #9aa6bd;
+  --text-soft: #9aa3b2;
 
   --border-soft: rgba(255, 255, 255, 0.08);
   --shadow-soft: 0 18px 40px rgba(0, 0, 0, 0.34);
 
-  --brand: #2f6bff;
+  --brand: #5b6472;
   --brand-contrast: #ffffff;
 
-  --notice-bg: rgba(47, 107, 255, 0.14);
-  --notice-border: rgba(135, 166, 255, 0.18);
+  --segmented-bg: rgba(255, 255, 255, 0.08);
+  --segment-active-bg: #5b6472;
+  --segment-active-text: #ffffff;
+  --segment-active-shadow: none;
 
-  --overlay-bg: rgba(3, 7, 16, 0.48);
+  --notice-bg: rgba(255, 255, 255, 0.06);
+  --notice-border: rgba(255, 255, 255, 0.1);
+
+  --overlay-bg: rgba(0, 0, 0, 0.48);
 }
 
 html {
@@ -73,13 +83,13 @@ body,
 
 .site-shell {
   background:
-    radial-gradient(circle at top, rgba(82, 110, 255, 0.07), transparent 36%),
+    radial-gradient(circle at top, rgba(27, 34, 48, 0.05), transparent 34%),
     var(--bg-page) !important;
 }
 
 html[data-theme='dark'] .site-shell {
   background:
-    radial-gradient(circle at top, rgba(47, 107, 255, 0.18), transparent 34%),
+    radial-gradient(circle at top, rgba(91, 100, 114, 0.12), transparent 30%),
     var(--bg-page) !important;
 }
 
@@ -154,6 +164,13 @@ html[data-theme='dark'] .site-shell {
   background: var(--brand) !important;
   color: var(--brand-contrast) !important;
   border-color: transparent !important;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.16) !important;
+}
+
+html[data-theme='dark'] .segment-btn.active,
+html[data-theme='dark'] .plan-card.active,
+html[data-theme='dark'] .btn-primary {
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.24) !important;
 }
 
 .plan-card:not(.active) {
@@ -188,6 +205,6 @@ html[data-theme='dark'] .site-shell {
 }
 
 html[data-theme='dark'] ::selection {
-  background: rgba(47, 107, 255, 0.38);
+  background: rgba(255, 255, 255, 0.22);
   color: #ffffff;
 }
