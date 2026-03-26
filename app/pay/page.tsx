@@ -4,6 +4,7 @@ import {
   Suspense,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ChangeEvent,
   type FocusEvent,
@@ -55,16 +56,17 @@ type PayUi = {
   copied: string
   warningTitle: string
   warningText: string
-  introTitle: string
-  introText: string
   deliveryTitle: string
   deliveryText: string
-  txHash: string
-  txPlaceholder: string
+  txHashTitle: string
+  txHashHint: string
+  txHashPlaceholder: string
   proofTitle: string
   proofHint: string
+  uploadButton: string
+  noFile: string
   proofReady: string
-  proofRequired: string
+  txHashRequired: string
   submit: string
   submitting: string
   successTitle: string
@@ -77,8 +79,7 @@ const PAY_UI: Record<string, PayUi> = {
   en: {
     back: 'Back to home',
     title: 'Complete payment',
-    subtitle:
-      'Review your order, choose the payment network, then submit your payment proof.',
+    subtitle: 'Review your order, choose the payment network, then submit your payment proof.',
     invalidParams: 'Order information is incomplete or invalid.',
     invalidParamsHint:
       'Please go back to the home page and create the order again with a valid TG username and email.',
@@ -93,24 +94,23 @@ const PAY_UI: Record<string, PayUi> = {
     copied: 'Copied',
     warningTitle: 'Important payment notice',
     warningText:
-      'For TRC20 payments, please use the correct TRC20 USDT chain and token. Do not use any other chain. The amount received must exactly match the amount shown in your order.',
-    introTitle: 'About Agnopol',
-    introText:
-      'One world, one breath.',
+      'Please transfer using the correct network and asset corresponding to the payment network currently selected on this page. Do not mix other networks. The received amount must exactly match the amount shown in your order.',
     deliveryTitle: 'Delivery time',
     deliveryText:
       'To ensure fund safety and compliance review, our standard delivery time is 5–15 minutes. During network congestion, it will not exceed 2 hours.',
-    txHash: 'Transaction hash',
-    txPlaceholder: 'Paste your transaction hash (optional)',
-    proofTitle: 'Upload payment proof',
-    proofHint: 'Upload your screenshot or payment receipt.',
-    proofReady: 'Proof ready:',
-    proofRequired: 'Please upload payment proof or fill in the transaction hash.',
+    txHashTitle: 'Transaction hash',
+    txHashHint: 'Please fill in the transaction hash first. This is the primary payment proof.',
+    txHashPlaceholder: 'Enter your transaction hash',
+    proofTitle: 'Auxiliary screenshot or receipt',
+    proofHint: 'You may also upload a screenshot or receipt as supporting proof.',
+    uploadButton: 'Choose screenshot',
+    noFile: 'No file selected',
+    proofReady: 'Selected file:',
+    txHashRequired: 'Please fill in the transaction hash first.',
     submit: 'Submit payment proof',
     submitting: 'Submitting...',
     successTitle: 'Payment proof submitted',
-    successText:
-      'Your order has been created and the payment proof has been submitted successfully.',
+    successText: 'Your order has been created and the payment proof has been submitted successfully.',
     trackOrder: 'Track order',
     createError: 'Failed to create the order.',
   },
@@ -131,18 +131,19 @@ const PAY_UI: Record<string, PayUi> = {
     copied: '已复制',
     warningTitle: '重要支付提示',
     warningText:
-      '转账请使用 TRC20 USDT 正确链桥及币种，不要使用其余链桥，支付到账金额必须与订单显示金额一致。',
-    introTitle: '关于 Agnopol',
-    introText: 'One world, one breath.',
+      '转账请务必使用当前页面所选支付网络对应的正确链与币种，不要混用其他网络。实际到账金额必须与订单显示金额完全一致。',
     deliveryTitle: '交付时效',
     deliveryText:
       '为了确保资金安全与合规审查，我们的标准交付时间为 5 - 15 分钟。在网络拥堵时，最迟不超过 2 小时。',
-    txHash: '交易哈希',
-    txPlaceholder: '填写交易哈希（可选）',
-    proofTitle: '上传付款凭证',
-    proofHint: '上传付款截图或收据。',
-    proofReady: '凭证已就绪：',
-    proofRequired: '请上传付款凭证，或填写交易哈希。',
+    txHashTitle: '交易哈希',
+    txHashHint: '请优先填写交易哈希，这是主要付款凭证。',
+    txHashPlaceholder: '请填写交易哈希',
+    proofTitle: '辅助截图或收据',
+    proofHint: '你也可以上传付款截图或收据，作为辅助凭证。',
+    uploadButton: '选择截图',
+    noFile: '未选择任何文件',
+    proofReady: '已选择文件：',
+    txHashRequired: '请先填写交易哈希。',
     submit: '提交付款凭证',
     submitting: '提交中...',
     successTitle: '付款凭证已提交',
@@ -167,18 +168,19 @@ const PAY_UI: Record<string, PayUi> = {
     copied: '已複製',
     warningTitle: '重要支付提示',
     warningText:
-      '轉帳請使用 TRC20 USDT 正確鏈橋及幣種，不要使用其餘鏈橋，支付到帳金額必須與訂單顯示金額一致。',
-    introTitle: '關於 Agnopol',
-    introText: 'One world, one breath.',
+      '轉帳請務必使用目前頁面所選支付網路對應的正確鏈與幣種，不要混用其他網路。實際到帳金額必須與訂單顯示金額完全一致。',
     deliveryTitle: '交付時效',
     deliveryText:
       '為了確保資金安全與合規審查，我們的標準交付時間為 5 - 15 分鐘。在網路壅塞時，最遲不超過 2 小時。',
-    txHash: '交易雜湊',
-    txPlaceholder: '填寫交易雜湊（可選）',
-    proofTitle: '上傳付款憑證',
-    proofHint: '上傳付款截圖或收據。',
-    proofReady: '憑證已就緒：',
-    proofRequired: '請上傳付款憑證，或填寫交易雜湊。',
+    txHashTitle: '交易雜湊',
+    txHashHint: '請優先填寫交易雜湊，這是主要付款憑證。',
+    txHashPlaceholder: '請填寫交易雜湊',
+    proofTitle: '輔助截圖或收據',
+    proofHint: '你也可以上傳付款截圖或收據，作為輔助憑證。',
+    uploadButton: '選擇截圖',
+    noFile: '未選擇任何檔案',
+    proofReady: '已選擇檔案：',
+    txHashRequired: '請先填寫交易雜湊。',
     submit: '提交付款憑證',
     submitting: '提交中...',
     successTitle: '付款憑證已提交',
@@ -217,6 +219,7 @@ function PayPageInner() {
   const { lang, t } = useI18n()
   const ui = PAY_UI[lang] || PAY_UI.en
   const searchParams = useSearchParams()
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
 
   const [config, setConfig] = useState<PublicConfig>(defaultConfig)
   const [configError, setConfigError] = useState('')
@@ -315,7 +318,7 @@ function PayPageInner() {
       setCopyState('copied')
       window.setTimeout(() => setCopyState('idle'), 1600)
     } catch {
-      // ignore clipboard errors
+      // ignore
     }
   }
 
@@ -344,8 +347,8 @@ function PayPageInner() {
       return
     }
 
-    if (!proofBase64 && !txHash.trim()) {
-      setSubmitError(ui.proofRequired)
+    if (!txHash.trim()) {
+      setSubmitError(ui.txHashRequired)
       return
     }
 
@@ -363,7 +366,7 @@ function PayPageInner() {
           stars_amount: productType === 'tg_stars' ? starsAmount : null,
           price_usd: priceUsd,
           payment_network: network,
-          tx_hash: txHash.trim() || null,
+          tx_hash: txHash.trim(),
           proof_image_base64: proofBase64 || null,
         }),
         cache: 'no-store',
@@ -380,6 +383,9 @@ function PayPageInner() {
       setTxHash('')
       setProofName('')
       setProofBase64('')
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ''
+      }
     } catch (error) {
       setSubmitError(error instanceof Error ? error.message : ui.createError)
     } finally {
@@ -418,119 +424,147 @@ function PayPageInner() {
             <div className="status-box-error">{ui.invalidParamsHint}</div>
           </section>
         ) : (
-          <>
-            <section className="pay-main-card card-soft">
-              <div className="pay-title">{ui.title}</div>
-              <div className="small-muted pay-subtitle">{ui.subtitle}</div>
+          <section className="pay-main-card card-soft">
+            <div className="pay-title">{ui.title}</div>
+            <div className="small-muted pay-subtitle">{ui.subtitle}</div>
 
-              {configError ? <div className="status-box-error">{configError}</div> : null}
+            {configError ? <div className="status-box-error">{configError}</div> : null}
 
-              <div className="pay-grid">
-                <div className="pay-info-card card-soft-sub">
-                  <div className="section-mini-title">{ui.summaryTitle}</div>
-                  <div className="summary-row">
-                    <span>{ui.product}</span>
-                    <strong>{productTitle}</strong>
-                  </div>
-                  <div className="summary-row">
-                    <span>{ui.username}</span>
-                    <strong>{username}</strong>
-                  </div>
-                  <div className="summary-row">
-                    <span>{ui.email}</span>
-                    <strong>{email}</strong>
-                  </div>
-                  <div className="summary-row summary-row-amount">
-                    <span>{ui.amountDue}</span>
-                    <strong>${formatMoney(priceUsd)}</strong>
-                  </div>
+            <div className="pay-grid">
+              <div className="pay-info-card card-soft-sub">
+                <div className="section-mini-title">{ui.summaryTitle}</div>
+
+                <div className="summary-row">
+                  <span>{ui.product}</span>
+                  <strong>{productTitle}</strong>
                 </div>
 
-                <div className="pay-info-card card-soft-sub">
-                  <div className="section-mini-title">{ui.networkTitle}</div>
-                  <div className="network-switch">
-                    <button
-                      type="button"
-                      className={`network-option ${network === 'TRC20' ? 'active' : ''}`}
-                      onClick={() => setNetwork('TRC20')}
-                    >
-                      TRC20
-                    </button>
-                    <button
-                      type="button"
-                      className={`network-option ${network === 'BASE' ? 'active' : ''}`}
-                      onClick={() => setNetwork('BASE')}
-                    >
-                      BASE
-                    </button>
-                  </div>
+                <div className="summary-row">
+                  <span>{ui.username}</span>
+                  <strong>{username}</strong>
+                </div>
 
-                  <div className="address-card">
-                    <div className="address-label">{ui.addressTitle}</div>
-                    <div className="address-value">{selectedAddress}</div>
-                    <button type="button" className="btn-secondary small-line-button" onClick={copyAddress}>
-                      {copyState === 'copied' ? ui.copied : ui.copy}
-                    </button>
-                  </div>
+                <div className="summary-row">
+                  <span>{ui.email}</span>
+                  <strong>{email}</strong>
+                </div>
+
+                <div className="summary-row summary-row-amount">
+                  <span>{ui.amountDue}</span>
+                  <strong>${formatMoney(priceUsd)}</strong>
                 </div>
               </div>
 
-              <div className="notice-grid">
-                <div className="notice-card notice-card-warning">
-                  <div className="section-mini-title">{ui.warningTitle}</div>
-                  <div className="notice-text">{ui.warningText}</div>
+              <div className="pay-info-card card-soft-sub">
+                <div className="section-mini-title">{ui.networkTitle}</div>
+
+                <div className="network-switch">
+                  <button
+                    type="button"
+                    className={`network-option ${network === 'TRC20' ? 'active' : ''}`}
+                    onClick={() => setNetwork('TRC20')}
+                  >
+                    TRC20
+                  </button>
+
+                  <button
+                    type="button"
+                    className={`network-option ${network === 'BASE' ? 'active' : ''}`}
+                    onClick={() => setNetwork('BASE')}
+                  >
+                    BASE
+                  </button>
                 </div>
 
-                <div className="notice-card">
-                  <div className="section-mini-title">{ui.introTitle}</div>
-                  <div className="notice-text">{ui.introText}</div>
-                </div>
+                <div className="address-card">
+                  <div className="address-label">{ui.addressTitle}</div>
+                  <div className="address-value">{selectedAddress}</div>
 
-                <div className="notice-card">
-                  <div className="section-mini-title">{ui.deliveryTitle}</div>
-                  <div className="notice-text">{ui.deliveryText}</div>
+                  <button
+                    type="button"
+                    className="btn-secondary small-line-button"
+                    onClick={copyAddress}
+                  >
+                    {copyState === 'copied' ? ui.copied : ui.copy}
+                  </button>
                 </div>
               </div>
+            </div>
 
-              <div className="proof-card card-soft-sub">
-                <div className="section-mini-title">{ui.proofTitle}</div>
-                <div className="small-muted proof-hint">{ui.proofHint}</div>
+            <div className="notice-grid">
+              <div className="notice-card notice-card-warning">
+                <div className="section-mini-title">{ui.warningTitle}</div>
+                <div className="notice-text">{ui.warningText}</div>
+              </div>
 
-                <input
-                  value={txHash}
-                  onChange={(e) => setTxHash(e.target.value)}
-                  onFocus={handleFieldFocus}
-                  placeholder={ui.txPlaceholder}
-                  className="input"
-                />
+              <div className="notice-card">
+                <div className="section-mini-title">{ui.deliveryTitle}</div>
+                <div className="notice-text">{ui.deliveryText}</div>
+              </div>
+            </div>
 
-                <input type="file" accept="image/*" onChange={handleProofChange} />
+            <div className="proof-card card-soft-sub">
+              <div className="section-mini-title">{ui.txHashTitle}</div>
+              <div className="small-muted proof-hint">{ui.txHashHint}</div>
 
-                {proofName ? (
-                  <div className="small-muted proof-ready">
-                    {ui.proofReady} {proofName}
-                  </div>
-                ) : null}
+              <input
+                value={txHash}
+                onChange={(e) => setTxHash(e.target.value)}
+                onFocus={handleFieldFocus}
+                placeholder={ui.txHashPlaceholder}
+                className="input"
+              />
 
-                {submitError ? <div className="status-box-error">{submitError}</div> : null}
+              <div className="section-mini-title proof-second-title">{ui.proofTitle}</div>
+              <div className="small-muted proof-hint">{ui.proofHint}</div>
 
-                <button type="button" className="btn-primary" onClick={handleSubmit}>
-                  {submitting ? ui.submitting : ui.submit}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleProofChange}
+                className="native-file-input"
+              />
+
+              <div className="file-upload-shell">
+                <button
+                  type="button"
+                  className="file-trigger"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  {ui.uploadButton}
                 </button>
+
+                <div className="file-name" title={proofName || ui.noFile}>
+                  {proofName || ui.noFile}
+                </div>
               </div>
 
-              {successVisible ? (
-                <div className="status-box-success success-box">
-                  <div className="success-title">{ui.successTitle}</div>
-                  <div className="success-text">{ui.successText}</div>
-                  {createdOrderNo ? <div className="success-order-no">#{createdOrderNo}</div> : null}
-                  <a href={withLang('/lookup', lang)} className="btn-secondary link-button success-link">
-                    {ui.trackOrder}
-                  </a>
+              {proofName ? (
+                <div className="small-muted proof-ready">
+                  {ui.proofReady} {proofName}
                 </div>
               ) : null}
-            </section>
-          </>
+
+              {submitError ? <div className="status-box-error">{submitError}</div> : null}
+
+              <button type="button" className="btn-primary" onClick={handleSubmit}>
+                {submitting ? ui.submitting : ui.submit}
+              </button>
+            </div>
+
+            {successVisible ? (
+              <div className="status-box-success success-box">
+                <div className="success-title">{ui.successTitle}</div>
+                <div className="success-text">{ui.successText}</div>
+                {createdOrderNo ? <div className="success-order-no">#{createdOrderNo}</div> : null}
+
+                <a href={withLang('/lookup', lang)} className="btn-secondary link-button success-link">
+                  {ui.trackOrder}
+                </a>
+              </div>
+            ) : null}
+          </section>
         )}
 
         <footer className="footer">
@@ -571,6 +605,8 @@ function PayPageInner() {
           background: var(--bg-card-soft, rgba(255, 255, 255, 0.88));
           box-shadow: var(--shadow-soft, 0 18px 40px rgba(10, 23, 54, 0.08));
           backdrop-filter: blur(14px);
+          box-sizing: border-box;
+          min-width: 0;
         }
 
         .card-soft-sub {
@@ -698,6 +734,8 @@ function PayPageInner() {
           max-width: 700px;
           margin: 0 auto;
           padding: 20px;
+          box-sizing: border-box;
+          min-width: 0;
         }
 
         .pay-title {
@@ -717,11 +755,14 @@ function PayPageInner() {
           display: grid;
           grid-template-columns: repeat(2, minmax(0, 1fr));
           gap: 14px;
+          min-width: 0;
         }
 
         .pay-info-card,
         .proof-card {
           padding: 16px;
+          box-sizing: border-box;
+          min-width: 0;
         }
 
         .section-mini-title {
@@ -729,6 +770,11 @@ function PayPageInner() {
           font-weight: 900;
           color: var(--text-main, #0a1736);
           margin-bottom: 12px;
+        }
+
+        .proof-second-title {
+          margin-top: 4px;
+          margin-bottom: 8px;
         }
 
         .summary-row {
@@ -739,6 +785,17 @@ function PayPageInner() {
           border-bottom: 1px solid rgba(10, 23, 54, 0.06);
           color: var(--text-main, #0a1736);
           font-size: 14px;
+          min-width: 0;
+        }
+
+        .summary-row span,
+        .summary-row strong {
+          min-width: 0;
+        }
+
+        .summary-row strong {
+          text-align: right;
+          word-break: break-word;
         }
 
         .summary-row:last-child {
@@ -788,6 +845,8 @@ function PayPageInner() {
           border-radius: 18px;
           background: rgba(11, 37, 112, 0.04);
           border: 1px solid rgba(11, 37, 112, 0.1);
+          min-width: 0;
+          box-sizing: border-box;
         }
 
         .address-label {
@@ -808,6 +867,7 @@ function PayPageInner() {
           display: grid;
           gap: 12px;
           margin-top: 14px;
+          min-width: 0;
         }
 
         .notice-card {
@@ -815,6 +875,8 @@ function PayPageInner() {
           border-radius: 22px;
           border: 1px solid var(--border-soft, rgba(10, 23, 54, 0.08));
           background: var(--bg-card, rgba(255, 255, 255, 0.96));
+          box-sizing: border-box;
+          min-width: 0;
         }
 
         .notice-card-warning {
@@ -826,17 +888,20 @@ function PayPageInner() {
           color: var(--text-main, #0a1736);
           line-height: 1.7;
           font-size: 14px;
+          word-break: break-word;
         }
 
         .proof-card {
           margin-top: 14px;
           display: grid;
           gap: 10px;
+          min-width: 0;
         }
 
         .proof-hint,
         .proof-ready {
           color: var(--text-soft, #7b8798);
+          word-break: break-word;
         }
 
         .input {
@@ -850,17 +915,68 @@ function PayPageInner() {
           font-size: 15px;
           outline: none;
           box-sizing: border-box;
+          min-width: 0;
+          max-width: 100%;
         }
 
         .input::placeholder {
           color: var(--text-soft, #7b8798);
         }
 
+        .native-file-input {
+          display: none;
+        }
+
+        .file-upload-shell {
+          width: 100%;
+          min-width: 0;
+          max-width: 100%;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          flex-wrap: wrap;
+          box-sizing: border-box;
+        }
+
+        .file-trigger {
+          flex: 0 0 auto;
+          min-height: 46px;
+          padding: 0 16px;
+          border-radius: 16px;
+          border: 1.5px solid var(--brand, #0b2570);
+          background: rgba(11, 37, 112, 0.04);
+          color: var(--brand, #0b2570);
+          font-size: 14px;
+          font-weight: 800;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          box-sizing: border-box;
+        }
+
+        .file-name {
+          flex: 1 1 220px;
+          min-width: 0;
+          min-height: 46px;
+          padding: 0 14px;
+          border-radius: 16px;
+          border: 1px solid var(--border-soft, rgba(10, 23, 54, 0.08));
+          background: var(--bg-card, rgba(255, 255, 255, 0.96));
+          color: var(--text-soft, #7b8798);
+          font-size: 14px;
+          display: flex;
+          align-items: center;
+          box-sizing: border-box;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
         .btn-primary,
         .btn-secondary,
-        .small-line-button {
+        .small-line-button,
+        .file-trigger {
           appearance: none;
-          border: 0;
           cursor: pointer;
           transition:
             transform 0.16s ease,
@@ -872,7 +988,8 @@ function PayPageInner() {
 
         .btn-primary:hover,
         .btn-secondary:hover,
-        .small-line-button:hover {
+        .small-line-button:hover,
+        .file-trigger:hover {
           transform: translateY(-1px);
         }
 
@@ -885,6 +1002,9 @@ function PayPageInner() {
           font-size: 15px;
           font-weight: 800;
           box-shadow: 0 16px 36px rgba(11, 37, 112, 0.2);
+          border: 0;
+          box-sizing: border-box;
+          max-width: 100%;
         }
 
         .btn-secondary,
@@ -907,7 +1027,8 @@ function PayPageInner() {
 
         .btn-secondary:hover,
         .small-line-button:hover,
-        .link-button:hover {
+        .link-button:hover,
+        .file-trigger:hover {
           background: rgba(11, 37, 112, 0.08);
         }
 
@@ -918,6 +1039,10 @@ function PayPageInner() {
           font-size: 14px;
           line-height: 1.6;
           margin-top: 10px;
+          box-sizing: border-box;
+          width: 100%;
+          max-width: 100%;
+          word-break: break-word;
         }
 
         .status-box-error {
@@ -1028,6 +1153,15 @@ function PayPageInner() {
 
           .pay-main-card {
             padding: 16px;
+          }
+
+          .file-upload-shell {
+            align-items: stretch;
+          }
+
+          .file-trigger,
+          .file-name {
+            width: 100%;
           }
 
           .footer-links {
