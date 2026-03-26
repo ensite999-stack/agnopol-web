@@ -1,15 +1,6 @@
 'use client'
 
-import {
-  Suspense,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ChangeEvent,
-  type FocusEvent,
-  type PointerEvent,
-} from 'react'
+import { Suspense, useEffect, useMemo, useState } from 'react'
 import { useI18n } from '../components/language-provider'
 import LanguageSwitcher from '../components/language-switcher'
 import ThemeToggle from '../components/theme-toggle'
@@ -17,20 +8,6 @@ import { withLang } from '../lib/i18n'
 
 type ProductType = 'premium' | 'stars'
 type DurationType = '3m' | '6m' | '12m'
-
-type OrderResult = {
-  order_no: string
-  status: string
-  product_type: string | null
-  duration: string | null
-  stars_amount: number | null
-  amount: number | null
-  price_usd: number | null
-  payment_network: string | null
-  created_at: string | null
-  public_note: string | null
-  tx_hash: string | null
-}
 
 type PublicConfig = {
   premium_3m_price: number
@@ -42,35 +19,6 @@ type PublicConfig = {
   updated_at?: string
 }
 
-type LookupUi = {
-  title: string
-  subtitle: string
-  placeholder: string
-  button: string
-  loading: string
-  orderNo: string
-  email: string
-  status: string
-  product: string
-  amount: string
-  network: string
-  createdAt: string
-  note: string
-  txHash: string
-  resubmit: string
-  proofReady: string
-  hashPlaceholder: string
-  resubmitButton: string
-  resubmitting: string
-  noOrders: string
-  pending: string
-  paid: string
-  completed: string
-  cancelled: string
-  resubmitSuccess: string
-  resubmitError: string
-}
-
 const defaultConfig: PublicConfig = {
   premium_3m_price: 13.1,
   premium_6m_price: 17.1,
@@ -78,245 +26,6 @@ const defaultConfig: PublicConfig = {
   stars_rate: 0.02,
   trc20_address: 'TD6sQK9NmqxKzP6WHvmUdkHQRZvwX6Cy1e',
   base_address: '0x21E43Ddaa992A0B5cfcCeFE98838239b9E91B40E',
-}
-
-const LOOKUP_UI: Record<string, LookupUi> = {
-  de: {
-    title: 'Bestellabfrage',
-    subtitle:
-      'Geben Sie Ihre Bestell-E-Mail ein, um Status, Systemhinweise und eine erneute Einreichung des Zahlungsnachweises nach Admin-Hinweis zu prüfen.',
-    placeholder: 'Bestell-E-Mail eingeben',
-    button: 'Bestellung prüfen',
-    loading: 'Wird geprüft...',
-    orderNo: 'Bestellnummer',
-    email: 'E-Mail',
-    status: 'Status',
-    product: 'Produkt',
-    amount: 'Betrag',
-    network: 'Zahlungsnetzwerk',
-    createdAt: 'Erstellt am',
-    note: 'Systemhinweis',
-    txHash: 'Transaktions-Hash',
-    resubmit: 'Nachweis erneut hochladen',
-    proofReady: 'Neuer Nachweis ist bereit:',
-    hashPlaceholder: 'Transaktions-Hash erneut eingeben (optional)',
-    resubmitButton: 'Neuen Nachweis senden',
-    resubmitting: 'Wird gesendet...',
-    noOrders: 'Keine passenden Bestellungen gefunden.',
-    pending: 'Ausstehende Zahlung',
-    paid: 'Bezahlt',
-    completed: 'Abgeschlossen',
-    cancelled: 'Storniert',
-    resubmitSuccess:
-      'Der neue Zahlungsnachweis wurde erfolgreich übermittelt. Bitte prüfen Sie den Bestellstatus später erneut.',
-    resubmitError: 'Der Zahlungsnachweis konnte nicht erneut übermittelt werden.',
-  },
-  en: {
-    title: 'Order Lookup',
-    subtitle:
-      'Enter your order email to check status, system notices, and resubmit payment proof only when instructed by admin.',
-    placeholder: 'Enter your order email',
-    button: 'Check Orders',
-    loading: 'Loading...',
-    orderNo: 'Order No',
-    email: 'Email',
-    status: 'Status',
-    product: 'Product',
-    amount: 'Amount',
-    network: 'Payment Network',
-    createdAt: 'Created At',
-    note: 'System Notice',
-    txHash: 'Transaction Hash',
-    resubmit: 'Resubmit Proof',
-    proofReady: 'New proof ready:',
-    hashPlaceholder: 'Resubmit transaction hash (optional)',
-    resubmitButton: 'Submit New Proof',
-    resubmitting: 'Submitting...',
-    noOrders: 'No matching orders found.',
-    pending: 'Pending Payment',
-    paid: 'Paid',
-    completed: 'Completed',
-    cancelled: 'Cancelled',
-    resubmitSuccess:
-      'Updated payment proof submitted successfully. Please check the order again later.',
-    resubmitError: 'Failed to resubmit payment proof.',
-  },
-  es: {
-    title: 'Consulta de pedido',
-    subtitle:
-      'Introduzca el correo de su pedido para comprobar el estado, los avisos del sistema y volver a enviar el comprobante de pago cuando el administrador lo indique.',
-    placeholder: 'Introduzca el correo del pedido',
-    button: 'Consultar pedido',
-    loading: 'Consultando...',
-    orderNo: 'Número de pedido',
-    email: 'Correo electrónico',
-    status: 'Estado',
-    product: 'Producto',
-    amount: 'Importe',
-    network: 'Red de pago',
-    createdAt: 'Fecha de creación',
-    note: 'Aviso del sistema',
-    txHash: 'Hash de transacción',
-    resubmit: 'Volver a subir comprobante',
-    proofReady: 'El nuevo comprobante está listo:',
-    hashPlaceholder: 'Volver a escribir el hash de transacción (opcional)',
-    resubmitButton: 'Enviar nuevo comprobante',
-    resubmitting: 'Enviando...',
-    noOrders: 'No se encontraron pedidos relacionados.',
-    pending: 'Pago pendiente',
-    paid: 'Pagado',
-    completed: 'Completado',
-    cancelled: 'Cancelado',
-    resubmitSuccess:
-      'El nuevo comprobante de pago se ha enviado correctamente. Vuelva a consultar el estado del pedido más tarde.',
-    resubmitError: 'No se pudo reenviar el comprobante de pago.',
-  },
-  fr: {
-    title: 'Recherche de commande',
-    subtitle:
-      "Entrez l'e-mail de votre commande pour consulter le statut, les avis du système et renvoyer la preuve de paiement si l'administrateur le demande.",
-    placeholder: "Entrez l'e-mail de commande",
-    button: 'Rechercher la commande',
-    loading: 'Recherche en cours...',
-    orderNo: 'N° de commande',
-    email: 'E-mail',
-    status: 'Statut',
-    product: 'Produit',
-    amount: 'Montant',
-    network: 'Réseau de paiement',
-    createdAt: 'Créé le',
-    note: 'Avis du système',
-    txHash: 'Hash de transaction',
-    resubmit: 'Téléverser à nouveau la preuve',
-    proofReady: 'La nouvelle preuve est prête :',
-    hashPlaceholder: 'Saisir à nouveau le hash de transaction (facultatif)',
-    resubmitButton: 'Envoyer la nouvelle preuve',
-    resubmitting: 'Envoi...',
-    noOrders: 'Aucune commande correspondante trouvée.',
-    pending: 'Paiement en attente',
-    paid: 'Payé',
-    completed: 'Terminé',
-    cancelled: 'Annulé',
-    resubmitSuccess:
-      'La nouvelle preuve de paiement a été envoyée avec succès. Veuillez consulter à nouveau le statut plus tard.',
-    resubmitError: "Échec de l'envoi de la nouvelle preuve de paiement.",
-  },
-  ja: {
-    title: '注文照会',
-    subtitle:
-      '注文時のメールアドレスを入力すると、注文状況、システム案内、管理者の案内に従った支払い証明の再提出を確認できます。',
-    placeholder: '注文メールアドレスを入力',
-    button: '注文を確認',
-    loading: '照会中...',
-    orderNo: '注文番号',
-    email: 'メール',
-    status: '状態',
-    product: '商品',
-    amount: '金額',
-    network: '支払いネットワーク',
-    createdAt: '作成時間',
-    note: 'システム案内',
-    txHash: 'トランザクションハッシュ',
-    resubmit: '証明を再アップロード',
-    proofReady: '新しい証明の準備ができました：',
-    hashPlaceholder: 'トランザクションハッシュを再入力（任意）',
-    resubmitButton: '新しい証明を送信',
-    resubmitting: '送信中...',
-    noOrders: '関連する注文が見つかりませんでした。',
-    pending: '未払い',
-    paid: '支払い済み',
-    completed: '完了',
-    cancelled: 'キャンセル済み',
-    resubmitSuccess:
-      '新しい支払い証明が正常に送信されました。しばらくしてから注文状況を再度ご確認ください。',
-    resubmitError: '支払い証明の再送信に失敗しました。',
-  },
-  ko: {
-    title: '주문 조회',
-    subtitle:
-      '주문 이메일을 입력하면 주문 상태, 시스템 안내, 그리고 관리자 안내에 따른 결제 증빙 재제출 여부를 확인할 수 있습니다.',
-    placeholder: '주문 이메일 입력',
-    button: '주문 조회',
-    loading: '조회 중...',
-    orderNo: '주문번호',
-    email: '이메일',
-    status: '상태',
-    product: '상품',
-    amount: '금액',
-    network: '결제 네트워크',
-    createdAt: '생성 시간',
-    note: '시스템 안내',
-    txHash: '거래 해시',
-    resubmit: '증빙 다시 업로드',
-    proofReady: '새 증빙이 준비되었습니다:',
-    hashPlaceholder: '거래 해시 다시 입력 (선택)',
-    resubmitButton: '새 증빙 제출',
-    resubmitting: '제출 중...',
-    noOrders: '관련 주문을 찾지 못했습니다.',
-    pending: '미결제',
-    paid: '결제됨',
-    completed: '완료됨',
-    cancelled: '취소됨',
-    resubmitSuccess:
-      '새 결제 증빙이 성공적으로 제출되었습니다. 잠시 후 주문 상태를 다시 확인하세요.',
-    resubmitError: '결제 증빙 재제출에 실패했습니다.',
-  },
-  'zh-cn': {
-    title: '查询订单',
-    subtitle: '输入下单邮箱，可查询订单状态、系统备注，并在管理员要求时重新提交付款凭证。',
-    placeholder: '请输入下单邮箱',
-    button: '查询订单',
-    loading: '查询中...',
-    orderNo: '订单号',
-    email: '邮箱',
-    status: '状态',
-    product: '商品',
-    amount: '金额',
-    network: '支付网络',
-    createdAt: '创建时间',
-    note: '系统备注',
-    txHash: '交易哈希',
-    resubmit: '重新上传凭证',
-    proofReady: '新的凭证已准备：',
-    hashPlaceholder: '重新填写交易哈希（可选）',
-    resubmitButton: '提交新的凭证',
-    resubmitting: '提交中...',
-    noOrders: '未找到相关订单。',
-    pending: '待支付',
-    paid: '已支付',
-    completed: '已完成',
-    cancelled: '已取消',
-    resubmitSuccess: '新的付款凭证已成功提交，请稍后再次查询订单状态。',
-    resubmitError: '重新提交付款凭证失败。',
-  },
-  'zh-tw': {
-    title: '查詢訂單',
-    subtitle: '輸入下單電子郵件，可查詢訂單狀態、系統備註，並在管理員要求時重新提交付款憑證。',
-    placeholder: '請輸入下單電子郵件',
-    button: '查詢訂單',
-    loading: '查詢中...',
-    orderNo: '訂單號',
-    email: '電子郵件',
-    status: '狀態',
-    product: '商品',
-    amount: '金額',
-    network: '支付網路',
-    createdAt: '建立時間',
-    note: '系統備註',
-    txHash: '交易雜湊',
-    resubmit: '重新上傳憑證',
-    proofReady: '新的憑證已準備：',
-    hashPlaceholder: '重新填寫交易雜湊（可選）',
-    resubmitButton: '提交新的憑證',
-    resubmitting: '提交中...',
-    noOrders: '未找到相關訂單。',
-    pending: '待支付',
-    paid: '已支付',
-    completed: '已完成',
-    cancelled: '已取消',
-    resubmitSuccess: '新的付款憑證已成功提交，請稍後再次查詢訂單狀態。',
-    resubmitError: '重新提交付款憑證失敗。',
-  },
 }
 
 const NAV_UI: Record<
@@ -386,6 +95,64 @@ const HOME_FORM_ERRORS: Record<
   },
 }
 
+const LOOKUP_ENTRY_UI: Record<
+  string,
+  {
+    title: string
+    subtitle: string
+    button: string
+  }
+> = {
+  de: {
+    title: 'Bestehende Bestellung prüfen',
+    subtitle:
+      'Status prüfen, Systemhinweise ansehen oder Zahlungsnachweis erneut einreichen.',
+    button: 'Bestellung suchen',
+  },
+  en: {
+    title: 'Check existing order',
+    subtitle:
+      'View order status, system notes, or resubmit payment proof from a dedicated lookup page.',
+    button: 'Order Lookup',
+  },
+  es: {
+    title: 'Consultar pedido existente',
+    subtitle:
+      'Consulte el estado del pedido, las notas del sistema o vuelva a enviar el comprobante de pago.',
+    button: 'Consultar pedido',
+  },
+  fr: {
+    title: 'Consulter une commande existante',
+    subtitle:
+      'Consultez le statut, les notes du système ou renvoyez la preuve de paiement depuis une page dédiée.',
+    button: 'Rechercher la commande',
+  },
+  ja: {
+    title: '既存の注文を確認',
+    subtitle:
+      '専用ページで注文状況、システム案内、支払い証明の再提出を確認できます。',
+    button: '注文を照会',
+  },
+  ko: {
+    title: '기존 주문 조회',
+    subtitle:
+      '전용 페이지에서 주문 상태, 시스템 안내, 결제 증빙 재제출을 확인하세요.',
+    button: '주문 조회',
+  },
+  'zh-cn': {
+    title: '查询已有订单',
+    subtitle:
+      '在独立页面中查看订单状态、系统备注，或重新提交付款凭证。',
+    button: '查询订单',
+  },
+  'zh-tw': {
+    title: '查詢已有訂單',
+    subtitle:
+      '在獨立頁面中查看訂單狀態、系統備註，或重新提交付款憑證。',
+    button: '查詢訂單',
+  },
+}
+
 function isValidEmail(value: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
 }
@@ -395,367 +162,15 @@ function getHomeFormError(lang: string, key: 'username' | 'email' | 'emailInvali
   return messages[key]
 }
 
-function formatBostonTime(value: string | null) {
-  if (!value) return '-'
-
-  try {
-    return new Intl.DateTimeFormat('en-US', {
-      timeZone: 'America/New_York',
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      hour12: false,
-    }).format(new Date(value))
-  } catch {
-    return value
-  }
-}
-
 function formatMoney(value: number) {
   const fixed = Number(value.toFixed(2))
   return Number.isInteger(fixed) ? String(fixed) : fixed.toFixed(2).replace(/\.?0+$/, '')
 }
 
-function getKeyboardInset() {
-  if (typeof window === 'undefined' || !window.visualViewport) return 0
-
-  const viewport = window.visualViewport
-  const inset = window.innerHeight - viewport.height - viewport.offsetTop
-
-  return inset > 120 ? inset : 0
-}
-function getFieldAnchor(target: HTMLInputElement) {
-  const anchor =
-    target.closest('.lookup-wrap') ||
-    target.closest('.form-stack') ||
-    target.closest('.single-box')
-
-  return (anchor as HTMLElement | null) ?? target
-}
-
-function scrollAnchorToTop(target: HTMLInputElement, offset = 14) {
-  if (typeof window === 'undefined') return
-
-  const anchor = getFieldAnchor(target)
-  const rect = anchor.getBoundingClientRect()
-  const top = rect.top + window.scrollY - offset
-
-  window.scrollTo({
-    top: Math.max(0, top),
-    behavior: 'auto',
-  })
-}
-
-function ensureFieldVisible(target: HTMLInputElement, bottomGap = 24) {
-  if (typeof window === 'undefined') return
-
-  scrollAnchorToTop(target, 14)
-
-  const rect = target.getBoundingClientRect()
-  const viewport = window.visualViewport
-
-  const visibleTop = 12
-  const visibleBottom = viewport
-    ? viewport.height + viewport.offsetTop - bottomGap
-    : window.innerHeight - bottomGap
-
-  let delta = 0
-
-  if (rect.bottom > visibleBottom) {
-    delta = rect.bottom - visibleBottom
-  } else if (rect.top < visibleTop) {
-    delta = rect.top - visibleTop
-  }
-
-  if (Math.abs(delta) > 1) {
-    window.scrollBy({
-      top: delta,
-      behavior: 'auto',
-    })
-  }
-}
-
-function scheduleFieldIntoView(target: HTMLInputElement) {
-  if (typeof window === 'undefined') return
-
-  ;[0, 80, 180, 320, 520, 760, 980].forEach((delay) => {
-    window.setTimeout(() => {
-      ensureFieldVisible(target, 24)
-    }, delay)
-  })
-}
-
-function OrderLookupSection({
-  onFieldPointerDown,
-  onFieldFocus,
-  onFieldBlur,
-}: {
-  onFieldPointerDown: (event: PointerEvent<HTMLInputElement>) => void
-  onFieldFocus: (event: FocusEvent<HTMLInputElement>) => void
-  onFieldBlur: () => void
-}) {
-  const { lang, t } = useI18n()
-  const ui = LOOKUP_UI[lang] || LOOKUP_UI.en
-
-  const [email, setEmail] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [errorText, setErrorText] = useState('')
-  const [results, setResults] = useState<OrderResult[]>([])
-
-  const [activeOrderNo, setActiveOrderNo] = useState('')
-  const [resubmitHash, setResubmitHash] = useState('')
-  const [resubmitProofName, setResubmitProofName] = useState('')
-  const [resubmitProofBase64, setResubmitProofBase64] = useState('')
-  const [resubmitLoading, setResubmitLoading] = useState(false)
-  const [resubmitMessage, setResubmitMessage] = useState('')
-  const [resubmitError, setResubmitError] = useState('')
-
-  function getProductLabel(item: OrderResult) {
-    const productType = String(item.product_type || '').toLowerCase()
-
-    if (productType.includes('premium')) {
-      const durationText =
-        item.duration === '3m'
-          ? t.home.months3
-          : item.duration === '6m'
-            ? t.home.months6
-            : item.duration === '12m'
-              ? t.home.months12
-              : item.duration || ''
-
-      return `${t.home.tgPremium}${durationText ? ` ${durationText}` : ''}`
-    }
-
-    if (productType.includes('stars')) {
-      const amount = Number(item.stars_amount || item.amount || 0)
-      return `${t.home.tgStars} ${amount || ''}`.trim()
-    }
-
-    return item.product_type || '-'
-  }
-
-  function getStatusLabel(status: string) {
-    const value = String(status || '').toLowerCase()
-
-    if (value === 'pending' || value === 'pending_payment') return ui.pending
-    if (value === 'paid') return ui.paid
-    if (value === 'completed') return ui.completed
-    if (value === 'failed' || value === 'cancelled') return ui.cancelled
-
-    return status || '-'
-  }
-
-  async function handleLookup() {
-    setLoading(true)
-    setErrorText('')
-    setResults([])
-    setResubmitMessage('')
-    setResubmitError('')
-
-    try {
-      const response = await fetch('/api/queryOrder', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim() }),
-        cache: 'no-store',
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data?.error || ui.noOrders)
-      }
-
-      setResults(data.orders || [])
-    } catch (error) {
-      setErrorText(error instanceof Error ? error.message : ui.noOrders)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  function handleResubmitFileChange(event: ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0]
-    if (!file) return
-
-    setResubmitProofName(file.name)
-
-    const reader = new FileReader()
-    reader.onload = () => {
-      setResubmitProofBase64(reader.result as string)
-    }
-    reader.readAsDataURL(file)
-  }
-
-  async function handleResubmit(orderNo: string) {
-    setResubmitLoading(true)
-    setResubmitMessage('')
-    setResubmitError('')
-
-    try {
-      const response = await fetch('/api/resubmitPayment', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: email.trim(),
-          order_no: orderNo,
-          tx_hash: resubmitHash.trim() || null,
-          proof_image_base64: resubmitProofBase64 || null,
-        }),
-        cache: 'no-store',
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data?.error || ui.resubmitError)
-      }
-
-      setResubmitMessage(ui.resubmitSuccess)
-      setActiveOrderNo('')
-      setResubmitHash('')
-      setResubmitProofName('')
-      setResubmitProofBase64('')
-
-      await handleLookup()
-    } catch (error) {
-      setResubmitError(error instanceof Error ? error.message : ui.resubmitError)
-    } finally {
-      setResubmitLoading(false)
-    }
-  }
-
-  return (
-    <section className="card-soft lookup-wrap">
-      <div className="lookup-title">{ui.title}</div>
-      <div className="small-muted lookup-subtitle">{ui.subtitle}</div>
-
-      <div className="lookup-form">
-        <input
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          onPointerDown={onFieldPointerDown}
-          onFocus={onFieldFocus}
-          onBlur={onFieldBlur}
-          placeholder={ui.placeholder}
-          className="input"
-          type="email"
-          inputMode="email"
-          autoComplete="email"
-        />
-        <button onClick={handleLookup} className="btn-primary lookup-btn" type="button">
-          {loading ? ui.loading : ui.button}
-        </button>
-      </div>
-
-      {errorText ? <div className="status-box-error">{errorText}</div> : null}
-      {resubmitMessage ? <div className="status-box-success">{resubmitMessage}</div> : null}
-      {resubmitError ? <div className="status-box-error">{resubmitError}</div> : null}
-
-      {results.length > 0 ? (
-        <div className="lookup-result-grid">
-          {results.map((item) => {
-            const allowResubmit =
-              Boolean(item.public_note) && String(item.status || '').toLowerCase() !== 'completed'
-
-            return (
-              <div key={item.order_no} className="lookup-item-card">
-                <div>
-                  <strong>{ui.orderNo}:</strong> {item.order_no}
-                </div>
-                <div>
-                  <strong>{ui.email}:</strong> {email}
-                </div>
-                <div>
-                  <strong>{ui.status}:</strong> {getStatusLabel(item.status)}
-                </div>
-                <div>
-                  <strong>{ui.product}:</strong> {getProductLabel(item)}
-                </div>
-                <div>
-                  <strong>{ui.amount}:</strong> ${item.price_usd ?? item.amount ?? 0}
-                </div>
-                <div>
-                  <strong>{ui.network}:</strong> {item.payment_network || '-'}
-                </div>
-                <div>
-                  <strong>{ui.createdAt}:</strong> {formatBostonTime(item.created_at)}
-                </div>
-
-                {item.tx_hash ? (
-                  <div className="lookup-break-all">
-                    <strong>{ui.txHash}:</strong> {item.tx_hash}
-                  </div>
-                ) : null}
-
-                {item.public_note ? (
-                  <div className="lookup-note-box">
-                    <strong>{ui.note}:</strong> {item.public_note}
-                  </div>
-                ) : null}
-                {allowResubmit ? (
-                  <>
-                    <button
-                      type="button"
-                      className="btn-secondary lookup-btn"
-                      onClick={() => {
-                        setActiveOrderNo(item.order_no)
-                        setResubmitHash('')
-                        setResubmitProofName('')
-                        setResubmitProofBase64('')
-                        setResubmitMessage('')
-                        setResubmitError('')
-                      }}
-                    >
-                      {ui.resubmit}
-                    </button>
-
-                    {activeOrderNo === item.order_no ? (
-                      <div className="lookup-resubmit-box">
-                        <input type="file" accept="image/*" onChange={handleResubmitFileChange} />
-                        {resubmitProofName ? (
-                          <div className="small-muted lookup-break-all">
-                            {ui.proofReady} {resubmitProofName}
-                          </div>
-                        ) : null}
-                        <input
-                          value={resubmitHash}
-                          onChange={(e) => setResubmitHash(e.target.value)}
-                          onPointerDown={onFieldPointerDown}
-                          onFocus={onFieldFocus}
-                          onBlur={onFieldBlur}
-                          placeholder={ui.hashPlaceholder}
-                          className="input"
-                        />
-                        <button
-                          type="button"
-                          className="btn-primary lookup-btn"
-                          onClick={() => handleResubmit(item.order_no)}
-                        >
-                          {resubmitLoading ? ui.resubmitting : ui.resubmitButton}
-                        </button>
-                      </div>
-                    ) : null}
-                  </>
-                ) : null}
-              </div>
-            )
-          })}
-        </div>
-      ) : null}
-    </section>
-  )
-}
-
 function HomePageInner() {
   const { lang, t } = useI18n()
   const navUi = NAV_UI[lang] || NAV_UI.en
-
-  const [keyboardInset, setKeyboardInset] = useState(0)
-  const activeFieldRef = useRef<HTMLInputElement | null>(null)
+  const lookupEntryUi = LOOKUP_ENTRY_UI[lang] || LOOKUP_ENTRY_UI.en
 
   const [tab, setTab] = useState<ProductType>('premium')
   const [duration, setDuration] = useState<DurationType>('12m')
@@ -776,60 +191,6 @@ function HomePageInner() {
     currentYear > startYear
       ? `© ${startYear}–${currentYear} Agnopol. All rights reserved.`
       : `© ${startYear} Agnopol. All rights reserved.`
-
-  function handleTrackedFieldPointerDown(event: PointerEvent<HTMLInputElement>) {
-    activeFieldRef.current = event.currentTarget
-    scheduleFieldIntoView(event.currentTarget)
-  }
-
-  function handleTrackedFieldFocus(event: FocusEvent<HTMLInputElement>) {
-    activeFieldRef.current = event.currentTarget
-    scheduleFieldIntoView(event.currentTarget)
-  }
-
-  function handleTrackedFieldBlur() {
-    window.setTimeout(() => {
-      const active = document.activeElement
-      if (!(active instanceof HTMLInputElement)) {
-        activeFieldRef.current = null
-      }
-    }, 0)
-  }
-
-  useEffect(() => {
-    if (typeof window === 'undefined' || !window.visualViewport) return
-
-    const viewport = window.visualViewport
-
-    const updateKeyboardInset = () => {
-      setKeyboardInset(getKeyboardInset())
-
-      if (activeFieldRef.current) {
-        ensureFieldVisible(activeFieldRef.current, 24)
-      }
-    }
-
-    viewport.addEventListener('resize', updateKeyboardInset)
-    viewport.addEventListener('scroll', updateKeyboardInset)
-    window.addEventListener('orientationchange', updateKeyboardInset)
-    window.addEventListener('resize', updateKeyboardInset)
-
-    const interval = window.setInterval(() => {
-      if (activeFieldRef.current) {
-        ensureFieldVisible(activeFieldRef.current, 24)
-      }
-    }, 220)
-
-    updateKeyboardInset()
-
-    return () => {
-      viewport.removeEventListener('resize', updateKeyboardInset)
-      viewport.removeEventListener('scroll', updateKeyboardInset)
-      window.removeEventListener('orientationchange', updateKeyboardInset)
-      window.removeEventListener('resize', updateKeyboardInset)
-      window.clearInterval(interval)
-    }
-  }, [])
 
   useEffect(() => {
     let active = true
@@ -947,12 +308,7 @@ function HomePageInner() {
   }
 
   return (
-    <main
-      className="site-shell"
-      style={{
-        paddingBottom: `calc(36px + ${keyboardInset}px)`,
-      }}
-    >
+    <main className="site-shell">
       <div className="site-container">
         <section className="hero-center hero-stack hero-stair-wrap">
           <h1 className="brand-title hero-step hero-step-1">{t.common.brand}</h1>
@@ -1031,9 +387,6 @@ function HomePageInner() {
                 step={1}
                 value={stars}
                 onChange={(e) => setStars(Number(e.target.value))}
-                onPointerDown={handleTrackedFieldPointerDown}
-                onFocus={handleTrackedFieldFocus}
-                onBlur={handleTrackedFieldBlur}
                 placeholder={t.home.starsPlaceholder}
                 className="input"
               />
@@ -1057,9 +410,6 @@ function HomePageInner() {
               setUsername(e.target.value)
               if (formError) setFormError('')
             }}
-            onPointerDown={handleTrackedFieldPointerDown}
-            onFocus={handleTrackedFieldFocus}
-            onBlur={handleTrackedFieldBlur}
             placeholder={t.home.usernamePlaceholder}
             className="input"
             autoComplete="off"
@@ -1072,9 +422,6 @@ function HomePageInner() {
               setEmail(e.target.value)
               if (formError) setFormError('')
             }}
-            onPointerDown={handleTrackedFieldPointerDown}
-            onFocus={handleTrackedFieldFocus}
-            onBlur={handleTrackedFieldBlur}
             placeholder={t.home.emailPlaceholder}
             className="input"
             autoComplete="email"
@@ -1093,13 +440,16 @@ function HomePageInner() {
           </button>
         </div>
 
-        <div className="lookup-section">
-          <OrderLookupSection
-            onFieldPointerDown={handleTrackedFieldPointerDown}
-            onFieldFocus={handleTrackedFieldFocus}
-            onFieldBlur={handleTrackedFieldBlur}
-          />
-        </div>
+        <section className="lookup-entry-card card-soft">
+          <div className="lookup-entry-header">
+            <div className="lookup-entry-title">{lookupEntryUi.title}</div>
+            <div className="small-muted lookup-entry-subtitle">{lookupEntryUi.subtitle}</div>
+          </div>
+
+          <a href={withLang('/lookup', lang)} className="btn-secondary link-button">
+            {lookupEntryUi.button}
+          </a>
+        </section>
 
         <footer className="footer">
           <p>{copyrightText}</p>
@@ -1166,8 +516,6 @@ function HomePageInner() {
           font-size: 15px;
           outline: none;
           box-sizing: border-box;
-          scroll-margin-top: 120px;
-          scroll-margin-bottom: 420px;
         }
 
         .input::placeholder {
@@ -1191,7 +539,8 @@ function HomePageInner() {
         .btn-primary:hover,
         .btn-secondary:hover,
         .segment-btn:hover,
-        .plan-card:hover {
+        .plan-card:hover,
+        .link-button:hover {
           transform: translateY(-1px);
         }
 
@@ -1206,15 +555,22 @@ function HomePageInner() {
           box-shadow: 0 16px 36px rgba(11, 37, 112, 0.2);
         }
 
-        .btn-secondary {
+        .btn-secondary,
+        .link-button {
           width: 100%;
-          min-height: 46px;
-          border-radius: 16px;
+          min-height: 50px;
+          border-radius: 18px;
           background: var(--bg-card-soft, rgba(255, 255, 255, 0.88));
           color: var(--text-main, #0a1736);
           border: 1px solid var(--border-soft, rgba(10, 23, 54, 0.08));
           font-size: 14px;
           font-weight: 800;
+          box-shadow: var(--shadow-soft, 0 18px 40px rgba(10, 23, 54, 0.08));
+          text-decoration: none;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-sizing: border-box;
         }
 
         .small-muted {
@@ -1395,6 +751,7 @@ function HomePageInner() {
           margin: 0 auto;
           padding: 22px;
         }
+
         .field-title {
           font-size: 18px;
           font-weight: 800;
@@ -1445,68 +802,22 @@ function HomePageInner() {
           gap: 12px;
         }
 
-        .lookup-section {
-          margin-top: 22px;
-        }
-
-        .lookup-wrap {
+        .lookup-entry-card {
           max-width: 700px;
-          margin: 0 auto;
-          padding: 20px;
+          margin: 22px auto 0;
+          padding: 18px;
+          display: grid;
+          gap: 14px;
         }
 
-        .lookup-title {
-          font-size: 20px;
+        .lookup-entry-title {
+          font-size: clamp(18px, 2.4vw, 24px);
           font-weight: 900;
           color: var(--text-main, #0a1736);
         }
 
-        .lookup-subtitle {
-          margin-top: 8px;
-          margin-bottom: 14px;
-        }
-
-        .lookup-form {
-          display: grid;
-          gap: 10px;
-        }
-
-        .lookup-btn {
-          margin-top: 2px;
-        }
-
-        .lookup-result-grid {
-          display: grid;
-          gap: 12px;
-          margin-top: 14px;
-        }
-
-        .lookup-item-card {
-          border-radius: 20px;
-          border: 1px solid var(--border-soft, rgba(10, 23, 54, 0.08));
-          background: var(--bg-card, rgba(255, 255, 255, 0.96));
-          padding: 16px;
-          display: grid;
-          gap: 8px;
-        }
-
-        .lookup-note-box {
-          border-radius: 14px;
-          padding: 12px;
-          background: rgba(82, 110, 255, 0.08);
-          border: 1px solid rgba(82, 110, 255, 0.14);
-          color: var(--text-main, #0a1736);
-          line-height: 1.6;
-        }
-
-        .lookup-resubmit-box {
-          display: grid;
-          gap: 10px;
-          padding-top: 4px;
-        }
-
-        .lookup-break-all {
-          word-break: break-all;
+        .lookup-entry-subtitle {
+          margin-top: 6px;
         }
 
         .footer {
@@ -1646,7 +957,7 @@ function HomePageInner() {
 
           .single-box,
           .summary-box,
-          .lookup-wrap {
+          .lookup-entry-card {
             padding: 16px;
           }
 
