@@ -1,150 +1,153 @@
-import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
-import { tenMinutesAgoIso } from '../../../lib/time'
-
-export const runtime = 'nodejs'
-export const dynamic = 'force-dynamic'
-export const revalidate = 0
-
-function getSupabase() {
-  const supabaseUrl = process.env.SUPABASE_URL
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-
-  if (!supabaseUrl || !serviceRoleKey) {
-    throw new Error('Missing Supabase environment variables')
-  }
-
-  return createClient(supabaseUrl, serviceRoleKey)
-}
-
-function generateOrderNo() {
-  const random = Math.random().toString(36).slice(2, 8).toUpperCase()
-  const time = Date.now().toString(36).toUpperCase()
-  return `AP${time}${random}`
-}
-
-function noStoreJson(data: any, init?: ResponseInit) {
-  const response = NextResponse.json(data, init)
-  response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
-  return response
-}
-
-function getDeviceId(req: Request, body: any) {
-  const bodyDevice = String(body?.device_id || '').trim()
-  if (bodyDevice) return bodyDevice
-
-  const forwarded = req.headers.get('x-forwarded-for') || ''
-  const ua = req.headers.get('user-agent') || ''
-  return `${forwarded}__${ua}`.slice(0, 240)
-}
+import { randomUUID } from 'crypto'
+import { getSupabaseServerClient } from '../../../lib/supabase-server'
 
 function isValidEmail(value: string) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim())
 }
 
-export async function POST(req: Request) {
+function isValidTelegramUsername(value: string) {
+  return /^@[A-Za-z][A-Za-z0-9_]{4,31}$/.test(value.trim())
+}
+
+function getClientIp(request: Request) {
+  const forwarded =
+    request.headers.get('x-forwarded-for') ||
+    request.headers.get('x-real-ip') ||
+    request.headers.get('cf-connecting-ip') ||
+    ''
+
+  return forwarded.split(',')[0]?.trim() || 'unknown'
+}
+
+function getDeviceFingerprint(request: Request) {
+  const userAgent = request.headers.get('user-agent') || 'unknown'
+  const acceptLanguage = request.headers.get('accept-language') || 'unknown'
+  const ip = getClientIp(request)
+
+  return `${ip}::${userAgent}::${acceptLanguage}`
+}
+
+export async function POST(request: Request) {
   try {
-    const supabase = getSupabase()
-    const body = await req.json()
+    const body = await request.json()
 
     const username = String(body?.username || '').trim()
     const email = String(body?.email || '').trim().toLowerCase()
     const productType = String(body?.product_type || '').trim()
     const duration = body?.duration ? String(body.duration).trim() : null
     const starsAmount =
-      body?.stars_amount === null || body?.stars_amount === undefined || body?.stars_amount === ''
+      body?.stars_amount === null || body?.stars_amount === undefined
         ? null
         : Number(body.stars_amount)
     const priceUsd = Number(body?.price_usd || 0)
-    const paymentNetwork = String(body?.payment_network || '').trim()
+    const paymentNetwork = String(body?.payment_network || '').trim().toUpperCase()
     const txHash = body?.tx_hash ? String(body.tx_hash).trim() : null
-    const proofImageBase64 = body?.proof_image_base64
-      ? String(body.proof_image_base64)
-      : null
-    const deviceId = getDeviceId(req, body)
+    const proofImageBase64 = body?.proof_image_base64 ? String(body.proof_image_base64) : null
 
     if (!username) {
-      return noStoreJson({ error: 'Telegram username is required' }, { status: 400 })
+      return NextResponse.json({ error: 'TG username is required.' }, { status: 400 })
+    }
+
+    if (!isValidTelegramUsername(username)) {
+      return NextResponse.json(
+        {
+          error:
+            'Invalid TG username. It must start with @, contain 5-32 characters, use only letters, numbers and underscores, and begin with a letter.',
+        },
+        { status: 400 }
+      )
     }
 
     if (!email) {
-      return noStoreJson({ error: 'Email is required' }, { status: 400 })
+      return NextResponse.json({ error: 'Email is required.' }, { status: 400 })
     }
 
     if (!isValidEmail(email)) {
-      return noStoreJson({ error: 'Invalid email address' }, { status: 400 })
+      return NextResponse.json({ error: 'Invalid email address.' }, { status: 400 })
     }
 
-    if (!productType) {
-      return noStoreJson({ error: 'Product type is required' }, { status: 400 })
+    if (!productType || !(priceUsd > 0)) {
+      return NextResponse.json({ error: 'Invalid order payload.' }, { status: 400 })
     }
 
-    if (!priceUsd || Number.isNaN(priceUsd) || priceUsd <= 0) {
-      return noStoreJson({ error: 'Invalid price' }, { status: 400 })
+    if (productType === 'tg_premium' && !['3m', '6m', '12m'].includes(duration || '')) {
+      return NextResponse.json({ error: 'Invalid premium duration.' }, { status: 400 })
     }
 
-    if (!proofImageBase64 && !txHash) {
-      return noStoreJson({ error: '请上传付款截图或填写交易哈希。' }, { status: 400 })
+    if (productType === 'tg_stars' && (!(starsAmount && starsAmount >= 50) || !Number.isFinite(starsAmount))) {
+      return NextResponse.json({ error: 'Invalid stars amount.' }, { status: 400 })
     }
 
-    const { count, error: countError } = await supabase
+    if (!['TRC20', 'BASE'].includes(paymentNetwork)) {
+      return NextResponse.json({ error: 'Invalid payment network.' }, { status: 400 })
+    }
+
+    if (!txHash && !proofImageBase64) {
+      return NextResponse.json(
+        { error: 'Please provide transaction hash or payment proof.' },
+        { status: 400 }
+      )
+    }
+
+    const supabase = getSupabaseServerClient()
+    const deviceFingerprint = getDeviceFingerprint(request)
+    const windowStart = new Date(Date.now() - 10 * 60 * 1000).toISOString()
+
+    const { count: recentCount, error: countError } = await supabase
       .from('orders')
       .select('id', { count: 'exact', head: true })
       .eq('email', email)
-      .eq('device_id', deviceId)
-      .gte('created_at', tenMinutesAgoIso())
+      .eq('device_fingerprint', deviceFingerprint)
+      .gte('created_at', windowStart)
 
     if (countError) {
-      throw new Error(countError.message)
+      return NextResponse.json({ error: countError.message }, { status: 500 })
     }
 
-    if ((count || 0) >= 5) {
-      return noStoreJson(
-        { error: '同邮箱同设备 10 分钟内最多提交 5 单，请稍后再试。' },
+    if ((recentCount || 0) >= 5) {
+      return NextResponse.json(
+        { error: 'Too many recent orders from this email and device. Please try again later.' },
         { status: 429 }
       )
     }
 
-    const orderNo = generateOrderNo()
+    const orderNo = `AG-${Date.now()}-${randomUUID().slice(0, 6).toUpperCase()}`
 
-    const insertData: Record<string, any> = {
+    const insertPayload = {
       order_no: orderNo,
       username,
       email,
-      device_id: deviceId,
       product_type: productType,
       duration,
-      stars_amount: starsAmount,
-      amount: priceUsd,
+      stars_amount: productType === 'tg_stars' ? starsAmount : null,
       price_usd: priceUsd,
-      payment_network: paymentNetwork || null,
+      amount: priceUsd,
+      payment_network: paymentNetwork,
       tx_hash: txHash,
       proof_image_base64: proofImageBase64,
-      status: 'paid',
-      public_note: '已收到您的付款凭证，订单正在处理中。预计五分钟内完成，请稍后查询订单详情。',
-      admin_note: null,
-      updated_at: new Date().toISOString(),
+      status: 'pending',
+      device_fingerprint: deviceFingerprint,
+      public_note: null,
     }
 
     const { data, error } = await supabase
       .from('orders')
-      .insert(insertData)
-      .select('id, order_no, status')
+      .insert(insertPayload)
+      .select('order_no')
       .single()
 
     if (error) {
-      return noStoreJson({ error: error.message }, { status: 500 })
+      return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    return noStoreJson({
+    return NextResponse.json({
       success: true,
-      id: data.id,
       order_no: data.order_no,
-      status: data.status,
     })
   } catch (error) {
-    return noStoreJson(
-      { error: error instanceof Error ? error.message : 'Server error' },
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : 'Unknown server error.' },
       { status: 500 }
     )
   }
