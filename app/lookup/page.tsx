@@ -474,25 +474,27 @@ function LookupPageInner() {
   return (
     <main className="site-shell lookup-page-shell">
       <div className="site-container">
-        <div className="lookup-topbar">
-          <a href={withLang('/', lang)} className="back-link">
-            ← {ui.back}
-          </a>
+        <section className="hero-center hero-stack hero-stair-wrap">
+          <h1 className="brand-title hero-step hero-step-1">{t.common.brand}</h1>
+          <p className="brand-slogan hero-step hero-step-2">{t.common.slogan}</p>
 
-          <div className="lookup-topbar-tools">
-            <div className="lookup-topbar-lang">
+          <div className="hero-stair hero-step hero-step-3">
+            <div className="hero-tools">
               <LanguageSwitcher size="compact" />
             </div>
-            <div className="lookup-topbar-theme">
+
+            <div className="hero-mode">
               <ThemeToggle />
             </div>
           </div>
-        </div>
-
-        <section className="lookup-hero card-soft">
-          <h1 className="brand-title lookup-page-brand">{t.common.brand}</h1>
-          <p className="brand-slogan lookup-page-slogan">{t.common.slogan}</p>
         </section>
+
+        <div className="lookup-back-wrap">
+          <a href={withLang('/', lang)} className="back-link back-link-pill">
+            <span className="back-link-arrow">←</span>
+            <span>{ui.back}</span>
+          </a>
+        </div>
 
         <section className="lookup-main-card card-soft">
           <div className="lookup-title">{ui.title}</div>
@@ -650,65 +652,125 @@ function LookupPageInner() {
           backdrop-filter: blur(14px);
         }
 
-        .lookup-topbar {
-          display: flex;
-          align-items: flex-start;
-          justify-content: space-between;
-          gap: 14px;
-          margin-bottom: 14px;
-        }
-
-        .back-link {
-          min-height: 42px;
-          padding: 0 16px;
-          border-radius: 999px;
-          border: 1px solid var(--border-soft, rgba(10, 23, 54, 0.08));
-          background: var(--bg-card-soft, rgba(255, 255, 255, 0.88));
-          color: var(--text-main, #0a1736);
-          text-decoration: none;
-          display: inline-flex;
-          align-items: center;
-          font-size: 14px;
-          font-weight: 800;
-          box-shadow: var(--shadow-soft, 0 18px 40px rgba(10, 23, 54, 0.08));
-        }
-
-        .lookup-topbar-tools {
-          display: grid;
-          gap: 8px;
-          justify-items: end;
-        }
-
-        .lookup-topbar-lang {
-          width: min(100%, 192px);
-        }
-
-        .lookup-topbar-theme {
-          width: min(100%, 160px);
-        }
-
-        .lookup-hero {
-          padding: 22px 18px;
+        .hero-center {
           text-align: center;
-          margin-bottom: 14px;
+          margin-bottom: 12px;
         }
 
-        .lookup-page-brand {
+        .hero-stack {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 4px;
+        }
+
+        .hero-stair-wrap {
+          width: 100%;
+          max-width: min(100%, 560px);
+          margin-left: auto;
+          margin-right: auto;
+        }
+
+        .hero-step {
+          width: 100%;
+        }
+
+        .hero-step-1,
+        .hero-step-2 {
+          text-align: center;
+        }
+
+        .hero-stair {
+          width: 100%;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 10px;
+          margin-top: 14px;
+        }
+
+        .hero-tools,
+        .hero-mode {
+          width: 100%;
+          display: flex;
+          justify-content: center;
+        }
+
+        .hero-tools {
+          max-width: clamp(176px, 42vw, 196px);
+        }
+
+        .hero-mode {
+          max-width: clamp(148px, 34vw, 164px);
+          margin-top: -2px;
+          margin-bottom: 10px;
+        }
+
+        .brand-title {
           margin: 0;
-          font-size: clamp(42px, 8vw, 72px);
+          font-size: clamp(48px, 9vw, 86px);
           line-height: 0.95;
           font-weight: 900;
           color: var(--text-strong, #08142f);
           letter-spacing: -0.04em;
         }
 
-        .lookup-page-slogan {
-          margin: 8px 0 0;
-          color: var(--text-soft, #7b8798);
+        .brand-slogan {
+          margin: 6px 0 0;
+          padding: 0 10px;
+          max-width: 100%;
           font-size: clamp(15px, 1.9vw, 18px);
+          color: var(--text-soft, #7b8798);
+        }
+
+        .lookup-back-wrap {
+          max-width: 700px;
+          margin: 0 auto 16px;
+        }
+
+        .back-link {
+          color: var(--text-main, #0a1736);
+          text-decoration: none;
+          box-shadow: var(--shadow-soft, 0 18px 40px rgba(10, 23, 54, 0.08));
+          transition:
+            transform 0.16s ease,
+            box-shadow 0.16s ease,
+            background 0.16s ease,
+            color 0.16s ease,
+            opacity 0.16s ease;
+        }
+
+        .back-link:hover {
+          transform: translateY(-1px);
+        }
+
+        .back-link-pill {
+          width: 100%;
+          min-height: 52px;
+          padding: 0 18px;
+          border-radius: 20px;
+          border: 1px solid var(--border-soft, rgba(10, 23, 54, 0.08));
+          background: var(--bg-card-soft, rgba(255, 255, 255, 0.88));
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 10px;
+          box-sizing: border-box;
+          font-size: 15px;
+          font-weight: 800;
+        }
+
+        .back-link-arrow {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 17px;
+          line-height: 1;
         }
 
         .lookup-main-card {
+          max-width: 700px;
+          margin: 0 auto;
           padding: 20px;
         }
 
@@ -883,32 +945,58 @@ function LookupPageInner() {
           margin-top: 10px;
         }
 
+        @media (min-width: 768px) {
+          .hero-tools {
+            transform: translateX(-18px);
+          }
+
+          .hero-mode {
+            transform: translateX(18px);
+          }
+        }
+
         @media (max-width: 640px) {
           .lookup-page-shell {
             padding: 14px 12px 30px;
           }
 
-          .lookup-topbar {
-            flex-direction: column;
-            align-items: stretch;
+          .hero-stair {
+            gap: 9px;
+            margin-top: 12px;
           }
 
-          .lookup-topbar-tools {
-            justify-items: stretch;
+          .hero-tools {
+            max-width: min(100%, 190px);
+            transform: none;
           }
 
-          .lookup-topbar-lang,
-          .lookup-topbar-theme {
-            width: 100%;
+          .hero-mode {
+            max-width: min(100%, 156px);
+            margin-bottom: 10px;
+            transform: none;
           }
 
-          .lookup-main-card,
-          .lookup-hero {
+          .brand-slogan {
+            padding: 0 6px;
+          }
+
+          .lookup-main-card {
             padding: 16px;
           }
 
           .footer-links {
             gap: 10px 14px;
+          }
+        }
+
+        @media (max-width: 420px) {
+          .lookup-page-shell {
+            padding-left: 10px;
+            padding-right: 10px;
+          }
+
+          .brand-title {
+            font-size: clamp(42px, 15vw, 60px);
           }
         }
       `}</style>
