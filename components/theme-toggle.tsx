@@ -72,13 +72,13 @@ export default function ThemeToggle() {
     <div
       ref={wrapRef}
       style={{
-        width: 'min(100%, 280px)',
+        width: 'min(100%, 188px)',
         position: 'relative',
       }}
     >
       <div
         style={{
-          marginBottom: 8,
+          marginBottom: 6,
           textAlign: 'center',
           color: 'var(--text-soft)',
           fontSize: 12,
@@ -96,8 +96,8 @@ export default function ThemeToggle() {
         aria-haspopup="menu"
         style={{
           width: '100%',
-          height: 50,
-          padding: '0 18px',
+          height: 42,
+          padding: '0 14px',
           borderRadius: 999,
           border: '1px solid var(--border-soft)',
           background: 'var(--bg-card-soft)',
@@ -105,7 +105,7 @@ export default function ThemeToggle() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          fontSize: 16,
+          fontSize: 14,
           fontWeight: 800,
           cursor: 'pointer',
           boxShadow: 'var(--shadow-soft)',
@@ -119,9 +119,9 @@ export default function ThemeToggle() {
           style={{
             width: 0,
             height: 0,
-            borderLeft: '7px solid transparent',
-            borderRight: '7px solid transparent',
-            borderTop: `9px solid var(--text-soft)`,
+            borderLeft: '6px solid transparent',
+            borderRight: '6px solid transparent',
+            borderTop: '8px solid var(--text-soft)',
             transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
             transition: 'transform 0.16s ease',
           }}
@@ -133,18 +133,18 @@ export default function ThemeToggle() {
           role="menu"
           style={{
             position: 'absolute',
-            top: 'calc(100% + 10px)',
+            top: 'calc(100% + 8px)',
             left: 0,
             right: 0,
             zIndex: 30,
-            padding: 8,
-            borderRadius: 18,
+            padding: 6,
+            borderRadius: 16,
             border: '1px solid var(--border-soft)',
             background: 'var(--bg-card)',
             boxShadow: 'var(--shadow-soft)',
             backdropFilter: 'blur(12px)',
             display: 'grid',
-            gap: 8,
+            gap: 6,
           }}
         >
           {items.map((item) => {
@@ -157,14 +157,14 @@ export default function ThemeToggle() {
                 role="menuitem"
                 onClick={() => handleSelect(item.value)}
                 style={{
-                  minHeight: 46,
-                  borderRadius: 14,
+                  minHeight: 38,
+                  borderRadius: 12,
                   border: active
                     ? '1px solid transparent'
                     : '1px solid var(--border-soft)',
                   background: active ? 'var(--brand)' : 'var(--bg-card-soft)',
                   color: active ? 'var(--brand-contrast)' : 'var(--text-main)',
-                  fontSize: 15,
+                  fontSize: 13,
                   fontWeight: 800,
                   cursor: 'pointer',
                 }}
