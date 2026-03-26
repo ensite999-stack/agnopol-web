@@ -16,7 +16,6 @@ import ThemeToggle from '../../components/theme-toggle'
 import { withLang } from '../../lib/i18n'
 
 type DurationType = '3m' | '6m' | '12m'
-type PaymentNetwork = 'TRC20' | 'BASE'
 
 type PublicConfig = {
   premium_3m_price: number
@@ -26,6 +25,16 @@ type PublicConfig = {
   trc20_address: string
   base_address: string
   updated_at?: string
+}
+
+type PaymentMethod = {
+  id: string | number
+  display_name?: string | null
+  chain_name?: string | null
+  token_name?: string | null
+  address?: string | null
+  active?: boolean | null
+  sort_order?: number | null
 }
 
 const CREATE_ORDER_ENDPOINT = '/api/createOrder'
@@ -55,7 +64,6 @@ type PayUi = {
   copy: string
   copied: string
   warningTitle: string
-  warningText: string
   deliveryTitle: string
   deliveryText: string
   txHashTitle: string
@@ -76,10 +84,45 @@ type PayUi = {
 }
 
 const PAY_UI: Record<string, PayUi> = {
+  de: {
+    back: 'Zurück zur Startseite',
+    title: 'Zahlung abschließen',
+    subtitle: 'Prüfen Sie Ihre Bestellinformationen, wählen Sie die Zahlungsmethode und reichen Sie dann den Zahlungsnachweis ein.',
+    invalidParams: 'Die Bestellinformationen sind unvollständig oder ungültig.',
+    invalidParamsHint: 'Bitte kehren Sie zur Startseite zurück und erstellen Sie die Bestellung mit gültigem TG-Benutzernamen und E-Mail erneut.',
+    summaryTitle: 'Bestellübersicht',
+    product: 'Produkt',
+    username: 'TG-Benutzername',
+    email: 'E-Mail',
+    amountDue: 'Fälliger Betrag',
+    networkTitle: 'Zahlungsmethode wählen',
+    addressTitle: 'Empfangsadresse',
+    copy: 'Adresse kopieren',
+    copied: 'Kopiert',
+    warningTitle: 'Wichtiger Zahlungshinweis',
+    deliveryTitle: 'Lieferzeit',
+    deliveryText:
+      'Um die Sicherheit der Gelder und die Compliance-Prüfung zu gewährleisten, beträgt unsere Standardbearbeitungszeit 5 bis 15 Minuten. Bei Netzwerküberlastung dauert es spätestens bis zu 2 Stunden.',
+    txHashTitle: 'Transaktions-Hash',
+    txHashHint: 'Bitte tragen Sie zuerst den Transaktions-Hash ein. Dies ist der primäre Zahlungsnachweis.',
+    txHashPlaceholder: 'Bitte Transaktions-Hash eingeben',
+    proofTitle: 'Zusätzlicher Screenshot oder Beleg',
+    proofHint: 'Sie können zusätzlich einen Screenshot oder Beleg als unterstützenden Nachweis hochladen.',
+    uploadButton: 'Screenshot auswählen',
+    noFile: 'Keine Datei ausgewählt',
+    proofReady: 'Ausgewählte Datei:',
+    txHashRequired: 'Bitte tragen Sie zuerst den Transaktions-Hash ein.',
+    submit: 'Zahlungsnachweis einreichen',
+    submitting: 'Wird eingereicht...',
+    successTitle: 'Zahlungsnachweis eingereicht',
+    successText: 'Ihre Bestellung wurde erstellt und der Zahlungsnachweis erfolgreich eingereicht.',
+    trackOrder: 'Bestellung verfolgen',
+    createError: 'Bestellung konnte nicht erstellt werden.',
+  },
   en: {
     back: 'Back to home',
     title: 'Complete payment',
-    subtitle: 'Review your order, choose the payment network, then submit your payment proof.',
+    subtitle: 'Review your order details, choose the payment method, then submit your payment proof.',
     invalidParams: 'Order information is incomplete or invalid.',
     invalidParamsHint:
       'Please go back to the home page and create the order again with a valid TG username and email.',
@@ -88,13 +131,11 @@ const PAY_UI: Record<string, PayUi> = {
     username: 'TG Username',
     email: 'Email',
     amountDue: 'Amount due',
-    networkTitle: 'Choose payment network',
+    networkTitle: 'Choose payment method',
     addressTitle: 'Payment address',
     copy: 'Copy address',
     copied: 'Copied',
     warningTitle: 'Important payment notice',
-    warningText:
-      'Please transfer using the correct network and asset corresponding to the payment network currently selected on this page. Do not mix other networks. The received amount must exactly match the amount shown in your order.',
     deliveryTitle: 'Delivery time',
     deliveryText:
       'To ensure fund safety and compliance review, our standard delivery time is 5–15 minutes. During network congestion, it will not exceed 2 hours.',
@@ -114,10 +155,154 @@ const PAY_UI: Record<string, PayUi> = {
     trackOrder: 'Track order',
     createError: 'Failed to create the order.',
   },
+  es: {
+    back: 'Volver al inicio',
+    title: 'Completar pago',
+    subtitle: 'Revise los datos del pedido, elija el método de pago y luego envíe su comprobante.',
+    invalidParams: 'La información del pedido es incompleta o no es válida.',
+    invalidParamsHint:
+      'Vuelva a la página principal y cree el pedido de nuevo con un nombre de usuario TG y un correo válidos.',
+    summaryTitle: 'Resumen del pedido',
+    product: 'Producto',
+    username: 'Usuario de TG',
+    email: 'Correo electrónico',
+    amountDue: 'Importe a pagar',
+    networkTitle: 'Elegir método de pago',
+    addressTitle: 'Dirección de pago',
+    copy: 'Copiar dirección',
+    copied: 'Copiado',
+    warningTitle: 'Aviso importante de pago',
+    deliveryTitle: 'Tiempo de entrega',
+    deliveryText:
+      'Para garantizar la seguridad de los fondos y la revisión de cumplimiento, nuestro tiempo estándar de entrega es de 5 a 15 minutos. En caso de congestión de red, no superará las 2 horas.',
+    txHashTitle: 'Hash de transacción',
+    txHashHint: 'Complete primero el hash de transacción. Es el comprobante principal de pago.',
+    txHashPlaceholder: 'Introduzca el hash de transacción',
+    proofTitle: 'Captura o recibo auxiliar',
+    proofHint: 'También puede subir una captura o recibo como comprobante de apoyo.',
+    uploadButton: 'Elegir captura',
+    noFile: 'No se ha seleccionado ningún archivo',
+    proofReady: 'Archivo seleccionado:',
+    txHashRequired: 'Complete primero el hash de transacción.',
+    submit: 'Enviar comprobante de pago',
+    submitting: 'Enviando...',
+    successTitle: 'Comprobante enviado',
+    successText: 'Su pedido se ha creado y el comprobante de pago se ha enviado correctamente.',
+    trackOrder: 'Seguir pedido',
+    createError: 'No se pudo crear el pedido.',
+  },
+  fr: {
+    back: "Retour à l'accueil",
+    title: 'Finaliser le paiement',
+    subtitle: 'Vérifiez les détails de votre commande, choisissez le mode de paiement, puis soumettez votre preuve de paiement.',
+    invalidParams: 'Les informations de commande sont incomplètes ou invalides.',
+    invalidParamsHint:
+      "Veuillez revenir à la page d'accueil et recréer la commande avec un nom d'utilisateur TG et un e-mail valides.",
+    summaryTitle: 'Résumé de la commande',
+    product: 'Produit',
+    username: "Nom d'utilisateur TG",
+    email: 'E-mail',
+    amountDue: 'Montant à payer',
+    networkTitle: 'Choisir le mode de paiement',
+    addressTitle: 'Adresse de paiement',
+    copy: "Copier l'adresse",
+    copied: 'Copié',
+    warningTitle: 'Avis de paiement important',
+    deliveryTitle: 'Délai de livraison',
+    deliveryText:
+      'Afin de garantir la sécurité des fonds et la conformité, notre délai standard de traitement est de 5 à 15 minutes. En cas de congestion réseau, il ne dépassera pas 2 heures.',
+    txHashTitle: 'Hash de transaction',
+    txHashHint: 'Veuillez renseigner d’abord le hash de transaction. Il s’agit de la preuve principale de paiement.',
+    txHashPlaceholder: 'Veuillez saisir le hash de transaction',
+    proofTitle: 'Capture ou reçu complémentaire',
+    proofHint: 'Vous pouvez également téléverser une capture ou un reçu comme preuve complémentaire.',
+    uploadButton: 'Choisir une capture',
+    noFile: 'Aucun fichier sélectionné',
+    proofReady: 'Fichier sélectionné :',
+    txHashRequired: 'Veuillez d’abord renseigner le hash de transaction.',
+    submit: 'Soumettre la preuve de paiement',
+    submitting: 'Envoi...',
+    successTitle: 'Preuve de paiement soumise',
+    successText: 'Votre commande a été créée et la preuve de paiement a été soumise avec succès.',
+    trackOrder: 'Suivre la commande',
+    createError: 'Échec de la création de la commande.',
+  },
+  ja: {
+    back: 'ホームへ戻る',
+    title: '支払いを完了',
+    subtitle: '注文内容を確認し、支払い方法を選択してから、支払い証明を送信してください。',
+    invalidParams: '注文情報が不完全、または無効です。',
+    invalidParamsHint:
+      'ホームに戻り、有効なTGユーザー名とメールアドレスで再度注文を作成してください。',
+    summaryTitle: '注文概要',
+    product: '商品',
+    username: 'TGユーザー名',
+    email: 'メール',
+    amountDue: '支払金額',
+    networkTitle: '支払い方法を選択',
+    addressTitle: '送金先アドレス',
+    copy: 'アドレスをコピー',
+    copied: 'コピー済み',
+    warningTitle: '重要な支払い案内',
+    deliveryTitle: '納品時間',
+    deliveryText:
+      '資金の安全性とコンプライアンス審査を確保するため、通常の納品時間は 5〜15 分です。ネットワーク混雑時でも最長 2 時間を超えません。',
+    txHashTitle: '取引ハッシュ',
+    txHashHint: 'まず取引ハッシュを入力してください。これが主要な支払い証明です。',
+    txHashPlaceholder: '取引ハッシュを入力してください',
+    proofTitle: '補助スクリーンショットまたは領収書',
+    proofHint: '補助証明としてスクリーンショットや領収書もアップロードできます。',
+    uploadButton: 'スクリーンショットを選択',
+    noFile: 'ファイルが選択されていません',
+    proofReady: '選択されたファイル：',
+    txHashRequired: '先に取引ハッシュを入力してください。',
+    submit: '支払い証明を送信',
+    submitting: '送信中...',
+    successTitle: '支払い証明を送信しました',
+    successText: '注文が作成され、支払い証明も正常に送信されました。',
+    trackOrder: '注文を追跡',
+    createError: '注文の作成に失敗しました。',
+  },
+  ko: {
+    back: '홈으로 돌아가기',
+    title: '결제 완료',
+    subtitle: '주문 정보를 확인하고 결제 방식을 선택한 뒤 결제 증빙을 제출하세요.',
+    invalidParams: '주문 정보가 불완전하거나 유효하지 않습니다.',
+    invalidParamsHint:
+      '홈으로 돌아가 올바른 TG 사용자명과 이메일로 다시 주문을 생성하세요.',
+    summaryTitle: '주문 요약',
+    product: '상품',
+    username: 'TG 사용자명',
+    email: '이메일',
+    amountDue: '결제 금액',
+    networkTitle: '결제 방식 선택',
+    addressTitle: '수취 주소',
+    copy: '주소 복사',
+    copied: '복사됨',
+    warningTitle: '중요한 결제 안내',
+    deliveryTitle: '처리 시간',
+    deliveryText:
+      '자금 안전과 규정 준수 심사를 위해 표준 처리 시간은 5~15분입니다. 네트워크 혼잡 시에도 최대 2시간을 넘지 않습니다.',
+    txHashTitle: '거래 해시',
+    txHashHint: '먼저 거래 해시를 입력하세요. 이것이 주요 결제 증빙입니다.',
+    txHashPlaceholder: '거래 해시를 입력하세요',
+    proofTitle: '보조 스크린샷 또는 영수증',
+    proofHint: '보조 증빙으로 스크린샷 또는 영수증을 업로드할 수도 있습니다.',
+    uploadButton: '스크린샷 선택',
+    noFile: '선택된 파일 없음',
+    proofReady: '선택한 파일:',
+    txHashRequired: '먼저 거래 해시를 입력하세요.',
+    submit: '결제 증빙 제출',
+    submitting: '제출 중...',
+    successTitle: '결제 증빙 제출 완료',
+    successText: '주문이 생성되었고 결제 증빙도 성공적으로 제출되었습니다.',
+    trackOrder: '주문 추적',
+    createError: '주문 생성에 실패했습니다.',
+  },
   'zh-cn': {
     back: '返回首页',
     title: '完成付款',
-    subtitle: '核对订单信息，选择支付网络，然后提交付款凭证。',
+    subtitle: '核对订单信息，选择支付方式，然后提交付款凭证。',
     invalidParams: '订单信息不完整或格式无效。',
     invalidParamsHint: '请返回首页重新下单，并确认 TG 用户名与邮箱格式正确。',
     summaryTitle: '订单摘要',
@@ -125,13 +310,11 @@ const PAY_UI: Record<string, PayUi> = {
     username: 'TG 用户名',
     email: '邮箱',
     amountDue: '应付金额',
-    networkTitle: '选择支付网络',
+    networkTitle: '选择支付方式',
     addressTitle: '收款地址',
     copy: '复制地址',
     copied: '已复制',
     warningTitle: '重要支付提示',
-    warningText:
-      '转账请务必使用当前页面所选支付网络对应的正确链与币种，不要混用其他网络。实际到账金额必须与订单显示金额完全一致。',
     deliveryTitle: '交付时效',
     deliveryText:
       '为了确保资金安全与合规审查，我们的标准交付时间为 5 - 15 分钟。在网络拥堵时，最迟不超过 2 小时。',
@@ -154,7 +337,7 @@ const PAY_UI: Record<string, PayUi> = {
   'zh-tw': {
     back: '返回首頁',
     title: '完成付款',
-    subtitle: '核對訂單資訊，選擇支付網路，然後提交付款憑證。',
+    subtitle: '核對訂單資訊，選擇支付方式，然後提交付款憑證。',
     invalidParams: '訂單資訊不完整或格式無效。',
     invalidParamsHint: '請返回首頁重新下單，並確認 TG 用戶名與電子郵件格式正確。',
     summaryTitle: '訂單摘要',
@@ -162,13 +345,11 @@ const PAY_UI: Record<string, PayUi> = {
     username: 'TG 用戶名',
     email: '電子郵件',
     amountDue: '應付金額',
-    networkTitle: '選擇支付網路',
+    networkTitle: '選擇支付方式',
     addressTitle: '收款地址',
     copy: '複製地址',
     copied: '已複製',
     warningTitle: '重要支付提示',
-    warningText:
-      '轉帳請務必使用目前頁面所選支付網路對應的正確鏈與幣種，不要混用其他網路。實際到帳金額必須與訂單顯示金額完全一致。',
     deliveryTitle: '交付時效',
     deliveryText:
       '為了確保資金安全與合規審查，我們的標準交付時間為 5 - 15 分鐘。在網路壅塞時，最遲不超過 2 小時。',
@@ -215,6 +396,59 @@ function scheduleFieldIntoView(target: HTMLInputElement) {
   })
 }
 
+function getMethodLabel(method?: PaymentMethod | null) {
+  if (!method) return ''
+
+  const displayName = String(method.display_name || '').trim()
+  if (displayName) return displayName
+
+  const chain = String(method.chain_name || '').trim()
+  const token = String(method.token_name || '').trim()
+  return [chain, token].filter(Boolean).join(' / ')
+}
+
+function getMethodShortLabel(method?: PaymentMethod | null) {
+  if (!method) return ''
+
+  const chain = String(method.chain_name || '').trim()
+  const token = String(method.token_name || '').trim()
+
+  if (chain && token) return `${chain} ${token}`
+  return getMethodLabel(method)
+}
+
+function getWarningText(lang: string, methodLabel: string) {
+  if (lang === 'zh-cn') {
+    return `转账请务必使用当前所选支付方式 ${methodLabel} 对应的正确链与币种，不要混用其他网络。实际到账金额必须与订单显示金额完全一致。`
+  }
+
+  if (lang === 'zh-tw') {
+    return `轉帳請務必使用目前所選支付方式 ${methodLabel} 對應的正確鏈與幣種，不要混用其他網路。實際到帳金額必須與訂單顯示金額完全一致。`
+  }
+
+  if (lang === 'de') {
+    return `Bitte verwenden Sie ausschließlich die korrekte Chain und den korrekten Token für die aktuell ausgewählte Zahlungsmethode ${methodLabel}. Der tatsächlich eingegangene Betrag muss exakt dem Bestellbetrag entsprechen.`
+  }
+
+  if (lang === 'es') {
+    return `Utilice únicamente la red y el token correctos para el método de pago seleccionado actualmente: ${methodLabel}. El importe recibido debe coincidir exactamente con el importe del pedido.`
+  }
+
+  if (lang === 'fr') {
+    return `Veuillez utiliser uniquement le bon réseau et le bon jeton pour le mode de paiement actuellement sélectionné : ${methodLabel}. Le montant reçu doit correspondre exactement au montant de la commande.`
+  }
+
+  if (lang === 'ja') {
+    return `現在選択中の支払い方法 ${methodLabel} に対応する正しいチェーンと通貨のみを使用してください。着金額は注文金額と完全に一致している必要があります。`
+  }
+
+  if (lang === 'ko') {
+    return `현재 선택한 결제 방식 ${methodLabel} 에 해당하는 올바른 체인과 코인만 사용하세요. 실제 입금 금액은 주문 금액과 정확히 일치해야 합니다.`
+  }
+
+  return `Please use only the correct chain and token for the currently selected payment method ${methodLabel}. The received amount must exactly match the order amount.`
+}
+
 function PayPageInner() {
   const { lang, t } = useI18n()
   const ui = PAY_UI[lang] || PAY_UI.en
@@ -223,7 +457,8 @@ function PayPageInner() {
 
   const [config, setConfig] = useState<PublicConfig>(defaultConfig)
   const [configError, setConfigError] = useState('')
-  const [network, setNetwork] = useState<PaymentNetwork>('TRC20')
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([])
+  const [selectedMethodId, setSelectedMethodId] = useState<string>('')
   const [txHash, setTxHash] = useState('')
   const [proofName, setProofName] = useState('')
   const [proofBase64, setProofBase64] = useState('')
@@ -259,44 +494,132 @@ function PayPageInner() {
   useEffect(() => {
     let active = true
 
-    async function loadConfig() {
+    async function loadConfigAndMethods() {
       try {
-        const response = await fetch('/api/public/config', {
-          cache: 'no-store',
-        })
-        const data = await response.json()
+        const [configResponse, methodsResponse] = await Promise.allSettled([
+          fetch('/api/public/config', { cache: 'no-store' }),
+          fetch('/api/public/payment-methods', { cache: 'no-store' }),
+        ])
 
-        if (!response.ok) {
-          throw new Error(data?.error || 'Failed to load config')
+        let nextConfig = defaultConfig
+
+        if (configResponse.status === 'fulfilled') {
+          const response = configResponse.value
+          const data = await response.json()
+
+          if (response.ok && active && data?.item) {
+            nextConfig = {
+              premium_3m_price: Number(data.item.premium_3m_price ?? defaultConfig.premium_3m_price),
+              premium_6m_price: Number(data.item.premium_6m_price ?? defaultConfig.premium_6m_price),
+              premium_12m_price: Number(data.item.premium_12m_price ?? defaultConfig.premium_12m_price),
+              stars_rate: Number(data.item.stars_rate ?? defaultConfig.stars_rate),
+              trc20_address: String(data.item.trc20_address ?? defaultConfig.trc20_address),
+              base_address: String(data.item.base_address ?? defaultConfig.base_address),
+              updated_at: data.item.updated_at,
+            }
+            setConfig(nextConfig)
+          } else if (active && !response.ok) {
+            setConfigError(data?.error || 'Failed to load config')
+          }
         }
 
-        if (active && data?.item) {
-          setConfig({
-            premium_3m_price: Number(data.item.premium_3m_price ?? defaultConfig.premium_3m_price),
-            premium_6m_price: Number(data.item.premium_6m_price ?? defaultConfig.premium_6m_price),
-            premium_12m_price: Number(data.item.premium_12m_price ?? defaultConfig.premium_12m_price),
-            stars_rate: Number(data.item.stars_rate ?? defaultConfig.stars_rate),
-            trc20_address: String(data.item.trc20_address ?? defaultConfig.trc20_address),
-            base_address: String(data.item.base_address ?? defaultConfig.base_address),
-            updated_at: data.item.updated_at,
-          })
+        let methods: PaymentMethod[] = []
+
+        if (methodsResponse.status === 'fulfilled') {
+          const response = methodsResponse.value
+          const data = await response.json()
+
+          if (response.ok && Array.isArray(data?.items)) {
+            methods = data.items
+              .filter((item: PaymentMethod) => item && item.active !== false && item.address)
+              .sort((a: PaymentMethod, b: PaymentMethod) => {
+                const ao = Number(a.sort_order ?? 0)
+                const bo = Number(b.sort_order ?? 0)
+                return ao - bo
+              })
+          }
+        }
+
+        if (!methods.length) {
+          methods = [
+            {
+              id: 'fallback-trc20',
+              display_name: 'TRC20 / USDT',
+              chain_name: 'TRC20',
+              token_name: 'USDT',
+              address: nextConfig.trc20_address,
+              active: true,
+              sort_order: 1,
+            },
+            {
+              id: 'fallback-base',
+              display_name: 'BASE / USDC',
+              chain_name: 'BASE',
+              token_name: 'USDC',
+              address: nextConfig.base_address,
+              active: true,
+              sort_order: 2,
+            },
+          ]
+        }
+
+        if (active) {
+          setPaymentMethods(methods)
+          if (methods[0]) {
+            setSelectedMethodId(String(methods[0].id))
+          }
         }
       } catch (error) {
         if (active) {
-          setConfigError(error instanceof Error ? error.message : 'Failed to load config')
           setConfig(defaultConfig)
+          setPaymentMethods([
+            {
+              id: 'fallback-trc20',
+              display_name: 'TRC20 / USDT',
+              chain_name: 'TRC20',
+              token_name: 'USDT',
+              address: defaultConfig.trc20_address,
+              active: true,
+              sort_order: 1,
+            },
+            {
+              id: 'fallback-base',
+              display_name: 'BASE / USDC',
+              chain_name: 'BASE',
+              token_name: 'USDC',
+              address: defaultConfig.base_address,
+              active: true,
+              sort_order: 2,
+            },
+          ])
+          setSelectedMethodId('fallback-trc20')
+          setConfigError(error instanceof Error ? error.message : 'Failed to load payment config')
         }
       }
     }
 
-    loadConfig()
+    loadConfigAndMethods()
 
     return () => {
       active = false
     }
   }, [])
 
-  const selectedAddress = network === 'TRC20' ? config.trc20_address : config.base_address
+  const selectedMethod = useMemo(
+    () => paymentMethods.find((item) => String(item.id) === selectedMethodId) || null,
+    [paymentMethods, selectedMethodId]
+  )
+
+  const selectedMethodLabel = useMemo(() => getMethodLabel(selectedMethod), [selectedMethod])
+  const selectedMethodShortLabel = useMemo(
+    () => getMethodShortLabel(selectedMethod),
+    [selectedMethod]
+  )
+
+  const selectedAddress = useMemo(() => {
+    if (selectedMethod?.address) return String(selectedMethod.address)
+    return ''
+  }, [selectedMethod])
 
   const productTitle = useMemo(() => {
     if (productType === 'tg_premium') {
@@ -347,6 +670,11 @@ function PayPageInner() {
       return
     }
 
+    if (!selectedMethodLabel || !selectedAddress) {
+      setSubmitError(ui.createError)
+      return
+    }
+
     if (!txHash.trim()) {
       setSubmitError(ui.txHashRequired)
       return
@@ -365,7 +693,7 @@ function PayPageInner() {
           duration: productType === 'tg_premium' ? duration : null,
           stars_amount: productType === 'tg_stars' ? starsAmount : null,
           price_usd: priceUsd,
-          payment_network: network,
+          payment_network: selectedMethodLabel,
           tx_hash: txHash.trim(),
           proof_image_base64: proofBase64 || null,
         }),
@@ -459,21 +787,21 @@ function PayPageInner() {
                 <div className="section-mini-title">{ui.networkTitle}</div>
 
                 <div className="network-switch">
-                  <button
-                    type="button"
-                    className={`network-option ${network === 'TRC20' ? 'active' : ''}`}
-                    onClick={() => setNetwork('TRC20')}
-                  >
-                    TRC20
-                  </button>
+                  {paymentMethods.map((item) => {
+                    const itemId = String(item.id)
+                    const active = itemId === selectedMethodId
 
-                  <button
-                    type="button"
-                    className={`network-option ${network === 'BASE' ? 'active' : ''}`}
-                    onClick={() => setNetwork('BASE')}
-                  >
-                    BASE
-                  </button>
+                    return (
+                      <button
+                        key={itemId}
+                        type="button"
+                        className={`network-option ${active ? 'active' : ''}`}
+                        onClick={() => setSelectedMethodId(itemId)}
+                      >
+                        {getMethodLabel(item)}
+                      </button>
+                    )
+                  })}
                 </div>
 
                 <div className="address-card">
@@ -494,7 +822,7 @@ function PayPageInner() {
             <div className="notice-grid">
               <div className="notice-card notice-card-warning">
                 <div className="section-mini-title">{ui.warningTitle}</div>
-                <div className="notice-text">{ui.warningText}</div>
+                <div className="notice-text">{getWarningText(lang, selectedMethodShortLabel)}</div>
               </div>
 
               <div className="notice-card">
@@ -773,7 +1101,7 @@ function PayPageInner() {
         }
 
         .proof-second-title {
-          margin-top: 4px;
+          margin-top: 6px;
           margin-bottom: 8px;
         }
 
@@ -827,6 +1155,9 @@ function PayPageInner() {
             background 0.16s ease,
             color 0.16s ease,
             border-color 0.16s ease;
+          padding: 8px 10px;
+          word-break: break-word;
+          text-align: center;
         }
 
         .network-option:hover {
