@@ -835,7 +835,9 @@ function HomePageInner() {
           <div className="summary-title">{selectedTitle}</div>
           <div className="summary-price">${selectedPrice}</div>
 
-          {configLoading ? <div className="small-muted summary-loading">{t.common.loading}</div> : null}
+          {configLoading ? (
+            <div className="small-muted summary-loading">{t.common.loading}</div>
+          ) : null}
         </div>
 
         <div className="form-stack">
@@ -946,11 +948,13 @@ function HomePageInner() {
 
         .hero-tools {
           margin-top: 2px;
+          transform: translateX(-10px);
         }
 
         .hero-mode {
-          margin-top: 4px;
+          margin-top: 2px;
           margin-bottom: 10px;
+          transform: translateX(16px);
         }
 
         .brand-title {
@@ -1237,12 +1241,20 @@ function HomePageInner() {
 
           .hero-step-3 {
             justify-content: flex-start;
-            padding-left: 40px;
+            padding-left: 34px;
           }
 
           .hero-step-4 {
             justify-content: flex-start;
-            padding-left: 64px;
+            padding-left: 72px;
+          }
+
+          .hero-tools {
+            transform: none;
+          }
+
+          .hero-mode {
+            transform: none;
           }
         }
 
