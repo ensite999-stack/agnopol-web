@@ -1,6 +1,13 @@
 'use client'
 
-import { Suspense, useEffect, useMemo, useState, type ChangeEvent } from 'react'
+import {
+  Suspense,
+  useEffect,
+  useMemo,
+  useState,
+  type ChangeEvent,
+  type FocusEvent,
+} from 'react'
 import { useI18n } from '../components/language-provider'
 import LanguageSwitcher from '../components/language-switcher'
 import ThemeToggle from '../components/theme-toggle'
@@ -410,6 +417,27 @@ function formatMoney(value: number) {
   return Number.isInteger(fixed) ? String(fixed) : fixed.toFixed(2).replace(/\.?0+$/, '')
 }
 
+function getKeyboardInset() {
+  if (typeof window === 'undefined' || !window.visualViewport) return 0
+
+  const viewport = window.visualViewport
+  const inset = window.innerHeight - viewport.height - viewport.offsetTop
+
+  return inset > 120 ? inset : 0
+}
+
+function scheduleFieldIntoView(target: HTMLInputElement) {
+  if (typeof window === 'undefined') return
+
+  window.setTimeout(() => {
+    target.scrollIntoView({
+      behavior: 'smooth',
+      block: 'center',
+      inline: 'nearest',
+    })
+  }, 260)
+}
+
 function OrderLookupSection() {
   const { lang, t } = useI18n()
   const ui = LOOKUP_UI[lang] || LOOKUP_UI.en
@@ -426,6 +454,10 @@ function OrderLookupSection() {
   const [resubmitLoading, setResubmitLoading] = useState(false)
   const [resubmitMessage, setResubmitMessage] = useState('')
   const [resubmitError, setResubmitError] = useState('')
+
+  function handleFieldFocus(event: FocusEvent<HTMLInputElement>) {
+    scheduleFieldIntoView(event.currentTarget)
+  }
 
   function getProductLabel(item: OrderResult) {
     const productType = String(item.product_type || '').toLowerCase()
@@ -551,6 +583,7 @@ function OrderLookupSection() {
         <input
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          onFocus={handleFieldFocus}
           placeholder={ui.placeholder}
           className="input"
           type="email"
@@ -636,6 +669,7 @@ function OrderLookupSection() {
                         <input
                           value={resubmitHash}
                           onChange={(e) => setResubmitHash(e.target.value)}
+                          onFocus={handleFieldFocus}
                           placeholder={ui.hashPlaceholder}
                           className="input"
                         />
@@ -663,6 +697,7 @@ function HomePageInner() {
   const { lang, t } = useI18n()
   const navUi = NAV_UI[lang] || NAV_UI.en
 
+  const [keyboardInset, setKeyboardInset] = useState(0)
   const [tab, setTab] = useState<ProductType>('premium')
   const [duration, setDuration] = useState<DurationType>('12m')
   const [stars, setStars] = useState(50)
@@ -682,6 +717,28 @@ function HomePageInner() {
     currentYear > startYear
       ? `© ${startYear}–${currentYear} Agnopol. All rights reserved.`
       : `© ${startYear} Agnopol. All rights reserved.`
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.visualViewport) return
+
+    const viewport = window.visualViewport
+
+    const updateKeyboardInset = () => {
+      setKeyboardInset(getKeyboardInset())
+    }
+
+    viewport.addEventListener('resize', updateKeyboardInset)
+    viewport.addEventListener('scroll', updateKeyboardInset)
+    window.addEventListener('orientationchange', updateKeyboardInset)
+
+    updateKeyboardInset()
+
+    return () => {
+      viewport.removeEventListener('resize', updateKeyboardInset)
+      viewport.removeEventListener('scroll', updateKeyboardInset)
+      window.removeEventListener('orientationchange', updateKeyboardInset)
+    }
+  }, [])
 
   useEffect(() => {
     let active = true
@@ -799,7 +856,12 @@ function HomePageInner() {
   }
 
   return (
-    <main className="site-shell">
+    <main
+      className="site-shell"
+      style={{
+        paddingBottom: `calc(36px + ${keyboardInset}px)`,
+      }}
+    >
       <div className="site-container">
         <section className="hero-center hero-stack hero-stair-wrap">
           <h1 className="brand-title hero-step hero-step-1">{t.common.brand}</h1>
@@ -878,6 +940,7 @@ function HomePageInner() {
                 step={1}
                 value={stars}
                 onChange={(e) => setStars(Number(e.target.value))}
+                onFocus={(e) => scheduleFieldIntoView(e.currentTarget)}
                 placeholder={t.home.starsPlaceholder}
                 className="input"
               />
@@ -901,6 +964,7 @@ function HomePageInner() {
               setUsername(e.target.value)
               if (formError) setFormError('')
             }}
+            onFocus={(e) => scheduleFieldIntoView(e.currentTarget)}
             placeholder={t.home.usernamePlaceholder}
             className="input"
             autoComplete="off"
@@ -913,6 +977,7 @@ function HomePageInner() {
               setEmail(e.target.value)
               if (formError) setFormError('')
             }}
+            onFocus={(e) => scheduleFieldIntoView(e.currentTarget)}
             placeholder={t.home.emailPlaceholder}
             className="input"
             autoComplete="email"
