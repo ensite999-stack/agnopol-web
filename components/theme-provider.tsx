@@ -2,6 +2,7 @@
 
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -9,142 +10,128 @@ import {
   type ReactNode,
 } from 'react'
 
-export type EffectiveTheme = 'light' | 'dark'
 export type ThemeMode = 'auto' | 'light' | 'dark'
+export type ResolvedTheme = 'light' | 'dark'
 
-type ThemeContextValue = {
-  effectiveTheme: EffectiveTheme
+type ThemeModeContextValue = {
   mode: ThemeMode
-  setMode: (mode: ThemeMode) => void
+  resolvedTheme: ResolvedTheme
+  setMode: (nextMode: ThemeMode) => void
 }
 
-const ThemeContext = createContext<ThemeContextValue | null>(null)
+const STORAGE_KEY = 'agnopol-theme-mode'
 
-function getSystemTheme(): EffectiveTheme {
-  if (typeof window === 'undefined' || !window.matchMedia) {
-    return 'light'
-  }
+const ThemeModeContext = createContext<ThemeModeContextValue | null>(null)
 
-  try {
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
-  } catch {
-    return 'light'
-  }
+function isThemeMode(value: unknown): value is ThemeMode {
+  return value === 'auto' || value === 'light' || value === 'dark'
 }
 
 function getStoredMode(): ThemeMode {
   if (typeof window === 'undefined') return 'auto'
 
   try {
-    const saved = localStorage.getItem('agnopol-theme-mode')
-    if (saved === 'light' || saved === 'dark' || saved === 'auto') {
-      return saved
-    }
+    const stored = window.localStorage.getItem(STORAGE_KEY)
+    return isThemeMode(stored) ? stored : 'auto'
   } catch {
-    // ignore
+    return 'auto'
   }
-
-  return 'auto'
 }
 
-function resolveTheme(mode: ThemeMode): EffectiveTheme {
+function getSystemTheme(): ResolvedTheme {
+  if (typeof window === 'undefined') return 'light'
+
+  return window.matchMedia('(prefers-color-scheme: dark)').matches
+    ? 'dark'
+    : 'light'
+}
+
+function resolveTheme(mode: ThemeMode): ResolvedTheme {
   if (mode === 'light') return 'light'
   if (mode === 'dark') return 'dark'
   return getSystemTheme()
 }
 
-function applyTheme(mode: ThemeMode) {
-  const theme = resolveTheme(mode)
+function applyTheme(theme: ResolvedTheme) {
+  if (typeof document === 'undefined') return
+
   const root = document.documentElement
-
-  root.dataset.themeMode = mode
-  root.dataset.theme = theme
+  root.setAttribute('data-theme', theme)
   root.style.colorScheme = theme
-
-  return theme
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [mode, setModeState] = useState<ThemeMode>('auto')
-  const [effectiveTheme, setEffectiveTheme] = useState<EffectiveTheme>('light')
+  const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>('light')
+  const [hydrated, setHydrated] = useState(false)
 
   useEffect(() => {
-    if (typeof window === 'undefined') return
-
     const initialMode = getStoredMode()
+    const initialResolvedTheme = resolveTheme(initialMode)
+
     setModeState(initialMode)
-    setEffectiveTheme(applyTheme(initialMode))
+    setResolvedTheme(initialResolvedTheme)
+    applyTheme(initialResolvedTheme)
+    setHydrated(true)
+  }, [])
 
-    const media = window.matchMedia?.('(prefers-color-scheme: dark)')
+  useEffect(() => {
+    if (!hydrated || typeof window === 'undefined') return
 
-    const syncAutoMode = () => {
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+
+    function handleSystemChange() {
       setModeState((currentMode) => {
         if (currentMode !== 'auto') return currentMode
-        setEffectiveTheme(applyTheme('auto'))
+
+        const nextResolvedTheme = mediaQuery.matches ? 'dark' : 'light'
+        setResolvedTheme(nextResolvedTheme)
+        applyTheme(nextResolvedTheme)
         return currentMode
       })
     }
 
-    const handleMediaChange = () => syncAutoMode()
-    const handlePageShow = () => syncAutoMode()
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        syncAutoMode()
-      }
+    if (typeof mediaQuery.addEventListener === 'function') {
+      mediaQuery.addEventListener('change', handleSystemChange)
+      return () => mediaQuery.removeEventListener('change', handleSystemChange)
     }
 
-    if (media) {
-      if (typeof media.addEventListener === 'function') {
-        media.addEventListener('change', handleMediaChange)
-      } else if (typeof media.addListener === 'function') {
-        media.addListener(handleMediaChange)
-      }
-    }
+    mediaQuery.addListener(handleSystemChange)
+    return () => mediaQuery.removeListener(handleSystemChange)
+  }, [hydrated])
 
-    window.addEventListener('pageshow', handlePageShow)
-    document.addEventListener('visibilitychange', handleVisibilityChange)
+  const setMode = useCallback((nextMode: ThemeMode) => {
+    const nextResolvedTheme = resolveTheme(nextMode)
 
-    return () => {
-      if (media) {
-        if (typeof media.removeEventListener === 'function') {
-          media.removeEventListener('change', handleMediaChange)
-        } else if (typeof media.removeListener === 'function') {
-          media.removeListener(handleMediaChange)
-        }
-      }
+    setModeState(nextMode)
+    setResolvedTheme(nextResolvedTheme)
+    applyTheme(nextResolvedTheme)
 
-      window.removeEventListener('pageshow', handlePageShow)
-      document.removeEventListener('visibilitychange', handleVisibilityChange)
+    try {
+      window.localStorage.setItem(STORAGE_KEY, nextMode)
+    } catch {
+      // ignore storage failure
     }
   }, [])
 
-  function setMode(nextMode: ThemeMode) {
-    setModeState(nextMode)
-    setEffectiveTheme(applyTheme(nextMode))
-
-    try {
-      localStorage.setItem('agnopol-theme-mode', nextMode)
-    } catch {
-      // ignore
-    }
-  }
-
-  const value = useMemo(
+  const value = useMemo<ThemeModeContextValue>(
     () => ({
-      effectiveTheme,
       mode,
+      resolvedTheme,
       setMode,
     }),
-    [effectiveTheme, mode]
+    [mode, resolvedTheme, setMode]
   )
 
-  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
+  return <ThemeModeContext.Provider value={value}>{children}</ThemeModeContext.Provider>
 }
 
 export function useThemeMode() {
-  const context = useContext(ThemeContext)
+  const context = useContext(ThemeModeContext)
+
   if (!context) {
     throw new Error('useThemeMode must be used within ThemeProvider')
   }
+
   return context
 }
