@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useMemo } from 'react'
 import { useI18n } from './language-provider'
 import { useThemeMode, type ThemeMode } from './theme-provider'
 
@@ -26,8 +26,6 @@ const LABELS: Record<
 export default function ThemeToggle() {
   const { lang } = useI18n()
   const { mode, setMode } = useThemeMode()
-  const [open, setOpen] = useState(false)
-  const wrapRef = useRef<HTMLDivElement | null>(null)
 
   const text = useMemo(() => LABELS[lang] || LABELS.en, [lang])
 
@@ -37,45 +35,10 @@ export default function ThemeToggle() {
     { value: 'dark', label: text.dark },
   ]
 
-  const currentLabel =
-    items.find((item) => item.value === mode)?.label || text.auto
-
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (!wrapRef.current) return
-      if (!wrapRef.current.contains(event.target as Node)) {
-        setOpen(false)
-      }
-    }
-
-    function handleEscape(event: KeyboardEvent) {
-      if (event.key === 'Escape') {
-        setOpen(false)
-      }
-    }
-
-    document.addEventListener('mousedown', handleClickOutside)
-    document.addEventListener('keydown', handleEscape)
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
-      document.removeEventListener('keydown', handleEscape)
-    }
-  }, [])
-
-  function handleSelect(nextMode: ThemeMode) {
-    setMode(nextMode)
-    setOpen(false)
-  }
-
   return (
     <div
-      ref={wrapRef}
       style={{
         width: '100%',
-        position: 'relative',
-        paddingBottom: open ? 138 : 0,
-        transition: 'padding-bottom 0.18s ease',
       }}
     >
       <div
@@ -86,98 +49,59 @@ export default function ThemeToggle() {
           fontSize: 12,
           fontWeight: 700,
           letterSpacing: '0.04em',
+          lineHeight: 1.1,
         }}
       >
         {text.title}
       </div>
 
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        aria-expanded={open}
-        aria-haspopup="menu"
+      <div
+        role="tablist"
+        aria-label={text.title}
         style={{
           width: '100%',
-          height: 38,
-          padding: '0 12px',
+          display: 'grid',
+          gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+          gap: 6,
+          padding: 6,
           borderRadius: 999,
           border: '1px solid var(--border-soft)',
           background: 'var(--bg-card-soft)',
-          color: 'var(--text-main)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          fontSize: 14,
-          fontWeight: 800,
-          cursor: 'pointer',
           boxShadow: 'var(--shadow-soft)',
           backdropFilter: 'blur(10px)',
         }}
       >
-        <span>{currentLabel}</span>
+        {items.map((item) => {
+          const active = item.value === mode
 
-        <span
-          aria-hidden="true"
-          style={{
-            width: 0,
-            height: 0,
-            borderLeft: '6px solid transparent',
-            borderRight: '6px solid transparent',
-            borderTop: '8px solid var(--text-soft)',
-            transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
-            transition: 'transform 0.16s ease',
-          }}
-        />
-      </button>
-
-      {open ? (
-        <div
-          role="menu"
-          style={{
-            position: 'absolute',
-            top: 'calc(100% + 8px)',
-            left: 0,
-            right: 0,
-            zIndex: 30,
-            padding: 6,
-            borderRadius: 16,
-            border: '1px solid var(--border-soft)',
-            background: 'var(--bg-card)',
-            boxShadow: 'var(--shadow-soft)',
-            backdropFilter: 'blur(12px)',
-            display: 'grid',
-            gap: 6,
-          }}
-        >
-          {items.map((item) => {
-            const active = item.value === mode
-
-            return (
-              <button
-                key={item.value}
-                type="button"
-                role="menuitemradio"
-                aria-checked={active}
-                onClick={() => handleSelect(item.value)}
-                style={{
-                  minHeight: 36,
-                  borderRadius: 12,
-                  border: active
-                    ? '1px solid transparent'
-                    : '1px solid var(--border-soft)',
-                  background: active ? 'var(--brand)' : 'var(--bg-card-soft)',
-                  color: active ? 'var(--brand-contrast)' : 'var(--text-main)',
-                  fontSize: 13,
-                  fontWeight: 800,
-                  cursor: 'pointer',
-                }}
-              >
-                {item.label}
-              </button>
-            )
-          })}
-        </div>
-      ) : null}
+          return (
+            <button
+              key={item.value}
+              type="button"
+              role="tab"
+              aria-selected={active}
+              onClick={() => setMode(item.value)}
+              style={{
+                minHeight: 34,
+                padding: '0 6px',
+                borderRadius: 999,
+                border: '1px solid transparent',
+                background: active ? 'var(--brand)' : 'transparent',
+                color: active ? 'var(--brand-contrast)' : 'var(--text-main)',
+                fontSize: 13,
+                fontWeight: 800,
+                lineHeight: 1,
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+                transition:
+                  'background 0.16s ease, color 0.16s ease, transform 0.16s ease',
+              }}
+            >
+              {item.label}
+            </button>
+          )
+        })}
+      </div>
     </div>
   )
 }
