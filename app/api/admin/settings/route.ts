@@ -28,6 +28,8 @@ const defaultSettings = {
   premium_6m_price: 17.1,
   premium_12m_price: 31.1,
   stars_rate: 0.02,
+  stars_min_amount: 50,
+  ton_address: 'UQC8kp8-ownfGWJdjf4XNteyMHPCkzGr5ZHX28wJjcPaX7dW',
   trc20_address: 'TD6sQK9NmqxKzP6WHvmUdkHQRZvwX6Cy1e',
   base_address: '0x21E43Ddaa992A0B5cfcCeFE98838239b9E91B40E',
 }
@@ -96,11 +98,19 @@ export async function PATCH(req: Request) {
     const body = await req.json()
     const current = await getOrCreateSettingsRow()
 
+    const starsMinAmount = Number(body?.stars_min_amount ?? 50)
+
+    if (!Number.isFinite(starsMinAmount) || starsMinAmount < 1) {
+      return noStoreJson({ error: 'Invalid stars_min_amount' }, { status: 400 })
+    }
+
     const patch = {
       premium_3m_price: Number(body?.premium_3m_price || 0),
       premium_6m_price: Number(body?.premium_6m_price || 0),
       premium_12m_price: Number(body?.premium_12m_price || 0),
       stars_rate: Number(body?.stars_rate || 0),
+      stars_min_amount: Math.floor(starsMinAmount),
+      ton_address: String(body?.ton_address || '').trim(),
       trc20_address: String(body?.trc20_address || '').trim(),
       base_address: String(body?.base_address || '').trim(),
       updated_at: new Date().toISOString(),
