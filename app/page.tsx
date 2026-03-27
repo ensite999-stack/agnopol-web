@@ -14,6 +14,7 @@ type PublicConfig = {
   premium_6m_price: number
   premium_12m_price: number
   stars_rate: number
+  stars_min_amount: number
   trc20_address: string
   base_address: string
   updated_at?: string
@@ -24,6 +25,7 @@ const defaultConfig: PublicConfig = {
   premium_6m_price: 17.1,
   premium_12m_price: 31.1,
   stars_rate: 0.02,
+  stars_min_amount: 50,
   trc20_address: 'TD6sQK9NmqxKzP6WHvmUdkHQRZvwX6Cy1e',
   base_address: '0x21E43Ddaa992A0B5cfcCeFE98838239b9E91B40E',
 }
@@ -238,6 +240,7 @@ function HomePageInner() {
             premium_6m_price: Number(data.item.premium_6m_price ?? defaultConfig.premium_6m_price),
             premium_12m_price: Number(data.item.premium_12m_price ?? defaultConfig.premium_12m_price),
             stars_rate: Number(data.item.stars_rate ?? defaultConfig.stars_rate),
+            stars_min_amount: Number(data.item.stars_min_amount ?? defaultConfig.stars_min_amount),
             trc20_address: String(data.item.trc20_address ?? defaultConfig.trc20_address),
             base_address: String(data.item.base_address ?? defaultConfig.base_address),
             updated_at: data.item.updated_at,
@@ -262,11 +265,17 @@ function HomePageInner() {
     }
   }, [])
 
+  const starsMinAmount = useMemo(() => {
+    const value = Number(config.stars_min_amount)
+    if (!Number.isFinite(value) || value < 1) return 50
+    return Math.floor(value)
+  }, [config.stars_min_amount])
+
   const safeStars = useMemo(() => {
-    if (!Number.isFinite(stars)) return 50
-    if (stars < 50) return 50
+    if (!Number.isFinite(stars)) return starsMinAmount
+    if (stars < starsMinAmount) return starsMinAmount
     return Math.floor(stars)
-  }, [stars])
+  }, [stars, starsMinAmount])
 
   const selectedPrice = useMemo(() => {
     if (tab === 'premium') {
@@ -411,14 +420,30 @@ function HomePageInner() {
               <div className="field-title">{t.home.starsAmount}</div>
               <input
                 type="number"
-                min={50}
+                min={starsMinAmount}
                 step={1}
                 value={stars}
                 onChange={(e) => setStars(Number(e.target.value))}
                 placeholder={t.home.starsPlaceholder}
                 className="input"
               />
-              <div className="field-hint">{t.home.starsMinHint}</div>
+              <div className="field-hint">
+                {lang === 'zh-cn'
+                  ? `最低下单数量：${starsMinAmount} Stars`
+                  : lang === 'zh-tw'
+                    ? `最低下單數量：${starsMinAmount} Stars`
+                    : lang === 'de'
+                      ? `Mindestbestellmenge: ${starsMinAmount} Stars`
+                      : lang === 'es'
+                        ? `Cantidad mínima: ${starsMinAmount} Stars`
+                        : lang === 'fr'
+                          ? `Quantité minimale : ${starsMinAmount} Stars`
+                          : lang === 'ja'
+                            ? `最小注文数：${starsMinAmount} Stars`
+                            : lang === 'ko'
+                              ? `최소 주문 수량: ${starsMinAmount} Stars`
+                              : `Minimum order amount: ${starsMinAmount} Stars`}
+              </div>
               <div className="field-hint">{t.home.autoPriceHint}</div>
             </div>
           </>
