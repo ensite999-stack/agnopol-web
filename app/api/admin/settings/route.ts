@@ -23,17 +23,12 @@ function noStoreJson(data: any, init?: ResponseInit) {
   return response
 }
 
-function isValidEmail(value: string) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim())
-}
-
 const defaultSettings = {
   premium_3m_price: 13.1,
   premium_6m_price: 17.1,
   premium_12m_price: 31.1,
   stars_rate: 0.02,
   stars_min_amount: 50,
-  order_notify_email: '',
 }
 
 async function getOrCreateSettingsRow() {
@@ -84,13 +79,14 @@ export async function GET() {
         premium_12m_price: Number(row.premium_12m_price ?? defaultSettings.premium_12m_price),
         stars_rate: Number(row.stars_rate ?? defaultSettings.stars_rate),
         stars_min_amount: Number(row.stars_min_amount ?? defaultSettings.stars_min_amount),
-        order_notify_email: String(row.order_notify_email ?? defaultSettings.order_notify_email),
         updated_at: row.updated_at,
       },
     })
   } catch (error) {
     return noStoreJson(
-      { error: error instanceof Error ? error.message : 'Server error' },
+      {
+        error: error instanceof Error ? error.message : 'Server error',
+      },
       {
         status: error instanceof Error && error.message === 'Unauthorized' ? 401 : 500,
       }
@@ -107,16 +103,9 @@ export async function PATCH(req: Request) {
     const current = await getOrCreateSettingsRow()
 
     const starsMinAmount = Number(body?.stars_min_amount ?? 50)
-    const notifyEmail = String(body?.order_notify_email ?? '')
-      .trim()
-      .toLowerCase()
 
     if (!Number.isFinite(starsMinAmount) || starsMinAmount < 1) {
       return noStoreJson({ error: 'Invalid stars_min_amount' }, { status: 400 })
-    }
-
-    if (notifyEmail && !isValidEmail(notifyEmail)) {
-      return noStoreJson({ error: 'Invalid order_notify_email' }, { status: 400 })
     }
 
     const patch = {
@@ -125,7 +114,6 @@ export async function PATCH(req: Request) {
       premium_12m_price: Number(body?.premium_12m_price || 0),
       stars_rate: Number(body?.stars_rate || 0),
       stars_min_amount: Math.floor(starsMinAmount),
-      order_notify_email: notifyEmail,
       updated_at: new Date().toISOString(),
     }
 
@@ -148,13 +136,14 @@ export async function PATCH(req: Request) {
         premium_12m_price: Number(data.premium_12m_price ?? defaultSettings.premium_12m_price),
         stars_rate: Number(data.stars_rate ?? defaultSettings.stars_rate),
         stars_min_amount: Number(data.stars_min_amount ?? defaultSettings.stars_min_amount),
-        order_notify_email: String(data.order_notify_email ?? defaultSettings.order_notify_email),
         updated_at: data.updated_at,
       },
     })
   } catch (error) {
     return noStoreJson(
-      { error: error instanceof Error ? error.message : 'Server error' },
+      {
+        error: error instanceof Error ? error.message : 'Server error',
+      },
       {
         status: error instanceof Error && error.message === 'Unauthorized' ? 401 : 500,
       }
