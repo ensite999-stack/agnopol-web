@@ -1,6 +1,6 @@
 'use client'
 
-import { Suspense, useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useI18n } from '../../../components/language-provider'
 import LanguageSwitcher from '../../../components/language-switcher'
 
@@ -87,9 +87,9 @@ const loginTexts = {
   },
 } as const
 
-function AdminLoginPageInner() {
+export default function AdminLoginPage() {
   const { lang } = useI18n()
-  const text = useMemo(() => loginTexts[lang as keyof typeof loginTexts] || loginTexts.en, [lang])
+  const text = useMemo(() => loginTexts[lang] || loginTexts.en, [lang])
 
   const [password, setPassword] = useState('')
   const [submitting, setSubmitting] = useState(false)
@@ -104,11 +104,10 @@ function AdminLoginPageInner() {
         })
         const data = await response.json()
 
-        if (data?.authenticated) {
+        if (response.ok && data?.authenticated) {
           window.location.href = `/admin?lang=${lang}`
         }
       } catch {
-        // ignore
       }
     }
 
@@ -129,7 +128,7 @@ function AdminLoginPageInner() {
 
       const data = await response.json()
 
-      if (!response.ok) {
+      if (!response.ok || !data?.authenticated) {
         if (response.status === 401) {
           throw new Error(text.invalid)
         }
@@ -171,76 +170,43 @@ function AdminLoginPageInner() {
           <LanguageSwitcher />
         </div>
 
-        <section className="card-soft">
-          <div className="hero-center" style={{ marginBottom: 18 }}>
-            <h1
-              style={{
-                margin: 0,
-                fontSize: 'clamp(28px, 5vw, 42px)',
-                fontWeight: 900,
-                color: '#0f172a',
-              }}
-            >
-              {text.title}
-            </h1>
+        <section
+          style={{
+            borderRadius: 28,
+            border: '1px solid rgba(15,23,42,0.08)',
+            background: 'rgba(255,255,255,0.94)',
+            boxShadow: '0 18px 40px rgba(15,23,42,0.08)',
+            padding: 24,
+          }}
+        >
+          <h1 style={{ margin: 0, fontSize: 28, fontWeight: 900 }}>{text.title}</h1>
+          <p style={{ marginTop: 10, color: '#64748b', lineHeight: 1.7 }}>{text.subtitle}</p>
 
-            <p className="small-muted" style={{ marginTop: 10 }}>
-              {text.subtitle}
-            </p>
-          </div>
-
-          <div style={{ display: 'grid', gap: 12 }}>
+          <div style={{ marginTop: 18, display: 'grid', gap: 12 }}>
             <input
               type="password"
-              className="input"
-              placeholder={text.password}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !submitting) {
-                  handleLogin()
-                }
-              }}
+              placeholder={text.password}
+              className="input"
+              autoComplete="current-password"
             />
+
+            {errorText ? (
+              <div className="status-box-error">{errorText}</div>
+            ) : null}
 
             <button
               type="button"
-              className="btn-primary"
               onClick={handleLogin}
+              className="btn-primary"
               disabled={submitting}
-              style={{ opacity: submitting ? 0.8 : 1 }}
             >
               {submitting ? text.loading : text.button}
             </button>
           </div>
-
-          {errorText ? <div className="status-box-error">{errorText}</div> : null}
         </section>
       </div>
     </main>
-  )
-}
-
-function PageFallback() {
-  return (
-    <main className="site-shell">
-      <div className="site-container" style={{ maxWidth: 520 }}>
-        <section className="card-soft">
-          <div className="hero-center">
-            <p className="small-muted" style={{ margin: 0 }}>
-              Loading...
-            </p>
-          </div>
-        </section>
-      </div>
-    </main>
-  )
-}
-
-export default function AdminLoginPage() {
-  return (
-    <Suspense fallback={<PageFallback />}>
-      <AdminLoginPageInner />
-    </Suspense>
   )
 }
