@@ -27,6 +27,8 @@ const defaultSettings = {
   premium_6m_price: 17.1,
   premium_12m_price: 31.1,
   stars_rate: 0.02,
+  stars_min_amount: 50,
+  ton_address: 'UQC8kp8-ownfGWJdjf4XNteyMHPCkzGr5ZHX28wJjcPaX7dW',
   trc20_address: 'TD6sQK9NmqxKzP6WHvmUdkHQRZvwX6Cy1e',
   base_address: '0x21E43Ddaa992A0B5cfcCeFE98838239b9E91B40E',
 }
@@ -38,7 +40,7 @@ export async function GET() {
     const { data, error } = await supabase
       .from('site_settings')
       .select(
-        'premium_3m_price, premium_6m_price, premium_12m_price, stars_rate, trc20_address, base_address, updated_at'
+        'premium_3m_price, premium_6m_price, premium_12m_price, stars_rate, stars_min_amount, ton_address, trc20_address, base_address, updated_at'
       )
       .order('id', { ascending: true })
       .limit(1)
@@ -50,7 +52,17 @@ export async function GET() {
 
     return noStoreJson({
       success: true,
-      item: data || defaultSettings,
+      item: {
+        premium_3m_price: Number(data?.premium_3m_price ?? defaultSettings.premium_3m_price),
+        premium_6m_price: Number(data?.premium_6m_price ?? defaultSettings.premium_6m_price),
+        premium_12m_price: Number(data?.premium_12m_price ?? defaultSettings.premium_12m_price),
+        stars_rate: Number(data?.stars_rate ?? defaultSettings.stars_rate),
+        stars_min_amount: Number(data?.stars_min_amount ?? defaultSettings.stars_min_amount),
+        ton_address: String(data?.ton_address ?? defaultSettings.ton_address),
+        trc20_address: String(data?.trc20_address ?? defaultSettings.trc20_address),
+        base_address: String(data?.base_address ?? defaultSettings.base_address),
+        updated_at: data?.updated_at,
+      },
     })
   } catch (error) {
     return noStoreJson(
