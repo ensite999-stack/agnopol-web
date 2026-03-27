@@ -13,10 +13,8 @@ function noStoreJson(data: any, init?: ResponseInit) {
 
 export async function GET() {
   try {
-    const authenticated = isAdminAuthenticated()
-
     return noStoreJson({
-      authenticated,
+      authenticated: isAdminAuthenticated(),
     })
   } catch (error) {
     return noStoreJson(
