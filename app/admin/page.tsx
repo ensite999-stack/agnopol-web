@@ -48,9 +48,6 @@ type SiteConfig = {
   premium_12m_price: number
   stars_rate: number
   stars_min_amount: number
-  trc20_address?: string
-  base_address?: string
-  ton_address?: string
 }
 
 type PaymentMethod = {
@@ -161,84 +158,6 @@ async function readJsonSafe(res: Response) {
 }
 
 const TEXTS: Record<string, UiText> = {
-  de: {
-    title: 'Admin-Konsole',
-    subtitle: 'Bestellverwaltung, Preisverwaltung und Zahlungsartenverwaltung',
-    checking: 'Anmeldestatus wird geprüft...',
-    tabs: { orders: 'Bestellungen', pricing: 'Preise & Zahlung' },
-    logout: 'Abmelden',
-    refreshing: 'Wird aktualisiert...',
-    refreshNow: 'Jetzt aktualisieren',
-    autoRefresh: 'Automatisch aktualisieren',
-    searchPlaceholder: 'Nach E-Mail / Bestellnr. / Benutzername suchen',
-    all: 'Alle',
-    pending: 'Ausstehend',
-    paid: 'Bezahlt',
-    completed: 'Abgeschlossen',
-    cancelled: 'Storniert',
-    noOrders: 'Keine Bestellungen gefunden',
-    selectHint: 'Wählen Sie links eine Bestellung zur Bearbeitung aus.',
-    orderNo: 'Bestellnummer',
-    product: 'Produkt',
-    amount: 'Betrag',
-    createdAt: 'Erstellt',
-    username: 'Telegram-Benutzername',
-    email: 'E-Mail',
-    network: 'Zahlungsnetzwerk',
-    txHash: 'Transaktions-Hash',
-    currentStatus: 'Aktueller Status',
-    userNote: 'Öffentliche Notiz',
-    adminNote: 'Interne Admin-Notiz',
-    saveHint: 'Speichern schreibt nur Notizen und Hash zurück. Statusänderungen bitte über die Aktionsbuttons ausführen.',
-    saveChanges: 'Änderungen speichern',
-    saving: 'Wird gespeichert...',
-    completedBtn: 'Als abgeschlossen markieren',
-    restoreBtn: 'Als bezahlt markieren',
-    cancelBtn: 'Als storniert markieren',
-    deleteBtn: 'Bestellung löschen',
-    restoring: 'Wird zurückgesetzt...',
-    completing: 'Wird abgeschlossen...',
-    cancelling: 'Wird storniert...',
-    deleting: 'Wird gelöscht...',
-    viewLarge: 'Großansicht',
-    closeImage: 'Schließen',
-    noImage: 'Kein Zahlungsnachweis-Bild vorhanden.',
-    noHash: 'Kein Hash vorhanden',
-    pricesTitle: 'Preis- und Adresskonfiguration',
-    price3m: 'TG Premium 3 Monate',
-    price6m: 'TG Premium 6 Monate',
-    price12m: 'TG Premium 12 Monate',
-    starsRate: 'Stars Stückpreis (USD)',
-    starsMinAmount: 'Mindestmenge Stars',
-    saveConfig: 'Preise speichern',
-    configSaving: 'Wird gespeichert...',
-    actionSuccess: 'Aktion erfolgreich',
-    saveSuccess: 'Bestellung erfolgreich gespeichert',
-    configSaveSuccess: 'Preise erfolgreich gespeichert',
-    loadFailed: 'Daten konnten nicht geladen werden',
-    actionFailed: 'Aktion fehlgeschlagen',
-    allTimeBoston: 'Alle Zeiten basieren auf der Boston-Zeitzone',
-    editOrder: 'Bestellung bearbeiten',
-    methodsTitle: 'Zahlungsarten verwalten',
-    methodsHint:
-      'Diese Methoden werden auf der Zahlungsseite öffentlich angezeigt. Reihenfolge, Namen, Netz, Coin und Adresse können jederzeit geändert werden.',
-    addMethod: 'Zahlungsart hinzufügen',
-    saveMethods: 'Zahlungsarten speichern',
-    methodsSaving: 'Wird gespeichert...',
-    displayName: 'Anzeigename',
-    chainName: 'Netzwerkname',
-    tokenName: 'Coin-Name',
-    address: 'Empfangsadresse',
-    sortOrder: 'Sortierung',
-    enabled: 'Aktiviert',
-    deleteMethod: 'Löschen',
-    methodNamePlaceholder: 'z. B. TRC20 / USDT',
-    methodChainPlaceholder: 'z. B. TRC20',
-    methodTokenPlaceholder: 'z. B. USDT',
-    methodsSaveSuccess: 'Zahlungsarten erfolgreich gespeichert',
-    methodDeleteSuccess: 'Zahlungsart gelöscht',
-    methodDeleteConfirm: 'Diese Zahlungsart wirklich löschen?',
-  },
   en: {
     title: 'Admin Console',
     subtitle: 'Order management, pricing, and payment method administration',
@@ -282,7 +201,7 @@ const TEXTS: Record<string, UiText> = {
     closeImage: 'Close',
     noImage: 'No payment proof image available.',
     noHash: 'No hash provided',
-    pricesTitle: 'Pricing and address configuration',
+    pricesTitle: 'Pricing settings',
     price3m: 'TG Premium 3 Months',
     price6m: 'TG Premium 6 Months',
     price12m: 'TG Premium 12 Months',
@@ -316,318 +235,6 @@ const TEXTS: Record<string, UiText> = {
     methodsSaveSuccess: 'Payment methods saved successfully',
     methodDeleteSuccess: 'Payment method deleted',
     methodDeleteConfirm: 'Delete this payment method?',
-  },
-  es: {
-    title: 'Consola de administración',
-    subtitle: 'Gestión de pedidos, precios y métodos de pago',
-    checking: 'Comprobando estado de inicio de sesión...',
-    tabs: { orders: 'Pedidos', pricing: 'Precios y pago' },
-    logout: 'Cerrar sesión',
-    refreshing: 'Actualizando...',
-    refreshNow: 'Actualizar ahora',
-    autoRefresh: 'Actualización automática',
-    searchPlaceholder: 'Buscar por correo / pedido / usuario',
-    all: 'Todos',
-    pending: 'Pendiente',
-    paid: 'Pagado',
-    completed: 'Completado',
-    cancelled: 'Cancelado',
-    noOrders: 'No se encontraron pedidos',
-    selectHint: 'Seleccione un pedido a la izquierda para revisarlo y editarlo.',
-    orderNo: 'N.º de pedido',
-    product: 'Producto',
-    amount: 'Importe',
-    createdAt: 'Creado el',
-    username: 'Usuario de Telegram',
-    email: 'Correo electrónico',
-    network: 'Red de pago',
-    txHash: 'Hash de transacción',
-    currentStatus: 'Estado actual',
-    userNote: 'Nota pública',
-    adminNote: 'Nota interna del administrador',
-    saveHint: 'Guardar solo actualiza notas y hash. Use los botones de acción para cambiar el estado.',
-    saveChanges: 'Guardar cambios',
-    saving: 'Guardando...',
-    completedBtn: 'Marcar como completado',
-    restoreBtn: 'Marcar como pagado',
-    cancelBtn: 'Marcar como cancelado',
-    deleteBtn: 'Eliminar pedido',
-    restoring: 'Restaurando...',
-    completing: 'Completando...',
-    cancelling: 'Cancelando...',
-    deleting: 'Eliminando...',
-    viewLarge: 'Ver grande',
-    closeImage: 'Cerrar',
-    noImage: 'No hay imagen de comprobante de pago.',
-    noHash: 'Sin hash',
-    pricesTitle: 'Configuración de precios y direcciones',
-    price3m: 'TG Premium 3 meses',
-    price6m: 'TG Premium 6 meses',
-    price12m: 'TG Premium 12 meses',
-    starsRate: 'Precio unitario de Stars (USD)',
-    starsMinAmount: 'Cantidad mínima de Stars',
-    saveConfig: 'Guardar precios',
-    configSaving: 'Guardando...',
-    actionSuccess: 'Acción completada correctamente',
-    saveSuccess: 'Pedido guardado correctamente',
-    configSaveSuccess: 'Precios guardados correctamente',
-    loadFailed: 'No se pudieron cargar los datos',
-    actionFailed: 'La acción falló',
-    allTimeBoston: 'Todos los horarios están basados en la hora de Boston',
-    editOrder: 'Editar pedido',
-    methodsTitle: 'Gestión de métodos de pago',
-    methodsHint:
-      'Estos métodos de pago se muestran públicamente en la página de pago. Puede ajustar orden, nombre, red, moneda y dirección en cualquier momento.',
-    addMethod: 'Agregar método de pago',
-    saveMethods: 'Guardar métodos',
-    methodsSaving: 'Guardando...',
-    displayName: 'Nombre visible',
-    chainName: 'Nombre de red',
-    tokenName: 'Nombre del token',
-    address: 'Dirección de recepción',
-    sortOrder: 'Orden',
-    enabled: 'Habilitado',
-    deleteMethod: 'Eliminar',
-    methodNamePlaceholder: 'p. ej. TRC20 / USDT',
-    methodChainPlaceholder: 'p. ej. TRC20',
-    methodTokenPlaceholder: 'p. ej. USDT',
-    methodsSaveSuccess: 'Métodos de pago guardados correctamente',
-    methodDeleteSuccess: 'Método de pago eliminado',
-    methodDeleteConfirm: '¿Eliminar este método de pago?',
-  },
-  fr: {
-    title: 'Console d’administration',
-    subtitle: 'Gestion des commandes, des prix et des moyens de paiement',
-    checking: 'Vérification de la session...',
-    tabs: { orders: 'Commandes', pricing: 'Prix et paiement' },
-    logout: 'Se déconnecter',
-    refreshing: 'Actualisation...',
-    refreshNow: 'Actualiser maintenant',
-    autoRefresh: 'Actualisation automatique',
-    searchPlaceholder: 'Rechercher par e-mail / n° de commande / utilisateur',
-    all: 'Tous',
-    pending: 'En attente',
-    paid: 'Payé',
-    completed: 'Terminé',
-    cancelled: 'Annulé',
-    noOrders: 'Aucune commande trouvée',
-    selectHint: 'Sélectionnez une commande à gauche pour la consulter et la modifier.',
-    orderNo: 'N° de commande',
-    product: 'Produit',
-    amount: 'Montant',
-    createdAt: 'Créé le',
-    username: 'Nom Telegram',
-    email: 'E-mail',
-    network: 'Réseau de paiement',
-    txHash: 'Hash de transaction',
-    currentStatus: 'Statut actuel',
-    userNote: 'Note publique',
-    adminNote: 'Note interne admin',
-    saveHint: 'L’enregistrement met uniquement à jour les notes et le hash. Utilisez les boutons d’action pour changer le statut.',
-    saveChanges: 'Enregistrer les modifications',
-    saving: 'Enregistrement...',
-    completedBtn: 'Marquer comme terminé',
-    restoreBtn: 'Marquer comme payé',
-    cancelBtn: 'Marquer comme annulé',
-    deleteBtn: 'Supprimer la commande',
-    restoring: 'Restauration...',
-    completing: 'Validation...',
-    cancelling: 'Annulation...',
-    deleting: 'Suppression...',
-    viewLarge: 'Voir en grand',
-    closeImage: 'Fermer',
-    noImage: 'Aucune image de preuve de paiement.',
-    noHash: 'Aucun hash fourni',
-    pricesTitle: 'Configuration des prix et adresses',
-    price3m: 'TG Premium 3 mois',
-    price6m: 'TG Premium 6 mois',
-    price12m: 'TG Premium 12 mois',
-    starsRate: 'Prix unitaire Stars (USD)',
-    starsMinAmount: 'Quantité minimale de Stars',
-    saveConfig: 'Enregistrer les tarifs',
-    configSaving: 'Enregistrement...',
-    actionSuccess: 'Action effectuée avec succès',
-    saveSuccess: 'Commande enregistrée avec succès',
-    configSaveSuccess: 'Tarifs enregistrés avec succès',
-    loadFailed: 'Impossible de charger les données',
-    actionFailed: 'Échec de l’action',
-    allTimeBoston: 'Toutes les heures sont basées sur le fuseau horaire de Boston',
-    editOrder: 'Modifier la commande',
-    methodsTitle: 'Gestion des moyens de paiement',
-    methodsHint:
-      'Ces moyens de paiement sont affichés publiquement sur la page de paiement. Vous pouvez ajuster l’ordre, le nom, le réseau, le token et l’adresse à tout moment.',
-    addMethod: 'Ajouter un moyen de paiement',
-    saveMethods: 'Enregistrer les moyens',
-    methodsSaving: 'Enregistrement...',
-    displayName: 'Nom affiché',
-    chainName: 'Nom du réseau',
-    tokenName: 'Nom du token',
-    address: 'Adresse de réception',
-    sortOrder: 'Ordre',
-    enabled: 'Activé',
-    deleteMethod: 'Supprimer',
-    methodNamePlaceholder: 'ex. TRC20 / USDT',
-    methodChainPlaceholder: 'ex. TRC20',
-    methodTokenPlaceholder: 'ex. USDT',
-    methodsSaveSuccess: 'Moyens de paiement enregistrés avec succès',
-    methodDeleteSuccess: 'Moyen de paiement supprimé',
-    methodDeleteConfirm: 'Supprimer ce moyen de paiement ?',
-  },
-  ja: {
-    title: '管理コンソール',
-    subtitle: '注文管理、価格管理、支払い方法管理',
-    checking: 'ログイン状態を確認しています...',
-    tabs: { orders: '注文', pricing: '価格と支払い' },
-    logout: 'ログアウト',
-    refreshing: '更新中...',
-    refreshNow: '今すぐ更新',
-    autoRefresh: '自動更新',
-    searchPlaceholder: 'メール / 注文番号 / ユーザー名で検索',
-    all: 'すべて',
-    pending: '保留中',
-    paid: '支払い済み',
-    completed: '完了',
-    cancelled: 'キャンセル',
-    noOrders: '注文が見つかりません',
-    selectHint: '左側の注文を選択して内容を確認・編集してください。',
-    orderNo: '注文番号',
-    product: '商品',
-    amount: '金額',
-    createdAt: '作成日時',
-    username: 'Telegramユーザー名',
-    email: 'メール',
-    network: '支払いネットワーク',
-    txHash: '取引ハッシュ',
-    currentStatus: '現在の状態',
-    userNote: '公開メモ',
-    adminNote: '内部管理メモ',
-    saveHint: '保存ではメモとハッシュのみ更新されます。状態変更は下のアクションボタンを使用してください。',
-    saveChanges: '変更を保存',
-    saving: '保存中...',
-    completedBtn: '完了にする',
-    restoreBtn: '支払い済みに戻す',
-    cancelBtn: 'キャンセルにする',
-    deleteBtn: '注文を削除',
-    restoring: '復元中...',
-    completing: '完了処理中...',
-    cancelling: 'キャンセル中...',
-    deleting: '削除中...',
-    viewLarge: '拡大表示',
-    closeImage: '閉じる',
-    noImage: '支払い証明画像はありません。',
-    noHash: 'ハッシュなし',
-    pricesTitle: '価格とアドレス設定',
-    price3m: 'TG Premium 3か月',
-    price6m: 'TG Premium 6か月',
-    price12m: 'TG Premium 12か月',
-    starsRate: 'Stars 単価 (USD)',
-    starsMinAmount: 'Stars 最小購入数',
-    saveConfig: '価格を保存',
-    configSaving: '保存中...',
-    actionSuccess: '操作成功',
-    saveSuccess: '注文を保存しました',
-    configSaveSuccess: '価格を保存しました',
-    loadFailed: 'データを読み込めませんでした',
-    actionFailed: '操作に失敗しました',
-    allTimeBoston: 'すべての時刻はボストン時間基準です',
-    editOrder: '注文を編集',
-    methodsTitle: '支払い方法管理',
-    methodsHint:
-      'これらの支払い方法は支払いページに公開表示されます。並び順、表示名、ネットワーク、通貨、アドレスはいつでも変更できます。',
-    addMethod: '支払い方法を追加',
-    saveMethods: '支払い方法を保存',
-    methodsSaving: '保存中...',
-    displayName: '表示名',
-    chainName: 'ネットワーク名',
-    tokenName: '通貨名',
-    address: '受取アドレス',
-    sortOrder: '表示順',
-    enabled: '有効',
-    deleteMethod: '削除',
-    methodNamePlaceholder: '例: TRC20 / USDT',
-    methodChainPlaceholder: '例: TRC20',
-    methodTokenPlaceholder: '例: USDT',
-    methodsSaveSuccess: '支払い方法を保存しました',
-    methodDeleteSuccess: '支払い方法を削除しました',
-    methodDeleteConfirm: 'この支払い方法を削除しますか？',
-  },
-  ko: {
-    title: '관리 콘솔',
-    subtitle: '주문 관리, 가격 관리 및 결제 방식 관리',
-    checking: '로그인 상태 확인 중...',
-    tabs: { orders: '주문', pricing: '가격 및 결제' },
-    logout: '로그아웃',
-    refreshing: '새로고침 중...',
-    refreshNow: '지금 새로고침',
-    autoRefresh: '자동 새로고침',
-    searchPlaceholder: '이메일 / 주문번호 / 사용자명 검색',
-    all: '전체',
-    pending: '대기 중',
-    paid: '결제됨',
-    completed: '완료됨',
-    cancelled: '취소됨',
-    noOrders: '주문이 없습니다',
-    selectHint: '왼쪽에서 주문을 선택해 상세 내용을 확인하고 수정하세요.',
-    orderNo: '주문번호',
-    product: '상품',
-    amount: '금액',
-    createdAt: '생성 시간',
-    username: 'Telegram 사용자명',
-    email: '이메일',
-    network: '결제 네트워크',
-    txHash: '거래 해시',
-    currentStatus: '현재 상태',
-    userNote: '공개 메모',
-    adminNote: '내부 관리자 메모',
-    saveHint: '저장은 메모와 해시만 갱신합니다. 상태 변경은 아래 액션 버튼을 사용하세요.',
-    saveChanges: '변경사항 저장',
-    saving: '저장 중...',
-    completedBtn: '완료 처리',
-    restoreBtn: '결제됨으로 복원',
-    cancelBtn: '취소 처리',
-    deleteBtn: '주문 삭제',
-    restoring: '복원 중...',
-    completing: '완료 처리 중...',
-    cancelling: '취소 중...',
-    deleting: '삭제 중...',
-    viewLarge: '크게 보기',
-    closeImage: '닫기',
-    noImage: '결제 증빙 이미지가 없습니다.',
-    noHash: '해시 없음',
-    pricesTitle: '가격 및 주소 설정',
-    price3m: 'TG Premium 3개월',
-    price6m: 'TG Premium 6개월',
-    price12m: 'TG Premium 12개월',
-    starsRate: 'Stars 단가 (USD)',
-    starsMinAmount: 'Stars 최소 구매 수량',
-    saveConfig: '가격 저장',
-    configSaving: '저장 중...',
-    actionSuccess: '작업 성공',
-    saveSuccess: '주문이 저장되었습니다',
-    configSaveSuccess: '가격이 저장되었습니다',
-    loadFailed: '데이터를 불러오지 못했습니다',
-    actionFailed: '작업 실패',
-    allTimeBoston: '모든 시간은 보스턴 시간 기준입니다',
-    editOrder: '주문 수정',
-    methodsTitle: '결제 방식 관리',
-    methodsHint:
-      '이 결제 방식들은 결제 페이지에 공개 표시됩니다. 순서, 표시명, 체인, 코인, 주소를 언제든지 수정할 수 있습니다.',
-    addMethod: '결제 방식 추가',
-    saveMethods: '결제 방식 저장',
-    methodsSaving: '저장 중...',
-    displayName: '표시 이름',
-    chainName: '체인 이름',
-    tokenName: '코인 이름',
-    address: '수취 주소',
-    sortOrder: '정렬 순서',
-    enabled: '사용',
-    deleteMethod: '삭제',
-    methodNamePlaceholder: '예: TRC20 / USDT',
-    methodChainPlaceholder: '예: TRC20',
-    methodTokenPlaceholder: '예: USDT',
-    methodsSaveSuccess: '결제 방식이 저장되었습니다',
-    methodDeleteSuccess: '결제 방식이 삭제되었습니다',
-    methodDeleteConfirm: '이 결제 방식을 삭제하시겠습니까?',
   },
   'zh-cn': {
     title: '后台管理',
@@ -672,7 +279,7 @@ const TEXTS: Record<string, UiText> = {
     closeImage: '关闭',
     noImage: '暂无付款截图。',
     noHash: '暂无交易哈希',
-    pricesTitle: '价格与地址配置',
+    pricesTitle: '价格配置',
     price3m: 'TG Premium 3个月',
     price6m: 'TG Premium 6个月',
     price12m: 'TG Premium 12个月',
@@ -750,7 +357,7 @@ const TEXTS: Record<string, UiText> = {
     closeImage: '關閉',
     noImage: '暫無付款截圖。',
     noHash: '暫無交易雜湊',
-    pricesTitle: '價格與地址設定',
+    pricesTitle: '價格設定',
     price3m: 'TG Premium 3個月',
     price6m: 'TG Premium 6個月',
     price12m: 'TG Premium 12個月',
@@ -823,6 +430,7 @@ function getStatusLabel(text: UiText, status: string | null | undefined) {
 
 function getProductLabel(order: OrderItem, lang: string) {
   const type = String(order.product_type || '').toLowerCase()
+
   if (type.includes('premium')) {
     const duration = String(order.duration || '')
     if (lang === 'zh-cn') {
@@ -834,31 +442,6 @@ function getProductLabel(order: OrderItem, lang: string) {
       if (duration === '3m') return 'TG Premium 3個月'
       if (duration === '6m') return 'TG Premium 6個月'
       if (duration === '12m') return 'TG Premium 12個月'
-    }
-    if (lang === 'ja') {
-      if (duration === '3m') return 'TG Premium 3か月'
-      if (duration === '6m') return 'TG Premium 6か月'
-      if (duration === '12m') return 'TG Premium 12か月'
-    }
-    if (lang === 'ko') {
-      if (duration === '3m') return 'TG Premium 3개월'
-      if (duration === '6m') return 'TG Premium 6개월'
-      if (duration === '12m') return 'TG Premium 12개월'
-    }
-    if (lang === 'de') {
-      if (duration === '3m') return 'TG Premium 3 Monate'
-      if (duration === '6m') return 'TG Premium 6 Monate'
-      if (duration === '12m') return 'TG Premium 12 Monate'
-    }
-    if (lang === 'es') {
-      if (duration === '3m') return 'TG Premium 3 meses'
-      if (duration === '6m') return 'TG Premium 6 meses'
-      if (duration === '12m') return 'TG Premium 12 meses'
-    }
-    if (lang === 'fr') {
-      if (duration === '3m') return 'TG Premium 3 mois'
-      if (duration === '6m') return 'TG Premium 6 mois'
-      if (duration === '12m') return 'TG Premium 12 mois'
     }
     if (duration === '3m') return 'TG Premium 3 Months'
     if (duration === '6m') return 'TG Premium 6 Months'
@@ -923,9 +506,6 @@ function AdminPageInner() {
     premium_12m_price: 31.1,
     stars_rate: 0.02,
     stars_min_amount: 50,
-    trc20_address: '',
-    base_address: '',
-    ton_address: '',
   })
 
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([])
@@ -961,6 +541,7 @@ function AdminPageInner() {
 
   const filteredOrders = useMemo(() => {
     const keyword = search.trim().toLowerCase()
+
     return orders.filter((item) => {
       const matchStatus = statusFilter === 'all' ? true : String(item.status) === statusFilter
       if (!matchStatus) return false
@@ -989,31 +570,12 @@ function AdminPageInner() {
         return
       }
 
-      const target =
-        list.find((item) => item.order_no === selectedOrderNo) || list[0]
-
+      const target = list.find((item) => item.order_no === selectedOrderNo) || list[0]
       setSelectedOrderNo(target.order_no)
       syncFormFromOrder(target)
     },
     [selectedOrderNo, syncFormFromOrder]
   )
-
-  const checkSession = useCallback(async () => {
-    const res = await fetch(API.session, {
-      method: 'GET',
-      credentials: 'include',
-      cache: 'no-store',
-    })
-    const data = await readJsonSafe(res)
-
-    if (!res.ok || !data?.ok) {
-      router.replace('/admin/login')
-      return false
-    }
-
-    setSessionChecked(true)
-    return true
-  }, [router])
 
   const loadOrders = useCallback(async () => {
     try {
@@ -1054,9 +616,6 @@ function AdminPageInner() {
           premium_12m_price: Number(data.item.premium_12m_price ?? 31.1),
           stars_rate: Number(data.item.stars_rate ?? 0.02),
           stars_min_amount: Number(data.item.stars_min_amount ?? 50),
-          trc20_address: String(data.item.trc20_address ?? ''),
-          base_address: String(data.item.base_address ?? ''),
-          ton_address: String(data.item.ton_address ?? ''),
         })
       }
     } catch (err) {
@@ -1083,18 +642,37 @@ function AdminPageInner() {
   }, [text.loadFailed])
 
   useEffect(() => {
-    let cancelled = false
+    let active = true
 
-    ;(async () => {
-      const ok = await checkSession()
-      if (!ok || cancelled) return
-      await Promise.all([loadOrders(), loadSiteConfig(), loadPaymentMethods()])
-    })()
+    async function bootstrap() {
+      try {
+        const res = await fetch(API.session, {
+          method: 'GET',
+          credentials: 'include',
+          cache: 'no-store',
+        })
+
+        const data = await readJsonSafe(res)
+        if (!active) return
+
+        if (!res.ok || !data?.authenticated) {
+          router.replace(`/admin/login?lang=${lang}`)
+          return
+        }
+
+        setSessionChecked(true)
+        await Promise.all([loadOrders(), loadSiteConfig(), loadPaymentMethods()])
+      } catch {
+        router.replace(`/admin/login?lang=${lang}`)
+      }
+    }
+
+    bootstrap()
 
     return () => {
-      cancelled = true
+      active = false
     }
-  }, [checkSession, loadOrders, loadSiteConfig, loadPaymentMethods])
+  }, [lang, router, loadOrders, loadSiteConfig, loadPaymentMethods])
 
   useEffect(() => {
     if (!sessionChecked || !autoRefresh || tab !== 'orders') return
@@ -1115,7 +693,7 @@ function AdminPageInner() {
         credentials: 'include',
       })
     } finally {
-      router.replace('/admin/login')
+      router.replace(`/admin/login?lang=${lang}`)
     }
   }
 
@@ -1125,6 +703,7 @@ function AdminPageInner() {
     try {
       setSaveLoading(true)
       setOrderNotice(null)
+
       const res = await fetch(API.orders, {
         method: 'PATCH',
         credentials: 'include',
@@ -2518,6 +2097,12 @@ const styles = `
     color: var(--text-soft);
     font-size: 15px;
     line-height: 1.7;
+  }
+
+  .small-note {
+    color: var(--text-soft);
+    font-size: 13px;
+    line-height: 1.6;
   }
 
   .image-modal {
