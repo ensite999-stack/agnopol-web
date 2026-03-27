@@ -17,15 +17,12 @@ export async function POST(req: Request) {
     const password = String(body?.password || '')
 
     if (!password) {
-      return noStoreJson({ error: 'Password is required' }, { status: 400 })
+      return noStoreJson({ authenticated: false, error: 'Password is required' }, { status: 400 })
     }
 
     if (!verifyAdminPassword(password)) {
       return noStoreJson(
-        {
-          authenticated: false,
-          error: 'Invalid password',
-        },
+        { authenticated: false, error: 'Invalid password' },
         { status: 401 }
       )
     }
@@ -37,7 +34,10 @@ export async function POST(req: Request) {
     })
   } catch (error) {
     return noStoreJson(
-      { error: error instanceof Error ? error.message : 'Server error' },
+      {
+        authenticated: false,
+        error: error instanceof Error ? error.message : 'Server error',
+      },
       { status: 500 }
     )
   }
