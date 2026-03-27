@@ -47,6 +47,7 @@ type SiteConfig = {
   premium_6m_price: number
   premium_12m_price: number
   stars_rate: number
+  stars_min_amount: number
   trc20_address?: string
   base_address?: string
   ton_address?: string
@@ -120,6 +121,7 @@ type UiText = {
   price6m: string
   price12m: string
   starsRate: string
+  starsMinAmount: string
   saveConfig: string
   configSaving: string
   actionSuccess: string
@@ -170,89 +172,90 @@ const TEXTS: Record<string, UiText> = {
     autoRefresh: 'Automatisch aktualisieren',
     searchPlaceholder: 'Nach E-Mail / Bestellnr. / Benutzername suchen',
     all: 'Alle',
-    pending: 'Ausstehende Zahlung',
+    pending: 'Ausstehend',
     paid: 'Bezahlt',
     completed: 'Abgeschlossen',
     cancelled: 'Storniert',
-    noOrders: 'Keine Bestellungen.',
-    selectHint: 'Keine Bestellungen.',
+    noOrders: 'Keine Bestellungen gefunden',
+    selectHint: 'Wählen Sie links eine Bestellung zur Bearbeitung aus.',
     orderNo: 'Bestellnummer',
     product: 'Produkt',
     amount: 'Betrag',
-    createdAt: 'Erstellt am',
+    createdAt: 'Erstellt',
     username: 'Telegram-Benutzername',
     email: 'E-Mail',
     network: 'Zahlungsnetzwerk',
     txHash: 'Transaktions-Hash',
     currentStatus: 'Aktueller Status',
-    userNote: 'Sichtbarer Hinweis',
-    adminNote: 'Admin-Notiz',
-    saveHint: 'Speichert Bestellinfos, sichtbaren Hinweis und Admin-Notiz.',
+    userNote: 'Öffentliche Notiz',
+    adminNote: 'Interne Admin-Notiz',
+    saveHint: 'Speichern schreibt nur Notizen und Hash zurück. Statusänderungen bitte über die Aktionsbuttons ausführen.',
     saveChanges: 'Änderungen speichern',
     saving: 'Wird gespeichert...',
-    completedBtn: 'Abgeschlossen',
-    restoreBtn: 'Zahlung wiederherstellen',
-    cancelBtn: 'Bestellung stornieren',
+    completedBtn: 'Als abgeschlossen markieren',
+    restoreBtn: 'Als bezahlt markieren',
+    cancelBtn: 'Als storniert markieren',
     deleteBtn: 'Bestellung löschen',
-    restoring: 'Wird wiederhergestellt...',
-    completing: 'Wird verarbeitet...',
+    restoring: 'Wird zurückgesetzt...',
+    completing: 'Wird abgeschlossen...',
     cancelling: 'Wird storniert...',
     deleting: 'Wird gelöscht...',
-    viewLarge: 'Groß anzeigen',
+    viewLarge: 'Großansicht',
     closeImage: 'Schließen',
-    noImage: 'Kein Zahlungsbild',
-    noHash: 'Bitte Transaktions-Hash eingeben',
-    pricesTitle: 'Preise',
+    noImage: 'Kein Zahlungsnachweis-Bild vorhanden.',
+    noHash: 'Kein Hash vorhanden',
+    pricesTitle: 'Preis- und Adresskonfiguration',
     price3m: 'TG Premium 3 Monate',
     price6m: 'TG Premium 6 Monate',
     price12m: 'TG Premium 12 Monate',
     starsRate: 'Stars Stückpreis (USD)',
+    starsMinAmount: 'Mindestmenge Stars',
     saveConfig: 'Preise speichern',
     configSaving: 'Wird gespeichert...',
     actionSuccess: 'Aktion erfolgreich',
-    saveSuccess: 'Erfolgreich gespeichert',
-    configSaveSuccess: 'Preise gespeichert',
-    loadFailed: 'Laden fehlgeschlagen',
+    saveSuccess: 'Bestellung erfolgreich gespeichert',
+    configSaveSuccess: 'Preise erfolgreich gespeichert',
+    loadFailed: 'Daten konnten nicht geladen werden',
     actionFailed: 'Aktion fehlgeschlagen',
-    allTimeBoston: 'Alle Zeiten werden in der Zeitzone Boston, USA angezeigt.',
+    allTimeBoston: 'Alle Zeiten basieren auf der Boston-Zeitzone',
     editOrder: 'Bestellung bearbeiten',
-    methodsTitle: 'Zahlungsarten',
+    methodsTitle: 'Zahlungsarten verwalten',
     methodsHint:
-      'Hier können Sie Zahlungsarten hinzufügen, löschen, aktivieren, deaktivieren, sortieren und bearbeiten. Die Zahlungsseite synchronisiert automatisch.',
+      'Diese Methoden werden auf der Zahlungsseite öffentlich angezeigt. Reihenfolge, Namen, Netz, Coin und Adresse können jederzeit geändert werden.',
     addMethod: 'Zahlungsart hinzufügen',
     saveMethods: 'Zahlungsarten speichern',
     methodsSaving: 'Wird gespeichert...',
     displayName: 'Anzeigename',
-    chainName: 'Chain',
-    tokenName: 'Coin',
-    address: 'Adresse',
-    sortOrder: 'Reihenfolge',
+    chainName: 'Netzwerkname',
+    tokenName: 'Coin-Name',
+    address: 'Empfangsadresse',
+    sortOrder: 'Sortierung',
     enabled: 'Aktiviert',
     deleteMethod: 'Löschen',
-    methodNamePlaceholder: 'Beispiel: TON / Toncoin',
-    methodChainPlaceholder: 'Beispiel: TON',
-    methodTokenPlaceholder: 'Beispiel: Toncoin',
-    methodsSaveSuccess: 'Zahlungsarten gespeichert.',
-    methodDeleteSuccess: 'Zahlungsart gelöscht.',
+    methodNamePlaceholder: 'z. B. TRC20 / USDT',
+    methodChainPlaceholder: 'z. B. TRC20',
+    methodTokenPlaceholder: 'z. B. USDT',
+    methodsSaveSuccess: 'Zahlungsarten erfolgreich gespeichert',
+    methodDeleteSuccess: 'Zahlungsart gelöscht',
     methodDeleteConfirm: 'Diese Zahlungsart wirklich löschen?',
   },
   en: {
     title: 'Admin Console',
-    subtitle: 'Order management, pricing and payment-method management',
-    checking: 'Checking session...',
+    subtitle: 'Order management, pricing, and payment method administration',
+    checking: 'Checking sign-in status...',
     tabs: { orders: 'Orders', pricing: 'Pricing & Payment' },
-    logout: 'Log Out',
+    logout: 'Sign out',
     refreshing: 'Refreshing...',
-    refreshNow: 'Refresh Now',
-    autoRefresh: 'Auto Refresh',
+    refreshNow: 'Refresh now',
+    autoRefresh: 'Auto refresh',
     searchPlaceholder: 'Search by email / order no / username',
     all: 'All',
-    pending: 'Pending Payment',
+    pending: 'Pending',
     paid: 'Paid',
     completed: 'Completed',
     cancelled: 'Cancelled',
-    noOrders: 'No orders.',
-    selectHint: 'No orders.',
+    noOrders: 'No orders found',
+    selectHint: 'Select an order from the left to review and edit.',
     orderNo: 'Order No',
     product: 'Product',
     amount: 'Amount',
@@ -262,151 +265,153 @@ const TEXTS: Record<string, UiText> = {
     network: 'Payment Network',
     txHash: 'Transaction Hash',
     currentStatus: 'Current Status',
-    userNote: 'User Visible Notice',
-    adminNote: 'Admin Note',
-    saveHint: 'Save order info, visible notice and admin note.',
+    userNote: 'Public Note',
+    adminNote: 'Internal Admin Note',
+    saveHint: 'Save only writes note and hash changes. Use the action buttons below for status transitions.',
     saveChanges: 'Save Changes',
     saving: 'Saving...',
-    completedBtn: 'Completed',
-    restoreBtn: 'Restore Payment',
-    cancelBtn: 'Cancel Order',
-    deleteBtn: 'Delete Order',
+    completedBtn: 'Mark as completed',
+    restoreBtn: 'Mark as paid',
+    cancelBtn: 'Mark as cancelled',
+    deleteBtn: 'Delete order',
     restoring: 'Restoring...',
-    completing: 'Processing...',
+    completing: 'Completing...',
     cancelling: 'Cancelling...',
     deleting: 'Deleting...',
-    viewLarge: 'View Large',
+    viewLarge: 'View large',
     closeImage: 'Close',
-    noImage: 'No payment proof image',
-    noHash: 'Please enter a transaction hash',
-    pricesTitle: 'Pricing',
+    noImage: 'No payment proof image available.',
+    noHash: 'No hash provided',
+    pricesTitle: 'Pricing and address configuration',
     price3m: 'TG Premium 3 Months',
     price6m: 'TG Premium 6 Months',
     price12m: 'TG Premium 12 Months',
     starsRate: 'Stars unit price (USD)',
+    starsMinAmount: 'Minimum Stars amount',
     saveConfig: 'Save Pricing',
     configSaving: 'Saving...',
-    actionSuccess: 'Action completed',
-    saveSuccess: 'Saved successfully',
-    configSaveSuccess: 'Pricing saved',
+    actionSuccess: 'Action completed successfully',
+    saveSuccess: 'Order saved successfully',
+    configSaveSuccess: 'Pricing saved successfully',
     loadFailed: 'Failed to load data',
     actionFailed: 'Action failed',
-    allTimeBoston: 'All times are displayed in the Boston, US time zone.',
+    allTimeBoston: 'All timestamps are based on Boston time',
     editOrder: 'Edit Order',
-    methodsTitle: 'Payment Methods',
+    methodsTitle: 'Payment method management',
     methodsHint:
-      'Add, delete, enable, disable, sort and edit payment methods here. The pay page syncs automatically.',
-    addMethod: 'Add Payment Method',
-    saveMethods: 'Save Payment Methods',
+      'These payment methods are shown publicly on the pay page. You can adjust order, labels, chain, token, and address at any time.',
+    addMethod: 'Add payment method',
+    saveMethods: 'Save methods',
     methodsSaving: 'Saving...',
-    displayName: 'Display Name',
-    chainName: 'Chain',
-    tokenName: 'Token',
-    address: 'Address',
-    sortOrder: 'Sort Order',
+    displayName: 'Display name',
+    chainName: 'Chain name',
+    tokenName: 'Token name',
+    address: 'Receiving address',
+    sortOrder: 'Sort order',
     enabled: 'Enabled',
     deleteMethod: 'Delete',
-    methodNamePlaceholder: 'Example: TON / Toncoin',
-    methodChainPlaceholder: 'Example: TON',
-    methodTokenPlaceholder: 'Example: Toncoin',
-    methodsSaveSuccess: 'Payment methods saved.',
-    methodDeleteSuccess: 'Payment method deleted.',
+    methodNamePlaceholder: 'e.g. TRC20 / USDT',
+    methodChainPlaceholder: 'e.g. TRC20',
+    methodTokenPlaceholder: 'e.g. USDT',
+    methodsSaveSuccess: 'Payment methods saved successfully',
+    methodDeleteSuccess: 'Payment method deleted',
     methodDeleteConfirm: 'Delete this payment method?',
   },
   es: {
     title: 'Consola de administración',
     subtitle: 'Gestión de pedidos, precios y métodos de pago',
-    checking: 'Comprobando sesión...',
-    tabs: { orders: 'Pedidos', pricing: 'Precios y pagos' },
+    checking: 'Comprobando estado de inicio de sesión...',
+    tabs: { orders: 'Pedidos', pricing: 'Precios y pago' },
     logout: 'Cerrar sesión',
     refreshing: 'Actualizando...',
     refreshNow: 'Actualizar ahora',
     autoRefresh: 'Actualización automática',
     searchPlaceholder: 'Buscar por correo / pedido / usuario',
     all: 'Todos',
-    pending: 'Pago pendiente',
+    pending: 'Pendiente',
     paid: 'Pagado',
     completed: 'Completado',
     cancelled: 'Cancelado',
-    noOrders: 'No hay pedidos.',
-    selectHint: 'No hay pedidos.',
-    orderNo: 'Número de pedido',
+    noOrders: 'No se encontraron pedidos',
+    selectHint: 'Seleccione un pedido a la izquierda para revisarlo y editarlo.',
+    orderNo: 'N.º de pedido',
     product: 'Producto',
     amount: 'Importe',
-    createdAt: 'Fecha de creación',
+    createdAt: 'Creado el',
     username: 'Usuario de Telegram',
     email: 'Correo electrónico',
     network: 'Red de pago',
     txHash: 'Hash de transacción',
     currentStatus: 'Estado actual',
-    userNote: 'Aviso visible para el usuario',
-    adminNote: 'Nota interna',
-    saveHint: 'Guarde la información del pedido, el aviso visible y la nota interna.',
+    userNote: 'Nota pública',
+    adminNote: 'Nota interna del administrador',
+    saveHint: 'Guardar solo actualiza notas y hash. Use los botones de acción para cambiar el estado.',
     saveChanges: 'Guardar cambios',
     saving: 'Guardando...',
-    completedBtn: 'Completado',
-    restoreBtn: 'Restaurar pago',
-    cancelBtn: 'Cancelar pedido',
+    completedBtn: 'Marcar como completado',
+    restoreBtn: 'Marcar como pagado',
+    cancelBtn: 'Marcar como cancelado',
     deleteBtn: 'Eliminar pedido',
     restoring: 'Restaurando...',
-    completing: 'Procesando...',
+    completing: 'Completando...',
     cancelling: 'Cancelando...',
     deleting: 'Eliminando...',
     viewLarge: 'Ver grande',
     closeImage: 'Cerrar',
-    noImage: 'Sin imagen de comprobante',
-    noHash: 'Introduzca el hash de transacción',
-    pricesTitle: 'Precios',
+    noImage: 'No hay imagen de comprobante de pago.',
+    noHash: 'Sin hash',
+    pricesTitle: 'Configuración de precios y direcciones',
     price3m: 'TG Premium 3 meses',
     price6m: 'TG Premium 6 meses',
     price12m: 'TG Premium 12 meses',
     starsRate: 'Precio unitario de Stars (USD)',
+    starsMinAmount: 'Cantidad mínima de Stars',
     saveConfig: 'Guardar precios',
     configSaving: 'Guardando...',
-    actionSuccess: 'Acción completada',
-    saveSuccess: 'Guardado correctamente',
-    configSaveSuccess: 'Precios guardados',
-    loadFailed: 'Error al cargar',
-    actionFailed: 'Error en la acción',
-    allTimeBoston: 'Todas las horas se muestran en la zona horaria de Boston, EE. UU.',
+    actionSuccess: 'Acción completada correctamente',
+    saveSuccess: 'Pedido guardado correctamente',
+    configSaveSuccess: 'Precios guardados correctamente',
+    loadFailed: 'No se pudieron cargar los datos',
+    actionFailed: 'La acción falló',
+    allTimeBoston: 'Todos los horarios están basados en la hora de Boston',
     editOrder: 'Editar pedido',
-    methodsTitle: 'Métodos de pago',
+    methodsTitle: 'Gestión de métodos de pago',
     methodsHint:
-      'Aquí puede añadir, eliminar, activar, desactivar, ordenar y editar métodos de pago. La página de pago se sincroniza automáticamente.',
-    addMethod: 'Añadir método de pago',
-    saveMethods: 'Guardar métodos de pago',
+      'Estos métodos de pago se muestran públicamente en la página de pago. Puede ajustar orden, nombre, red, moneda y dirección en cualquier momento.',
+    addMethod: 'Agregar método de pago',
+    saveMethods: 'Guardar métodos',
     methodsSaving: 'Guardando...',
     displayName: 'Nombre visible',
-    chainName: 'Cadena',
-    tokenName: 'Moneda',
-    address: 'Dirección',
+    chainName: 'Nombre de red',
+    tokenName: 'Nombre del token',
+    address: 'Dirección de recepción',
     sortOrder: 'Orden',
-    enabled: 'Activado',
+    enabled: 'Habilitado',
     deleteMethod: 'Eliminar',
-    methodNamePlaceholder: 'Ejemplo: TON / Toncoin',
-    methodChainPlaceholder: 'Ejemplo: TON',
-    methodTokenPlaceholder: 'Ejemplo: Toncoin',
-    methodsSaveSuccess: 'Métodos de pago guardados.',
-    methodDeleteSuccess: 'Método de pago eliminado.',
+    methodNamePlaceholder: 'p. ej. TRC20 / USDT',
+    methodChainPlaceholder: 'p. ej. TRC20',
+    methodTokenPlaceholder: 'p. ej. USDT',
+    methodsSaveSuccess: 'Métodos de pago guardados correctamente',
+    methodDeleteSuccess: 'Método de pago eliminado',
     methodDeleteConfirm: '¿Eliminar este método de pago?',
   },
   fr: {
     title: 'Console d’administration',
-    subtitle: 'Gestion des commandes, des tarifs et des moyens de paiement',
+    subtitle: 'Gestion des commandes, des prix et des moyens de paiement',
     checking: 'Vérification de la session...',
-    tabs: { orders: 'Commandes', pricing: 'Tarifs et paiements' },
+    tabs: { orders: 'Commandes', pricing: 'Prix et paiement' },
     logout: 'Se déconnecter',
     refreshing: 'Actualisation...',
-    refreshNow: 'Actualiser',
+    refreshNow: 'Actualiser maintenant',
     autoRefresh: 'Actualisation automatique',
-    searchPlaceholder: 'Rechercher par e-mail / commande / utilisateur',
+    searchPlaceholder: 'Rechercher par e-mail / n° de commande / utilisateur',
     all: 'Tous',
-    pending: 'Paiement en attente',
+    pending: 'En attente',
     paid: 'Payé',
     completed: 'Terminé',
     cancelled: 'Annulé',
-    noOrders: 'Aucune commande.',
-    selectHint: 'Aucune commande.',
+    noOrders: 'Aucune commande trouvée',
+    selectHint: 'Sélectionnez une commande à gauche pour la consulter et la modifier.',
     orderNo: 'N° de commande',
     product: 'Produit',
     amount: 'Montant',
@@ -416,151 +421,153 @@ const TEXTS: Record<string, UiText> = {
     network: 'Réseau de paiement',
     txHash: 'Hash de transaction',
     currentStatus: 'Statut actuel',
-    userNote: 'Message visible',
-    adminNote: 'Note admin',
-    saveHint: 'Enregistrez les infos de commande, le message visible et la note admin.',
+    userNote: 'Note publique',
+    adminNote: 'Note interne admin',
+    saveHint: 'L’enregistrement met uniquement à jour les notes et le hash. Utilisez les boutons d’action pour changer le statut.',
     saveChanges: 'Enregistrer les modifications',
     saving: 'Enregistrement...',
-    completedBtn: 'Terminé',
-    restoreBtn: 'Restaurer le paiement',
-    cancelBtn: 'Annuler la commande',
+    completedBtn: 'Marquer comme terminé',
+    restoreBtn: 'Marquer comme payé',
+    cancelBtn: 'Marquer comme annulé',
     deleteBtn: 'Supprimer la commande',
     restoring: 'Restauration...',
-    completing: 'Traitement...',
+    completing: 'Validation...',
     cancelling: 'Annulation...',
     deleting: 'Suppression...',
     viewLarge: 'Voir en grand',
     closeImage: 'Fermer',
-    noImage: 'Aucune image de preuve',
-    noHash: 'Veuillez saisir le hash de transaction',
-    pricesTitle: 'Tarifs',
+    noImage: 'Aucune image de preuve de paiement.',
+    noHash: 'Aucun hash fourni',
+    pricesTitle: 'Configuration des prix et adresses',
     price3m: 'TG Premium 3 mois',
     price6m: 'TG Premium 6 mois',
     price12m: 'TG Premium 12 mois',
     starsRate: 'Prix unitaire Stars (USD)',
+    starsMinAmount: 'Quantité minimale de Stars',
     saveConfig: 'Enregistrer les tarifs',
     configSaving: 'Enregistrement...',
-    actionSuccess: 'Action réussie',
-    saveSuccess: 'Enregistré avec succès',
-    configSaveSuccess: 'Tarifs enregistrés',
-    loadFailed: 'Échec du chargement',
+    actionSuccess: 'Action effectuée avec succès',
+    saveSuccess: 'Commande enregistrée avec succès',
+    configSaveSuccess: 'Tarifs enregistrés avec succès',
+    loadFailed: 'Impossible de charger les données',
     actionFailed: 'Échec de l’action',
-    allTimeBoston: 'Toutes les heures sont affichées selon le fuseau horaire de Boston, États-Unis.',
+    allTimeBoston: 'Toutes les heures sont basées sur le fuseau horaire de Boston',
     editOrder: 'Modifier la commande',
-    methodsTitle: 'Moyens de paiement',
+    methodsTitle: 'Gestion des moyens de paiement',
     methodsHint:
-      'Ajoutez, supprimez, activez, désactivez, triez et modifiez les moyens de paiement ici. La page de paiement se synchronise automatiquement.',
+      'Ces moyens de paiement sont affichés publiquement sur la page de paiement. Vous pouvez ajuster l’ordre, le nom, le réseau, le token et l’adresse à tout moment.',
     addMethod: 'Ajouter un moyen de paiement',
-    saveMethods: 'Enregistrer les moyens de paiement',
+    saveMethods: 'Enregistrer les moyens',
     methodsSaving: 'Enregistrement...',
     displayName: 'Nom affiché',
-    chainName: 'Chaîne',
-    tokenName: 'Jeton',
-    address: 'Adresse',
+    chainName: 'Nom du réseau',
+    tokenName: 'Nom du token',
+    address: 'Adresse de réception',
     sortOrder: 'Ordre',
     enabled: 'Activé',
     deleteMethod: 'Supprimer',
-    methodNamePlaceholder: 'Exemple : TON / Toncoin',
-    methodChainPlaceholder: 'Exemple : TON',
-    methodTokenPlaceholder: 'Exemple : Toncoin',
-    methodsSaveSuccess: 'Moyens de paiement enregistrés.',
-    methodDeleteSuccess: 'Moyen de paiement supprimé.',
+    methodNamePlaceholder: 'ex. TRC20 / USDT',
+    methodChainPlaceholder: 'ex. TRC20',
+    methodTokenPlaceholder: 'ex. USDT',
+    methodsSaveSuccess: 'Moyens de paiement enregistrés avec succès',
+    methodDeleteSuccess: 'Moyen de paiement supprimé',
     methodDeleteConfirm: 'Supprimer ce moyen de paiement ?',
   },
   ja: {
     title: '管理コンソール',
-    subtitle: '注文管理、価格設定、支払い方法管理',
-    checking: 'ログイン状態を確認中...',
-    tabs: { orders: '注文管理', pricing: '価格と支払い' },
+    subtitle: '注文管理、価格管理、支払い方法管理',
+    checking: 'ログイン状態を確認しています...',
+    tabs: { orders: '注文', pricing: '価格と支払い' },
     logout: 'ログアウト',
     refreshing: '更新中...',
     refreshNow: '今すぐ更新',
     autoRefresh: '自動更新',
     searchPlaceholder: 'メール / 注文番号 / ユーザー名で検索',
     all: 'すべて',
-    pending: '未払い',
+    pending: '保留中',
     paid: '支払い済み',
     completed: '完了',
-    cancelled: 'キャンセル済み',
-    noOrders: '注文はありません。',
-    selectHint: '注文はありません。',
+    cancelled: 'キャンセル',
+    noOrders: '注文が見つかりません',
+    selectHint: '左側の注文を選択して内容を確認・編集してください。',
     orderNo: '注文番号',
     product: '商品',
     amount: '金額',
-    createdAt: '作成時間',
-    username: 'Telegram ユーザー名',
+    createdAt: '作成日時',
+    username: 'Telegramユーザー名',
     email: 'メール',
     network: '支払いネットワーク',
-    txHash: 'トランザクションハッシュ',
+    txHash: '取引ハッシュ',
     currentStatus: '現在の状態',
-    userNote: 'ユーザー向け案内',
-    adminNote: '管理メモ',
-    saveHint: '注文情報、表示案内、管理メモを保存します。',
+    userNote: '公開メモ',
+    adminNote: '内部管理メモ',
+    saveHint: '保存ではメモとハッシュのみ更新されます。状態変更は下のアクションボタンを使用してください。',
     saveChanges: '変更を保存',
     saving: '保存中...',
     completedBtn: '完了にする',
-    restoreBtn: '支払いを復元',
-    cancelBtn: '注文をキャンセル',
+    restoreBtn: '支払い済みに戻す',
+    cancelBtn: 'キャンセルにする',
     deleteBtn: '注文を削除',
     restoring: '復元中...',
-    completing: '処理中...',
+    completing: '完了処理中...',
     cancelling: 'キャンセル中...',
     deleting: '削除中...',
-    viewLarge: '大きく表示',
+    viewLarge: '拡大表示',
     closeImage: '閉じる',
-    noImage: '画像なし',
-    noHash: 'トランザクションハッシュを入力してください',
-    pricesTitle: '価格設定',
+    noImage: '支払い証明画像はありません。',
+    noHash: 'ハッシュなし',
+    pricesTitle: '価格とアドレス設定',
     price3m: 'TG Premium 3か月',
     price6m: 'TG Premium 6か月',
     price12m: 'TG Premium 12か月',
     starsRate: 'Stars 単価 (USD)',
+    starsMinAmount: 'Stars 最小購入数',
     saveConfig: '価格を保存',
     configSaving: '保存中...',
     actionSuccess: '操作成功',
-    saveSuccess: '保存成功',
+    saveSuccess: '注文を保存しました',
     configSaveSuccess: '価格を保存しました',
-    loadFailed: '読み込み失敗',
-    actionFailed: '操作失敗',
-    allTimeBoston: 'すべての時間は米国ボストン時間で表示されます。',
+    loadFailed: 'データを読み込めませんでした',
+    actionFailed: '操作に失敗しました',
+    allTimeBoston: 'すべての時刻はボストン時間基準です',
     editOrder: '注文を編集',
-    methodsTitle: '支払い方法',
+    methodsTitle: '支払い方法管理',
     methodsHint:
-      'ここで支払い方法の追加、削除、有効化、無効化、並び替え、編集ができます。支払いページには自動同期されます。',
+      'これらの支払い方法は支払いページに公開表示されます。並び順、表示名、ネットワーク、通貨、アドレスはいつでも変更できます。',
     addMethod: '支払い方法を追加',
     saveMethods: '支払い方法を保存',
     methodsSaving: '保存中...',
     displayName: '表示名',
-    chainName: 'チェーン',
-    tokenName: '通貨',
-    address: 'アドレス',
-    sortOrder: '並び順',
+    chainName: 'ネットワーク名',
+    tokenName: '通貨名',
+    address: '受取アドレス',
+    sortOrder: '表示順',
     enabled: '有効',
     deleteMethod: '削除',
-    methodNamePlaceholder: '例: TON / Toncoin',
-    methodChainPlaceholder: '例: TON',
-    methodTokenPlaceholder: '例: Toncoin',
-    methodsSaveSuccess: '支払い方法を保存しました。',
-    methodDeleteSuccess: '支払い方法を削除しました。',
+    methodNamePlaceholder: '例: TRC20 / USDT',
+    methodChainPlaceholder: '例: TRC20',
+    methodTokenPlaceholder: '例: USDT',
+    methodsSaveSuccess: '支払い方法を保存しました',
+    methodDeleteSuccess: '支払い方法を削除しました',
     methodDeleteConfirm: 'この支払い方法を削除しますか？',
   },
   ko: {
-    title: '관리자 콘솔',
-    subtitle: '주문 관리, 가격 설정, 결제 방식 관리',
+    title: '관리 콘솔',
+    subtitle: '주문 관리, 가격 관리 및 결제 방식 관리',
     checking: '로그인 상태 확인 중...',
-    tabs: { orders: '주문 관리', pricing: '가격 및 결제' },
+    tabs: { orders: '주문', pricing: '가격 및 결제' },
     logout: '로그아웃',
     refreshing: '새로고침 중...',
-    refreshNow: '즉시 새로고침',
+    refreshNow: '지금 새로고침',
     autoRefresh: '자동 새로고침',
-    searchPlaceholder: '이메일 / 주문번호 / 사용자명으로 검색',
+    searchPlaceholder: '이메일 / 주문번호 / 사용자명 검색',
     all: '전체',
-    pending: '미결제',
+    pending: '대기 중',
     paid: '결제됨',
     completed: '완료됨',
     cancelled: '취소됨',
-    noOrders: '주문이 없습니다.',
-    selectHint: '주문이 없습니다.',
+    noOrders: '주문이 없습니다',
+    selectHint: '왼쪽에서 주문을 선택해 상세 내용을 확인하고 수정하세요.',
     orderNo: '주문번호',
     product: '상품',
     amount: '금액',
@@ -570,215 +577,214 @@ const TEXTS: Record<string, UiText> = {
     network: '결제 네트워크',
     txHash: '거래 해시',
     currentStatus: '현재 상태',
-    userNote: '사용자 안내',
-    adminNote: '관리자 메모',
-    saveHint: '주문 정보, 표시 안내, 관리자 메모를 저장합니다.',
-    saveChanges: '변경 저장',
+    userNote: '공개 메모',
+    adminNote: '내부 관리자 메모',
+    saveHint: '저장은 메모와 해시만 갱신합니다. 상태 변경은 아래 액션 버튼을 사용하세요.',
+    saveChanges: '변경사항 저장',
     saving: '저장 중...',
     completedBtn: '완료 처리',
-    restoreBtn: '결제 복구',
-    cancelBtn: '주문 취소',
+    restoreBtn: '결제됨으로 복원',
+    cancelBtn: '취소 처리',
     deleteBtn: '주문 삭제',
-    restoring: '복구 중...',
-    completing: '처리 중...',
+    restoring: '복원 중...',
+    completing: '완료 처리 중...',
     cancelling: '취소 중...',
     deleting: '삭제 중...',
     viewLarge: '크게 보기',
     closeImage: '닫기',
-    noImage: '업로드된 이미지 없음',
-    noHash: '거래 해시를 입력하세요',
-    pricesTitle: '가격 설정',
+    noImage: '결제 증빙 이미지가 없습니다.',
+    noHash: '해시 없음',
+    pricesTitle: '가격 및 주소 설정',
     price3m: 'TG Premium 3개월',
     price6m: 'TG Premium 6개월',
     price12m: 'TG Premium 12개월',
     starsRate: 'Stars 단가 (USD)',
+    starsMinAmount: 'Stars 최소 구매 수량',
     saveConfig: '가격 저장',
     configSaving: '저장 중...',
     actionSuccess: '작업 성공',
-    saveSuccess: '저장 성공',
+    saveSuccess: '주문이 저장되었습니다',
     configSaveSuccess: '가격이 저장되었습니다',
-    loadFailed: '불러오기 실패',
+    loadFailed: '데이터를 불러오지 못했습니다',
     actionFailed: '작업 실패',
-    allTimeBoston: '모든 시간은 미국 보스턴 시간대로 표시됩니다.',
-    editOrder: '주문 편집',
-    methodsTitle: '결제 방식',
+    allTimeBoston: '모든 시간은 보스턴 시간 기준입니다',
+    editOrder: '주문 수정',
+    methodsTitle: '결제 방식 관리',
     methodsHint:
-      '여기서 결제 방식 추가, 삭제, 활성화, 비활성화, 정렬, 편집이 가능합니다. 결제 페이지에 자동 동기화됩니다.',
+      '이 결제 방식들은 결제 페이지에 공개 표시됩니다. 순서, 표시명, 체인, 코인, 주소를 언제든지 수정할 수 있습니다.',
     addMethod: '결제 방식 추가',
     saveMethods: '결제 방식 저장',
     methodsSaving: '저장 중...',
     displayName: '표시 이름',
-    chainName: '체인',
-    tokenName: '코인',
-    address: '주소',
-    sortOrder: '정렬',
+    chainName: '체인 이름',
+    tokenName: '코인 이름',
+    address: '수취 주소',
+    sortOrder: '정렬 순서',
     enabled: '사용',
     deleteMethod: '삭제',
-    methodNamePlaceholder: '예: TON / Toncoin',
-    methodChainPlaceholder: '예: TON',
-    methodTokenPlaceholder: '예: Toncoin',
-    methodsSaveSuccess: '결제 방식이 저장되었습니다.',
-    methodDeleteSuccess: '결제 방식이 삭제되었습니다.',
-    methodDeleteConfirm: '이 결제 방식을 삭제할까요?',
+    methodNamePlaceholder: '예: TRC20 / USDT',
+    methodChainPlaceholder: '예: TRC20',
+    methodTokenPlaceholder: '예: USDT',
+    methodsSaveSuccess: '결제 방식이 저장되었습니다',
+    methodDeleteSuccess: '결제 방식이 삭제되었습니다',
+    methodDeleteConfirm: '이 결제 방식을 삭제하시겠습니까?',
   },
   'zh-cn': {
     title: '后台管理',
-    subtitle: '订单管理、价格设置、支付方式管理',
-    checking: '检查登录状态中...',
+    subtitle: '订单管理、价格管理与支付方式管理',
+    checking: '正在检查登录状态...',
     tabs: { orders: '订单管理', pricing: '价格与支付' },
     logout: '退出登录',
     refreshing: '刷新中...',
     refreshNow: '立即刷新',
     autoRefresh: '自动刷新',
-    searchPlaceholder: '按邮箱 / 订单号 / 用户名搜索',
+    searchPlaceholder: '搜索邮箱 / 订单号 / 用户名',
     all: '全部',
-    pending: '待支付',
+    pending: '待处理',
     paid: '已支付',
     completed: '已完成',
     cancelled: '已取消',
-    noOrders: '暂无订单。',
-    selectHint: '暂无订单。',
+    noOrders: '暂无订单',
+    selectHint: '请先从左侧选择一个订单进行查看和编辑。',
     orderNo: '订单号',
-    product: '产品',
+    product: '商品',
     amount: '金额',
     createdAt: '创建时间',
     username: 'Telegram 用户名',
-    email: '电子邮箱',
+    email: '邮箱',
     network: '支付网络',
     txHash: '交易哈希',
     currentStatus: '当前状态',
-    userNote: '用户可见提示',
-    adminNote: '后台备注',
-    saveHint: '保存订单信息、用户提示与后台备注。',
+    userNote: '用户可见备注',
+    adminNote: '管理员内部备注',
+    saveHint: '保存仅会更新备注和交易哈希。状态切换请使用下方动作按钮。',
     saveChanges: '保存修改',
     saving: '保存中...',
-    completedBtn: '已完成',
-    restoreBtn: '恢复支付',
-    cancelBtn: '取消订单',
+    completedBtn: '标记为已完成',
+    restoreBtn: '恢复为已支付',
+    cancelBtn: '标记为已取消',
     deleteBtn: '删除订单',
-    restoring: '恢复支付中...',
-    completing: '处理中...',
+    restoring: '恢复中...',
+    completing: '完成中...',
     cancelling: '取消中...',
     deleting: '删除中...',
     viewLarge: '查看大图',
     closeImage: '关闭',
-    noImage: '暂无图片凭证',
-    noHash: '请输入交易哈希',
-    pricesTitle: '价格设置',
+    noImage: '暂无付款截图。',
+    noHash: '暂无交易哈希',
+    pricesTitle: '价格与地址配置',
     price3m: 'TG Premium 3个月',
     price6m: 'TG Premium 6个月',
     price12m: 'TG Premium 12个月',
     starsRate: 'Stars 单价（USD）',
+    starsMinAmount: 'Stars 最低购买数量',
     saveConfig: '保存价格',
     configSaving: '保存中...',
     actionSuccess: '操作成功',
-    saveSuccess: '保存成功',
-    configSaveSuccess: '价格已保存',
-    loadFailed: '读取失败',
+    saveSuccess: '订单保存成功',
+    configSaveSuccess: '价格保存成功',
+    loadFailed: '加载数据失败',
     actionFailed: '操作失败',
-    allTimeBoston: '所有时间均按美国波士顿时区显示。',
+    allTimeBoston: '所有时间均按波士顿时区显示',
     editOrder: '编辑订单',
     methodsTitle: '支付方式管理',
     methodsHint:
-      '这里可以新增、删除、启用、停用、排序和编辑支付方式，支付页会自动同步。',
+      '这些支付方式会公开显示在支付页。你可以随时调整顺序、显示名、链名、币种和地址。',
     addMethod: '新增支付方式',
     saveMethods: '保存支付方式',
     methodsSaving: '保存中...',
     displayName: '显示名称',
     chainName: '链名称',
     tokenName: '币种名称',
-    address: '地址',
+    address: '收款地址',
     sortOrder: '排序',
     enabled: '启用',
     deleteMethod: '删除',
-    methodNamePlaceholder: '例如：TON / Toncoin',
-    methodChainPlaceholder: '例如：TON',
-    methodTokenPlaceholder: '例如：Toncoin',
-    methodsSaveSuccess: '支付方式已保存。',
-    methodDeleteSuccess: '支付方式已删除。',
+    methodNamePlaceholder: '例如：TRC20 / USDT',
+    methodChainPlaceholder: '例如：TRC20',
+    methodTokenPlaceholder: '例如：USDT',
+    methodsSaveSuccess: '支付方式保存成功',
+    methodDeleteSuccess: '支付方式删除成功',
     methodDeleteConfirm: '确定删除这个支付方式吗？',
   },
   'zh-tw': {
     title: '後台管理',
-    subtitle: '訂單管理、價格設定、支付方式管理',
-    checking: '檢查登入狀態中...',
+    subtitle: '訂單管理、價格管理與支付方式管理',
+    checking: '正在檢查登入狀態...',
     tabs: { orders: '訂單管理', pricing: '價格與支付' },
-    logout: '退出登入',
-    refreshing: '刷新中...',
-    refreshNow: '立即刷新',
-    autoRefresh: '自動刷新',
-    searchPlaceholder: '按郵箱 / 訂單號 / 用戶名搜尋',
+    logout: '登出',
+    refreshing: '重新整理中...',
+    refreshNow: '立即重新整理',
+    autoRefresh: '自動重新整理',
+    searchPlaceholder: '搜尋電子郵件 / 訂單號 / 用戶名',
     all: '全部',
-    pending: '待支付',
+    pending: '待處理',
     paid: '已支付',
     completed: '已完成',
     cancelled: '已取消',
-    noOrders: '暫無訂單。',
-    selectHint: '暫無訂單。',
+    noOrders: '暫無訂單',
+    selectHint: '請先從左側選擇一筆訂單進行查看與編輯。',
     orderNo: '訂單號',
-    product: '產品',
+    product: '商品',
     amount: '金額',
     createdAt: '建立時間',
     username: 'Telegram 用戶名',
-    email: '電子郵箱',
+    email: '電子郵件',
     network: '支付網路',
-    txHash: '交易哈希',
-    currentStatus: '當前狀態',
-    userNote: '用戶可見提示',
-    adminNote: '後台備註',
-    saveHint: '保存訂單資訊、用戶提示與後台備註。',
-    saveChanges: '保存修改',
-    saving: '保存中...',
-    completedBtn: '已完成',
-    restoreBtn: '恢復支付',
-    cancelBtn: '取消訂單',
+    txHash: '交易雜湊',
+    currentStatus: '目前狀態',
+    userNote: '使用者可見備註',
+    adminNote: '管理員內部備註',
+    saveHint: '儲存僅會更新備註與交易雜湊。狀態切換請使用下方動作按鈕。',
+    saveChanges: '儲存修改',
+    saving: '儲存中...',
+    completedBtn: '標記為已完成',
+    restoreBtn: '恢復為已支付',
+    cancelBtn: '標記為已取消',
     deleteBtn: '刪除訂單',
-    restoring: '恢復支付中...',
-    completing: '處理中...',
+    restoring: '恢復中...',
+    completing: '完成中...',
     cancelling: '取消中...',
     deleting: '刪除中...',
     viewLarge: '查看大圖',
     closeImage: '關閉',
-    noImage: '暫無圖片憑證',
-    noHash: '請輸入交易哈希',
-    pricesTitle: '價格設定',
+    noImage: '暫無付款截圖。',
+    noHash: '暫無交易雜湊',
+    pricesTitle: '價格與地址設定',
     price3m: 'TG Premium 3個月',
     price6m: 'TG Premium 6個月',
     price12m: 'TG Premium 12個月',
     starsRate: 'Stars 單價（USD）',
+    starsMinAmount: 'Stars 最低購買數量',
     saveConfig: '保存價格',
     configSaving: '保存中...',
     actionSuccess: '操作成功',
-    saveSuccess: '保存成功',
-    configSaveSuccess: '價格已保存',
-    loadFailed: '讀取失敗',
+    saveSuccess: '訂單保存成功',
+    configSaveSuccess: '價格保存成功',
+    loadFailed: '載入資料失敗',
     actionFailed: '操作失敗',
-    allTimeBoston: '所有時間均按美國波士頓時區顯示。',
+    allTimeBoston: '所有時間均按波士頓時區顯示',
     editOrder: '編輯訂單',
     methodsTitle: '支付方式管理',
     methodsHint:
-      '這裡可以新增、刪除、啟用、停用、排序和編輯支付方式，支付頁會自動同步。',
+      '這些支付方式會公開顯示在支付頁。你可以隨時調整順序、顯示名稱、鏈名、幣種和地址。',
     addMethod: '新增支付方式',
     saveMethods: '保存支付方式',
     methodsSaving: '保存中...',
     displayName: '顯示名稱',
     chainName: '鏈名稱',
     tokenName: '幣種名稱',
-    address: '地址',
+    address: '收款地址',
     sortOrder: '排序',
     enabled: '啟用',
     deleteMethod: '刪除',
-    methodNamePlaceholder: '例如：TON / Toncoin',
-    methodChainPlaceholder: '例如：TON',
-    methodTokenPlaceholder: '例如：Toncoin',
-    methodsSaveSuccess: '支付方式已保存。',
-    methodDeleteSuccess: '支付方式已刪除。',
+    methodNamePlaceholder: '例如：TRC20 / USDT',
+    methodChainPlaceholder: '例如：TRC20',
+    methodTokenPlaceholder: '例如：USDT',
+    methodsSaveSuccess: '支付方式保存成功',
+    methodDeleteSuccess: '支付方式刪除成功',
     methodDeleteConfirm: '確定刪除這個支付方式嗎？',
   },
-}
-
-function buildText(lang: string) {
-  return TEXTS[lang] || TEXTS.en
 }
 
 function formatBostonTime(value: string | null) {
@@ -799,46 +805,109 @@ function formatBostonTime(value: string | null) {
   }
 }
 
-function getProductLabel(order: OrderItem, text: UiText) {
-  if (order.product_type === 'tg_stars') {
-    return `TG Stars ${order.stars_amount ?? 0}`
-  }
-  if (order.duration === '3m') return text.price3m
-  if (order.duration === '6m') return text.price6m
-  return text.price12m
-}
-
-function getStatusLabel(status: string | null | undefined, text: UiText) {
-  const s = String(status || '').toLowerCase()
-  if (s === 'pending' || s === 'pending_payment') return text.pending
-  if (s === 'paid') return text.paid
-  if (s === 'completed') return text.completed
-  if (s === 'cancelled' || s === 'failed') return text.cancelled
-  return status || '-'
-}
-
 function getStatusClass(status: string | null | undefined) {
-  const s = String(status || '').toLowerCase()
-  if (s === 'pending' || s === 'pending_payment') return 'status pending'
-  if (s === 'paid') return 'status paid'
-  if (s === 'completed') return 'status completed'
-  if (s === 'cancelled' || s === 'failed') return 'status cancelled'
-  return 'status'
+  const value = String(status || '').toLowerCase()
+  if (value === 'completed') return 'completed'
+  if (value === 'paid') return 'paid'
+  if (value === 'cancelled') return 'cancelled'
+  return 'pending'
+}
+
+function getStatusLabel(text: UiText, status: string | null | undefined) {
+  const value = String(status || '').toLowerCase()
+  if (value === 'completed') return text.completed
+  if (value === 'paid') return text.paid
+  if (value === 'cancelled') return text.cancelled
+  return text.pending
+}
+
+function getProductLabel(order: OrderItem, lang: string) {
+  const type = String(order.product_type || '').toLowerCase()
+  if (type.includes('premium')) {
+    const duration = String(order.duration || '')
+    if (lang === 'zh-cn') {
+      if (duration === '3m') return 'TG Premium 3个月'
+      if (duration === '6m') return 'TG Premium 6个月'
+      if (duration === '12m') return 'TG Premium 12个月'
+    }
+    if (lang === 'zh-tw') {
+      if (duration === '3m') return 'TG Premium 3個月'
+      if (duration === '6m') return 'TG Premium 6個月'
+      if (duration === '12m') return 'TG Premium 12個月'
+    }
+    if (lang === 'ja') {
+      if (duration === '3m') return 'TG Premium 3か月'
+      if (duration === '6m') return 'TG Premium 6か月'
+      if (duration === '12m') return 'TG Premium 12か月'
+    }
+    if (lang === 'ko') {
+      if (duration === '3m') return 'TG Premium 3개월'
+      if (duration === '6m') return 'TG Premium 6개월'
+      if (duration === '12m') return 'TG Premium 12개월'
+    }
+    if (lang === 'de') {
+      if (duration === '3m') return 'TG Premium 3 Monate'
+      if (duration === '6m') return 'TG Premium 6 Monate'
+      if (duration === '12m') return 'TG Premium 12 Monate'
+    }
+    if (lang === 'es') {
+      if (duration === '3m') return 'TG Premium 3 meses'
+      if (duration === '6m') return 'TG Premium 6 meses'
+      if (duration === '12m') return 'TG Premium 12 meses'
+    }
+    if (lang === 'fr') {
+      if (duration === '3m') return 'TG Premium 3 mois'
+      if (duration === '6m') return 'TG Premium 6 mois'
+      if (duration === '12m') return 'TG Premium 12 mois'
+    }
+    if (duration === '3m') return 'TG Premium 3 Months'
+    if (duration === '6m') return 'TG Premium 6 Months'
+    if (duration === '12m') return 'TG Premium 12 Months'
+    return 'TG Premium'
+  }
+
+  if (type.includes('stars')) {
+    return `Stars ${order.stars_amount ?? ''}`.trim()
+  }
+
+  return order.product_type || '-'
+}
+
+function buildSearchText(text: UiText, statusFilter: string) {
+  if (statusFilter === 'pending_payment') return text.pending
+  if (statusFilter === 'paid') return text.paid
+  if (statusFilter === 'completed') return text.completed
+  if (statusFilter === 'cancelled') return text.cancelled
+  return text.all
+}
+
+function normalizePaymentMethod(item?: Partial<PaymentMethod>): PaymentMethod {
+  return {
+    id: item?.id,
+    display_name: String(item?.display_name || ''),
+    chain_name: String(item?.chain_name || ''),
+    token_name: String(item?.token_name || ''),
+    address: String(item?.address || ''),
+    sort_order: Number(item?.sort_order ?? 0),
+    is_enabled: item?.is_enabled !== false,
+    updated_at: item?.updated_at ?? null,
+  }
 }
 
 function AdminPageInner() {
-  const router = useRouter()
   const { lang } = useI18n()
-  const text = useMemo(() => buildText(lang), [lang])
+  const router = useRouter()
+  const text = TEXTS[lang] || TEXTS.en
 
-  const [authChecking, setAuthChecking] = useState(true)
   const [tab, setTab] = useState<AdminTab>('orders')
+  const [sessionChecked, setSessionChecked] = useState(false)
+
   const [orders, setOrders] = useState<OrderItem[]>([])
-  const [loadingOrders, setLoadingOrders] = useState(false)
   const [search, setSearch] = useState('')
-  const [statusFilter, setStatusFilter] = useState('all')
+  const [statusFilter, setStatusFilter] = useState<string>('all')
   const [autoRefresh, setAutoRefresh] = useState(true)
   const [selectedOrderNo, setSelectedOrderNo] = useState('')
+
   const [form, setForm] = useState<FormState>({
     username: '',
     email: '',
@@ -853,6 +922,7 @@ function AdminPageInner() {
     premium_6m_price: 17.1,
     premium_12m_price: 31.1,
     stars_rate: 0.02,
+    stars_min_amount: 50,
     trc20_address: '',
     base_address: '',
     ton_address: '',
@@ -889,6 +959,84 @@ function AdminPageInner() {
     })
   }, [])
 
+  const filteredOrders = useMemo(() => {
+    const keyword = search.trim().toLowerCase()
+    return orders.filter((item) => {
+      const matchStatus = statusFilter === 'all' ? true : String(item.status) === statusFilter
+      if (!matchStatus) return false
+      if (!keyword) return true
+
+      const combined = [
+        item.order_no,
+        item.username || '',
+        item.email || '',
+        item.product_type || '',
+        item.payment_network || '',
+        item.tx_hash || '',
+      ]
+        .join(' ')
+        .toLowerCase()
+
+      return combined.includes(keyword)
+    })
+  }, [orders, search, statusFilter])
+
+  const ensureSelection = useCallback(
+    (list: OrderItem[]) => {
+      if (!list.length) {
+        setSelectedOrderNo('')
+        syncFormFromOrder(null)
+        return
+      }
+
+      const target =
+        list.find((item) => item.order_no === selectedOrderNo) || list[0]
+
+      setSelectedOrderNo(target.order_no)
+      syncFormFromOrder(target)
+    },
+    [selectedOrderNo, syncFormFromOrder]
+  )
+
+  const checkSession = useCallback(async () => {
+    const res = await fetch(API.session, {
+      method: 'GET',
+      credentials: 'include',
+      cache: 'no-store',
+    })
+    const data = await readJsonSafe(res)
+
+    if (!res.ok || !data?.ok) {
+      router.replace('/admin/login')
+      return false
+    }
+
+    setSessionChecked(true)
+    return true
+  }, [router])
+
+  const loadOrders = useCallback(async () => {
+    try {
+      setPageError('')
+      const params = new URLSearchParams()
+      params.set('t', Date.now().toString())
+
+      const res = await fetch(`${API.orders}?${params.toString()}`, {
+        method: 'GET',
+        credentials: 'include',
+        cache: 'no-store',
+      })
+      const data = await readJsonSafe(res)
+      if (!res.ok) throw new Error(data?.error || text.loadFailed)
+
+      const list = Array.isArray(data?.orders) ? data.orders : []
+      setOrders(list)
+      ensureSelection(list)
+    } catch (err) {
+      setPageError(err instanceof Error ? err.message : text.loadFailed)
+    }
+  }, [ensureSelection, text.loadFailed])
+
   const loadSiteConfig = useCallback(async () => {
     try {
       const res = await fetch(API.settings, {
@@ -905,6 +1053,7 @@ function AdminPageInner() {
           premium_6m_price: Number(data.item.premium_6m_price ?? 17.1),
           premium_12m_price: Number(data.item.premium_12m_price ?? 31.1),
           stars_rate: Number(data.item.stars_rate ?? 0.02),
+          stars_min_amount: Number(data.item.stars_min_amount ?? 50),
           trc20_address: String(data.item.trc20_address ?? ''),
           base_address: String(data.item.base_address ?? ''),
           ton_address: String(data.item.ton_address ?? ''),
@@ -933,128 +1082,82 @@ function AdminPageInner() {
     }
   }, [text.loadFailed])
 
-  const loadOrders = useCallback(
-    async (silent = false) => {
-      try {
-        if (!silent) setLoadingOrders(true)
-
-        const params = new URLSearchParams()
-        if (search.trim()) params.set('q', search.trim())
-        if (statusFilter !== 'all') params.set('status', statusFilter)
-        params.set('page', '1')
-        params.set('page_size', '50')
-
-        const res = await fetch(`${API.orders}?${params.toString()}`, {
-          method: 'GET',
-          credentials: 'include',
-          cache: 'no-store',
-        })
-
-        const data = await readJsonSafe(res)
-
-        if (res.status === 401) {
-          router.replace(`/admin/login?lang=${lang}`)
-          return
-        }
-
-        if (!res.ok) throw new Error(data?.error || text.loadFailed)
-
-        const nextOrders: OrderItem[] = Array.isArray(data?.items) ? data.items : []
-        setOrders(nextOrders)
-
-        if (!selectedOrderNo && nextOrders[0]) {
-          setSelectedOrderNo(nextOrders[0].order_no)
-          syncFormFromOrder(nextOrders[0])
-          return
-        }
-
-        if (selectedOrderNo) {
-          const nextSelected = nextOrders.find((item) => item.order_no === selectedOrderNo) || null
-          if (nextSelected) {
-            syncFormFromOrder(nextSelected)
-          } else {
-            setSelectedOrderNo(nextOrders[0]?.order_no || '')
-            syncFormFromOrder(nextOrders[0] || null)
-          }
-        }
-      } catch (err) {
-        setPageError(err instanceof Error ? err.message : text.loadFailed)
-      } finally {
-        if (!silent) setLoadingOrders(false)
-      }
-    },
-    [lang, router, search, selectedOrderNo, statusFilter, syncFormFromOrder, text.loadFailed]
-  )
-
   useEffect(() => {
-    let active = true
+    let cancelled = false
 
-    async function bootstrap() {
-      try {
-        const res = await fetch(API.session, {
-          method: 'GET',
-          credentials: 'include',
-          cache: 'no-store',
-        })
-
-        const data = await readJsonSafe(res)
-        if (!active) return
-
-        if (!data?.authenticated) {
-          router.replace(`/admin/login?lang=${lang}`)
-          return
-        }
-
-        setAuthChecking(false)
-      } catch {
-        router.replace(`/admin/login?lang=${lang}`)
-      }
-    }
-
-    bootstrap()
+    ;(async () => {
+      const ok = await checkSession()
+      if (!ok || cancelled) return
+      await Promise.all([loadOrders(), loadSiteConfig(), loadPaymentMethods()])
+    })()
 
     return () => {
-      active = false
+      cancelled = true
     }
-  }, [lang, router])
+  }, [checkSession, loadOrders, loadSiteConfig, loadPaymentMethods])
 
   useEffect(() => {
-    if (authChecking) return
-    loadOrders()
-    loadSiteConfig()
-    loadPaymentMethods()
-  }, [authChecking, loadOrders, loadSiteConfig, loadPaymentMethods])
-
-  useEffect(() => {
-    if (authChecking || !autoRefresh) return
+    if (!sessionChecked || !autoRefresh || tab !== 'orders') return
     const timer = window.setInterval(() => {
-      loadOrders(true)
-    }, 15000)
+      loadOrders()
+    }, 10000)
     return () => window.clearInterval(timer)
-  }, [authChecking, autoRefresh, loadOrders])
+  }, [sessionChecked, autoRefresh, tab, loadOrders])
 
-  function pickOrder(order: OrderItem) {
-    setSelectedOrderNo(order.order_no)
-    syncFormFromOrder(order)
-    setOrderNotice(null)
+  useEffect(() => {
+    syncFormFromOrder(selectedOrder)
+  }, [selectedOrder, syncFormFromOrder])
+
+  const handleLogout = async () => {
+    try {
+      await fetch(API.logout, {
+        method: 'POST',
+        credentials: 'include',
+      })
+    } finally {
+      router.replace('/admin/login')
+    }
   }
 
-  function setNotice(
-    setter: React.Dispatch<React.SetStateAction<Notice>>,
-    type: NoticeType,
-    message: string
-  ) {
-    setter({ type, text: message })
-    window.setTimeout(() => {
-      setter((current) => (current?.text === message ? null : current))
-    }, 2800)
-  }
-
-  async function saveOrder() {
+  const saveOrder = async () => {
     if (!selectedOrder) return
 
     try {
       setSaveLoading(true)
+      setOrderNotice(null)
+      const res = await fetch(API.orders, {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          order_no: selectedOrder.order_no,
+          tx_hash: form.tx_hash,
+          public_note: form.public_note,
+          admin_note: form.admin_note,
+        }),
+      })
+      const data = await readJsonSafe(res)
+      if (!res.ok) throw new Error(data?.error || text.actionFailed)
+
+      setOrderNotice({ type: 'success', text: text.saveSuccess })
+      await loadOrders()
+    } catch (err) {
+      setOrderNotice({
+        type: 'error',
+        text: err instanceof Error ? err.message : text.actionFailed,
+      })
+    } finally {
+      setSaveLoading(false)
+    }
+  }
+
+  const updateOrderStatus = async (status: 'completed' | 'paid' | 'cancelled') => {
+    if (!selectedOrder) return
+
+    try {
+      if (status === 'completed') setActionLoading('complete')
+      if (status === 'paid') setActionLoading('restore')
+      if (status === 'cancelled') setActionLoading('cancel')
       setOrderNotice(null)
 
       const res = await fetch(API.orders, {
@@ -1063,81 +1166,55 @@ function AdminPageInner() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           order_no: selectedOrder.order_no,
-          username: form.username.trim(),
-          email: form.email.trim(),
-          payment_network: form.payment_network.trim(),
-          tx_hash: form.tx_hash.trim(),
-          public_note: form.public_note.trim(),
-          admin_note: form.admin_note.trim(),
+          status,
         }),
       })
-
       const data = await readJsonSafe(res)
       if (!res.ok) throw new Error(data?.error || text.actionFailed)
 
-      await loadOrders(true)
-      setNotice(setOrderNotice, 'success', text.saveSuccess)
+      setOrderNotice({ type: 'success', text: text.actionSuccess })
+      await loadOrders()
     } catch (err) {
-      setNotice(setOrderNotice, 'error', err instanceof Error ? err.message : text.actionFailed)
-    } finally {
-      setSaveLoading(false)
-    }
-  }
-
-  async function runOrderAction(kind: 'complete' | 'restore' | 'cancel' | 'delete') {
-    if (!selectedOrder) return
-
-    try {
-      setActionLoading(kind)
-      setOrderNotice(null)
-
-      let res: Response
-
-      if (kind === 'delete') {
-        res = await fetch(API.orders, {
-          method: 'DELETE',
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ order_no: selectedOrder.order_no }),
-        })
-      } else {
-        res = await fetch(API.orders, {
-          method: 'POST',
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            order_no: selectedOrder.order_no,
-            action:
-              kind === 'complete'
-                ? 'completed'
-                : kind === 'restore'
-                  ? 'restore_paid'
-                  : 'cancelled',
-          }),
-        })
-      }
-
-      const data = await readJsonSafe(res)
-      if (!res.ok) throw new Error(data?.error || text.actionFailed)
-
-      if (kind === 'delete') {
-        const next = orders.filter((item) => item.order_no !== selectedOrder.order_no)
-        setOrders(next)
-        setSelectedOrderNo(next[0]?.order_no || '')
-        syncFormFromOrder(next[0] || null)
-      } else {
-        await loadOrders(true)
-      }
-
-      setNotice(setOrderNotice, 'success', text.actionSuccess)
-    } catch (err) {
-      setNotice(setOrderNotice, 'error', err instanceof Error ? err.message : text.actionFailed)
+      setOrderNotice({
+        type: 'error',
+        text: err instanceof Error ? err.message : text.actionFailed,
+      })
     } finally {
       setActionLoading(null)
     }
   }
 
-  async function saveSiteConfig() {
+  const deleteOrder = async () => {
+    if (!selectedOrder) return
+
+    try {
+      setActionLoading('delete')
+      setOrderNotice(null)
+
+      const res = await fetch(API.orders, {
+        method: 'DELETE',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          order_no: selectedOrder.order_no,
+        }),
+      })
+      const data = await readJsonSafe(res)
+      if (!res.ok) throw new Error(data?.error || text.actionFailed)
+
+      setOrderNotice({ type: 'success', text: text.actionSuccess })
+      await loadOrders()
+    } catch (err) {
+      setOrderNotice({
+        type: 'error',
+        text: err instanceof Error ? err.message : text.actionFailed,
+      })
+    } finally {
+      setActionLoading(null)
+    }
+  }
+
+  const saveSiteConfig = async () => {
     try {
       setConfigLoading(true)
       setConfigNotice(null)
@@ -1148,116 +1225,97 @@ function AdminPageInner() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(siteConfig),
       })
-
       const data = await readJsonSafe(res)
       if (!res.ok) throw new Error(data?.error || text.actionFailed)
 
-      setNotice(setConfigNotice, 'success', text.configSaveSuccess)
+      setConfigNotice({ type: 'success', text: text.configSaveSuccess })
+      await loadSiteConfig()
     } catch (err) {
-      setNotice(setConfigNotice, 'error', err instanceof Error ? err.message : text.actionFailed)
+      setConfigNotice({
+        type: 'error',
+        text: err instanceof Error ? err.message : text.actionFailed,
+      })
     } finally {
       setConfigLoading(false)
     }
   }
 
-  function createEmptyMethod(nextOrder: number): PaymentMethod {
-    return {
-      display_name: '',
-      chain_name: '',
-      token_name: '',
-      address: '',
-      sort_order: nextOrder,
-      is_enabled: true,
-    }
-  }
-
-  function addPaymentMethod() {
-    const nextOrder =
-      paymentMethods.length > 0
-        ? Math.max(...paymentMethods.map((item) => Number(item.sort_order || 0))) + 1
-        : 1
-
-    setPaymentMethods((prev) => [...prev, createEmptyMethod(nextOrder)])
-    setMethodNotice(null)
-  }
-
-  function updatePaymentMethod(index: number, patch: Partial<PaymentMethod>) {
+  const updatePaymentMethod = (index: number, patch: Partial<PaymentMethod>) => {
     setPaymentMethods((prev) =>
-      prev.map((item, itemIndex) => {
-        if (itemIndex !== index) return item
-
-        const next = { ...item, ...patch }
-
-        if (patch.chain_name !== undefined || patch.token_name !== undefined) {
-          const originalAutoName =
-            item.display_name.trim() === '' ||
-            item.display_name.trim() === `${item.chain_name} / ${item.token_name}`
-
-          if (originalAutoName) {
-            next.display_name = `${next.chain_name} / ${next.token_name}`.trim()
-          }
-        }
-
-        return next
-      })
+      prev.map((item, i) =>
+        i === index
+          ? {
+              ...item,
+              ...patch,
+            }
+          : item
+      )
     )
   }
 
-  async function saveAllPaymentMethods() {
+  const addPaymentMethod = () => {
+    setPaymentMethods((prev) => [
+      ...prev,
+      normalizePaymentMethod({
+        display_name: '',
+        chain_name: '',
+        token_name: '',
+        address: '',
+        sort_order: prev.length + 1,
+        is_enabled: true,
+      }),
+    ])
+  }
+
+  const saveAllPaymentMethods = async () => {
     try {
       setMethodsSaving(true)
       setMethodNotice(null)
 
-      for (const method of paymentMethods) {
-        const payload = {
-          id: method.id,
-          display_name:
-            method.display_name.trim() ||
-            `${method.chain_name.trim()} / ${method.token_name.trim()}`,
-          chain_name: method.chain_name.trim(),
-          token_name: method.token_name.trim(),
-          address: method.address.trim(),
-          sort_order: Number(method.sort_order || 0),
-          is_enabled: Boolean(method.is_enabled),
-        }
+      const normalized = paymentMethods.map((item) => ({
+        id: item.id,
+        display_name: String(item.display_name || '').trim(),
+        chain_name: String(item.chain_name || '').trim(),
+        token_name: String(item.token_name || '').trim(),
+        address: String(item.address || '').trim(),
+        sort_order: Number(item.sort_order || 0),
+        is_enabled: Boolean(item.is_enabled),
+      }))
 
-        if (!payload.chain_name || !payload.token_name || !payload.address) {
-          throw new Error(text.actionFailed)
-        }
+      const res = await fetch(API.paymentMethods, {
+        method: 'PUT',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ items: normalized }),
+      })
+      const data = await readJsonSafe(res)
+      if (!res.ok) throw new Error(data?.error || text.actionFailed)
 
-        const res = await fetch(API.paymentMethods, {
-          method: method.id ? 'PATCH' : 'POST',
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        })
-
-        const data = await readJsonSafe(res)
-        if (!res.ok) throw new Error(data?.error || text.actionFailed)
-      }
-
+      setMethodNotice({ type: 'success', text: text.methodsSaveSuccess })
       await loadPaymentMethods()
-      setNotice(setMethodNotice, 'success', text.methodsSaveSuccess)
     } catch (err) {
-      setNotice(setMethodNotice, 'error', err instanceof Error ? err.message : text.actionFailed)
+      setMethodNotice({
+        type: 'error',
+        text: err instanceof Error ? err.message : text.actionFailed,
+      })
     } finally {
       setMethodsSaving(false)
     }
   }
 
-  async function deletePaymentMethod(item: PaymentMethod, index: number) {
-    const ok = window.confirm(text.methodDeleteConfirm)
-    if (!ok) return
-
-    if (!item.id) {
-      setPaymentMethods((prev) => prev.filter((_, i) => i !== index))
-      setNotice(setMethodNotice, 'success', text.methodDeleteSuccess)
-      return
-    }
+  const deletePaymentMethod = async (item: PaymentMethod, index: number) => {
+    const confirmed = window.confirm(text.methodDeleteConfirm)
+    if (!confirmed) return
 
     try {
       setMethodsSaving(true)
       setMethodNotice(null)
+
+      if (!item.id) {
+        setPaymentMethods((prev) => prev.filter((_, i) => i !== index))
+        setMethodNotice({ type: 'success', text: text.methodDeleteSuccess })
+        return
+      }
 
       const res = await fetch(API.paymentMethods, {
         method: 'DELETE',
@@ -1265,39 +1323,23 @@ function AdminPageInner() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: item.id }),
       })
-
       const data = await readJsonSafe(res)
       if (!res.ok) throw new Error(data?.error || text.actionFailed)
 
+      setMethodNotice({ type: 'success', text: text.methodDeleteSuccess })
       await loadPaymentMethods()
-      setNotice(setMethodNotice, 'success', text.methodDeleteSuccess)
     } catch (err) {
-      setNotice(setMethodNotice, 'error', err instanceof Error ? err.message : text.actionFailed)
+      setMethodNotice({
+        type: 'error',
+        text: err instanceof Error ? err.message : text.actionFailed,
+      })
     } finally {
       setMethodsSaving(false)
     }
   }
 
-  async function logout() {
-    try {
-      await fetch(API.logout, {
-        method: 'POST',
-        credentials: 'include',
-      })
-    } finally {
-      router.replace(`/admin/login?lang=${lang}`)
-    }
-  }
-
-  if (authChecking) {
-    return (
-      <main className="admin-shell">
-        <div className="admin-panel small-panel">
-          <div className="loading-card">{text.checking}</div>
-          <style>{`${globalThemeStyles}\n${styles}`}</style>
-        </div>
-      </main>
-    )
+  if (!sessionChecked) {
+    return <PageFallback />
   }
 
   return (
@@ -1307,15 +1349,12 @@ function AdminPageInner() {
           <div>
             <h1 className="hero-title">{text.title}</h1>
             <p className="hero-subtitle">{text.subtitle}</p>
-            <p className="hero-subtitle" style={{ marginTop: 18 }}>
-              {text.allTimeBoston}
-            </p>
           </div>
 
           <div className="hero-actions-wrap">
             <div className="hero-actions-row">
               <LanguageSwitcher size="hero" fullWidth />
-              <button type="button" className="logout-btn" onClick={logout}>
+              <button type="button" className="logout-btn" onClick={handleLogout}>
                 {text.logout}
               </button>
             </div>
@@ -1351,24 +1390,12 @@ function AdminPageInner() {
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder={text.searchPlaceholder}
                 />
-                <button type="button" className="small-btn" onClick={() => loadOrders()}>
-                  {loadingOrders ? text.refreshing : text.refreshNow}
+                <button type="button" className="small-btn" onClick={loadOrders}>
+                  {text.refreshNow}
                 </button>
               </div>
 
               <div className="filter-row">
-                <select
-                  className="input"
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                >
-                  <option value="all">{text.all}</option>
-                  <option value="pending_payment">{text.pending}</option>
-                  <option value="paid">{text.paid}</option>
-                  <option value="completed">{text.completed}</option>
-                  <option value="cancelled">{text.cancelled}</option>
-                </select>
-
                 <label className="checkbox-row">
                   <input
                     type="checkbox"
@@ -1377,25 +1404,43 @@ function AdminPageInner() {
                   />
                   <span>{text.autoRefresh}</span>
                 </label>
+
+                <div className="tabs-row">
+                  {(['all', 'pending_payment', 'paid', 'completed', 'cancelled'] as const).map((value) => (
+                    <button
+                      key={value}
+                      type="button"
+                      className={`tab-btn ${statusFilter === value ? 'active' : ''}`}
+                      onClick={() => setStatusFilter(value)}
+                    >
+                      {buildSearchText(text, value)}
+                    </button>
+                  ))}
+                </div>
               </div>
+
+              <div className="small-note">{text.allTimeBoston}</div>
             </section>
 
             <section className="card order-list-card">
-              {orders.length === 0 ? (
+              {filteredOrders.length === 0 ? (
                 <div className="empty-text">{text.noOrders}</div>
               ) : (
-                orders.map((order) => (
+                filteredOrders.map((order) => (
                   <button
                     key={order.order_no}
                     type="button"
-                    onClick={() => pickOrder(order)}
                     className={`order-item ${selectedOrderNo === order.order_no ? 'active' : ''}`}
+                    onClick={() => {
+                      setSelectedOrderNo(order.order_no)
+                      syncFormFromOrder(order)
+                    }}
                   >
                     <div className="order-item-title">{order.order_no}</div>
                     <div className="order-item-sub">{order.email || '-'}</div>
-                    <div className="order-item-sub">{getProductLabel(order, text)}</div>
-                    <div className={getStatusClass(order.status)}>
-                      {getStatusLabel(order.status, text)}
+                    <div className="order-item-sub">{getProductLabel(order, lang)}</div>
+                    <div className={`status ${getStatusClass(order.status)}`}>
+                      {getStatusLabel(text, order.status)}
                     </div>
                   </button>
                 ))
@@ -1403,171 +1448,191 @@ function AdminPageInner() {
             </section>
 
             <section className="card editor-card">
-              <h2 className="section-title">{text.editOrder}</h2>
-
-              {selectedOrder ? (
+              {!selectedOrder ? (
+                <div className="empty-text">{text.selectHint}</div>
+              ) : (
                 <>
+                  <h2 className="section-title">{text.editOrder}</h2>
+
                   <div className="meta-grid">
                     <div>
                       <span className="meta-label">{text.orderNo}:</span> {selectedOrder.order_no}
                     </div>
                     <div>
-                      <span className="meta-label">{text.product}:</span> {getProductLabel(selectedOrder, text)}
+                      <span className="meta-label">{text.product}:</span>{' '}
+                      {getProductLabel(selectedOrder, lang)}
                     </div>
                     <div>
                       <span className="meta-label">{text.amount}:</span> $
                       {selectedOrder.price_usd ?? selectedOrder.amount ?? 0}
                     </div>
                     <div>
-                      <span className="meta-label">{text.createdAt}:</span> {formatBostonTime(selectedOrder.created_at)}
+                      <span className="meta-label">{text.createdAt}:</span>{' '}
+                      {formatBostonTime(selectedOrder.created_at)}
                     </div>
                   </div>
 
                   <div className="form-grid">
-                    <input
-                      className="input"
-                      value={form.username}
-                      onChange={(e) => setForm((prev) => ({ ...prev, username: e.target.value }))}
-                      placeholder={text.username}
-                    />
-                    <input
-                      className="input"
-                      value={form.email}
-                      onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
-                      placeholder={text.email}
-                    />
-                    <input
-                      className="input"
-                      value={form.payment_network}
-                      onChange={(e) => setForm((prev) => ({ ...prev, payment_network: e.target.value }))}
-                      placeholder={text.network}
-                    />
-                  </div>
+                    <label className="setting-field">
+                      <span>{text.username}</span>
+                      <input
+                        className="input"
+                        value={form.username}
+                        onChange={(e) => setForm((prev) => ({ ...prev, username: e.target.value }))}
+                      />
+                    </label>
 
-                  <div className="readonly-status-row">
-                    <span className="meta-label">{text.currentStatus}:</span>
-                    <span className={getStatusClass(selectedOrder.status)}>
-                      {getStatusLabel(selectedOrder.status, text)}
-                    </span>
-                  </div>
+                    <label className="setting-field">
+                      <span>{text.email}</span>
+                      <input
+                        className="input"
+                        value={form.email}
+                        onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
+                      />
+                    </label>
 
-                  <div className="preview-box">
-                    {selectedOrder.proof_image_base64 ? (
-                      <>
-                        <img
-                          src={selectedOrder.proof_image_base64}
-                          alt="payment proof"
-                          className="proof-image"
-                        />
-                        <button
-                          type="button"
-                          className="secondary-wide-btn"
-                          onClick={() => setPreviewImage(selectedOrder.proof_image_base64 || '')}
-                        >
-                          {text.viewLarge}
-                        </button>
-                      </>
-                    ) : (
-                      <div className="empty-text">{text.noImage}</div>
-                    )}
-                  </div>
+                    <label className="setting-field">
+                      <span>{text.network}</span>
+                      <input
+                        className="input"
+                        value={form.payment_network}
+                        onChange={(e) =>
+                          setForm((prev) => ({ ...prev, payment_network: e.target.value }))
+                        }
+                      />
+                    </label>
 
-                  <div className="hash-box">
-                    <div className="field-label">{text.txHash}</div>
-                    <textarea
-                      className="textarea mono"
-                      value={form.tx_hash}
-                      onChange={(e) => setForm((prev) => ({ ...prev, tx_hash: e.target.value }))}
-                      placeholder={text.noHash}
-                      rows={4}
-                    />
-                  </div>
+                    <label className="setting-field">
+                      <span>{text.txHash}</span>
+                      <input
+                        className="input mono"
+                        value={form.tx_hash}
+                        onChange={(e) => setForm((prev) => ({ ...prev, tx_hash: e.target.value }))}
+                      />
+                    </label>
 
-                  <div className="preview-note-box">
-                    <div className="field-label">{text.userNote}</div>
-                    <textarea
-                      className="textarea"
-                      value={form.public_note}
-                      onChange={(e) => setForm((prev) => ({ ...prev, public_note: e.target.value }))}
-                      placeholder={text.userNote}
-                      rows={4}
-                    />
-                  </div>
+                    <div className="readonly-status-row">
+                      <span className="field-label">{text.currentStatus}</span>
+                      <div className={`status ${getStatusClass(selectedOrder.status)}`}>
+                        {getStatusLabel(text, selectedOrder.status)}
+                      </div>
+                    </div>
 
-                  <div className="preview-note-box">
-                    <div className="field-label">{text.adminNote}</div>
-                    <textarea
-                      className="textarea"
-                      value={form.admin_note}
-                      onChange={(e) => setForm((prev) => ({ ...prev, admin_note: e.target.value }))}
-                      placeholder={text.adminNote}
-                      rows={4}
-                    />
-                  </div>
+                    <label className="setting-field">
+                      <span>{text.userNote}</span>
+                      <textarea
+                        className="textarea"
+                        rows={4}
+                        value={form.public_note}
+                        onChange={(e) =>
+                          setForm((prev) => ({ ...prev, public_note: e.target.value }))
+                        }
+                      />
+                    </label>
 
-                  <div className="save-hint">{text.saveHint}</div>
+                    <label className="setting-field">
+                      <span>{text.adminNote}</span>
+                      <textarea
+                        className="textarea"
+                        rows={4}
+                        value={form.admin_note}
+                        onChange={(e) =>
+                          setForm((prev) => ({ ...prev, admin_note: e.target.value }))
+                        }
+                      />
+                    </label>
 
-                  <button
-                    type="button"
-                    className="primary-btn"
-                    onClick={saveOrder}
-                    disabled={saveLoading || actionLoading !== null}
-                  >
-                    {saveLoading ? text.saving : text.saveChanges}
-                  </button>
-
-                  {orderNotice ? (
-                    <div className={`inline-notice ${orderNotice.type}`}>{orderNotice.text}</div>
-                  ) : null}
-
-                  <div className="action-grid">
-                    <button
-                      type="button"
-                      className={`admin-action-btn admin-action-complete ${
-                        actionLoading === 'complete' ? 'loading' : ''
-                      }`}
-                      disabled={saveLoading || actionLoading !== null}
-                      onClick={() => runOrderAction('complete')}
-                    >
-                      {actionLoading === 'complete' ? text.completing : text.completedBtn}
-                    </button>
+                    <div className="save-hint">{text.saveHint}</div>
 
                     <button
                       type="button"
-                      className={`admin-action-btn admin-action-restore ${
-                        actionLoading === 'restore' ? 'loading' : ''
-                      }`}
-                      disabled={saveLoading || actionLoading !== null}
-                      onClick={() => runOrderAction('restore')}
+                      className="primary-btn"
+                      onClick={saveOrder}
+                      disabled={saveLoading}
                     >
-                      {actionLoading === 'restore' ? text.restoring : text.restoreBtn}
+                      {saveLoading ? text.saving : text.saveChanges}
                     </button>
 
-                    <button
-                      type="button"
-                      className={`admin-action-btn admin-action-cancel ${
-                        actionLoading === 'cancel' ? 'loading' : ''
-                      }`}
-                      disabled={saveLoading || actionLoading !== null}
-                      onClick={() => runOrderAction('cancel')}
-                    >
-                      {actionLoading === 'cancel' ? text.cancelling : text.cancelBtn}
-                    </button>
+                    {orderNotice ? (
+                      <div className={`inline-notice ${orderNotice.type}`}>{orderNotice.text}</div>
+                    ) : null}
 
-                    <button
-                      type="button"
-                      className={`admin-action-btn admin-action-delete ${
-                        actionLoading === 'delete' ? 'loading' : ''
-                      }`}
-                      disabled={saveLoading || actionLoading !== null}
-                      onClick={() => runOrderAction('delete')}
-                    >
-                      {actionLoading === 'delete' ? text.deleting : text.deleteBtn}
-                    </button>
+                    <div className="preview-box">
+                      <span className="field-label">{text.txHash}</span>
+                      <div className="hash-box mono">
+                        {selectedOrder.tx_hash || form.tx_hash || text.noHash}
+                      </div>
+                    </div>
+
+                    <div className="preview-box">
+                      <span className="field-label">Proof Image</span>
+                      {selectedOrder.proof_image_base64 ? (
+                        <>
+                          <img
+                            src={selectedOrder.proof_image_base64}
+                            alt="payment proof preview"
+                            className="proof-image"
+                          />
+                          <button
+                            type="button"
+                            className="secondary-wide-btn"
+                            onClick={() => setPreviewImage(selectedOrder.proof_image_base64 || '')}
+                          >
+                            {text.viewLarge}
+                          </button>
+                        </>
+                      ) : (
+                        <div className="preview-note-box">{text.noImage}</div>
+                      )}
+                    </div>
+
+                    <div className="action-grid">
+                      <button
+                        type="button"
+                        className={`admin-action-btn admin-action-complete ${
+                          actionLoading === 'complete' ? 'loading' : ''
+                        }`}
+                        onClick={() => updateOrderStatus('completed')}
+                        disabled={actionLoading !== null}
+                      >
+                        {actionLoading === 'complete' ? text.completing : text.completedBtn}
+                      </button>
+
+                      <button
+                        type="button"
+                        className={`admin-action-btn admin-action-restore ${
+                          actionLoading === 'restore' ? 'loading' : ''
+                        }`}
+                        onClick={() => updateOrderStatus('paid')}
+                        disabled={actionLoading !== null}
+                      >
+                        {actionLoading === 'restore' ? text.restoring : text.restoreBtn}
+                      </button>
+
+                      <button
+                        type="button"
+                        className={`admin-action-btn admin-action-cancel ${
+                          actionLoading === 'cancel' ? 'loading' : ''
+                        }`}
+                        onClick={() => updateOrderStatus('cancelled')}
+                        disabled={actionLoading !== null}
+                      >
+                        {actionLoading === 'cancel' ? text.cancelling : text.cancelBtn}
+                      </button>
+
+                      <button
+                        type="button"
+                        className={`admin-action-btn admin-action-delete ${
+                          actionLoading === 'delete' ? 'loading' : ''
+                        }`}
+                        onClick={deleteOrder}
+                        disabled={actionLoading !== null}
+                      >
+                        {actionLoading === 'delete' ? text.deleting : text.deleteBtn}
+                      </button>
+                    </div>
                   </div>
                 </>
-              ) : (
-                <div className="empty-text">{text.selectHint}</div>
               )}
             </section>
           </div>
@@ -1637,6 +1702,23 @@ function AdminPageInner() {
                     setSiteConfig((prev) => ({
                       ...prev,
                       stars_rate: Number(e.target.value || 0),
+                    }))
+                  }
+                />
+              </label>
+
+              <label className="setting-field">
+                <span>{text.starsMinAmount}</span>
+                <input
+                  className="input"
+                  type="number"
+                  step="1"
+                  min="1"
+                  value={siteConfig.stars_min_amount}
+                  onChange={(e) =>
+                    setSiteConfig((prev) => ({
+                      ...prev,
+                      stars_min_amount: Number(e.target.value || 0),
                     }))
                   }
                 />
