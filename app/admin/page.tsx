@@ -114,6 +114,7 @@ type UiText = {
   noImage: string
   noHash: string
   pricesTitle: string
+  pricesHint: string
   price3m: string
   price6m: string
   price12m: string
@@ -149,23 +150,29 @@ type UiText = {
 }
 
 async function readJsonSafe(res: Response) {
+  const contentType = res.headers.get('content-type') || ''
   const raw = await res.text()
+
+  if (!contentType.includes('application/json')) {
+    throw new Error(`接口没有返回 JSON（状态 ${res.status}）`)
+  }
+
   try {
     return JSON.parse(raw)
   } catch {
-    throw new Error(`接口没有返回 JSON（状态 ${res.status}）`)
+    throw new Error(`接口 JSON 解析失败（状态 ${res.status}）`)
   }
 }
 
 const TEXTS: Record<string, UiText> = {
   en: {
     title: 'Admin Console',
-    subtitle: 'Order management, pricing, and payment method administration',
+    subtitle: 'Manage orders, pricing, and payment methods in one place.',
     checking: 'Checking sign-in status...',
     tabs: { orders: 'Orders', pricing: 'Pricing & Payment' },
     logout: 'Sign out',
     refreshing: 'Refreshing...',
-    refreshNow: 'Refresh now',
+    refreshNow: 'Refresh',
     autoRefresh: 'Auto refresh',
     searchPlaceholder: 'Search by email / order no / username',
     all: 'All',
@@ -174,7 +181,7 @@ const TEXTS: Record<string, UiText> = {
     completed: 'Completed',
     cancelled: 'Cancelled',
     noOrders: 'No orders found',
-    selectHint: 'Select an order from the left to review and edit.',
+    selectHint: 'Select an order from the list to review and edit.',
     orderNo: 'Order No',
     product: 'Product',
     amount: 'Amount',
@@ -186,12 +193,12 @@ const TEXTS: Record<string, UiText> = {
     currentStatus: 'Current Status',
     userNote: 'Public Note',
     adminNote: 'Internal Admin Note',
-    saveHint: 'Save only writes note and hash changes. Use the action buttons below for status transitions.',
+    saveHint: 'Save updates notes and hash only. Use action buttons for status changes.',
     saveChanges: 'Save Changes',
     saving: 'Saving...',
-    completedBtn: 'Mark as completed',
-    restoreBtn: 'Mark as paid',
-    cancelBtn: 'Mark as cancelled',
+    completedBtn: 'Mark completed',
+    restoreBtn: 'Mark paid',
+    cancelBtn: 'Mark cancelled',
     deleteBtn: 'Delete order',
     restoring: 'Restoring...',
     completing: 'Completing...',
@@ -202,6 +209,7 @@ const TEXTS: Record<string, UiText> = {
     noImage: 'No payment proof image available.',
     noHash: 'No hash provided',
     pricesTitle: 'Pricing settings',
+    pricesHint: 'Update product pricing and the minimum purchase amount for Stars.',
     price3m: 'TG Premium 3 Months',
     price6m: 'TG Premium 6 Months',
     price12m: 'TG Premium 12 Months',
@@ -216,11 +224,11 @@ const TEXTS: Record<string, UiText> = {
     actionFailed: 'Action failed',
     allTimeBoston: 'All timestamps are based on Boston time',
     editOrder: 'Edit Order',
-    methodsTitle: 'Payment method management',
+    methodsTitle: 'Payment methods',
     methodsHint:
-      'These payment methods are shown publicly on the pay page. You can adjust order, labels, chain, token, and address at any time.',
+      'These payment methods are shown publicly on the pay page. You can change labels, network name, token, address, order, and enabled status at any time.',
     addMethod: 'Add payment method',
-    saveMethods: 'Save methods',
+    saveMethods: 'Save payment methods',
     methodsSaving: 'Saving...',
     displayName: 'Display name',
     chainName: 'Chain name',
@@ -238,7 +246,7 @@ const TEXTS: Record<string, UiText> = {
   },
   'zh-cn': {
     title: '后台管理',
-    subtitle: '订单管理、价格管理与支付方式管理',
+    subtitle: '在同一界面集中管理订单、价格和支付方式。',
     checking: '正在检查登录状态...',
     tabs: { orders: '订单管理', pricing: '价格与支付' },
     logout: '退出登录',
@@ -252,7 +260,7 @@ const TEXTS: Record<string, UiText> = {
     completed: '已完成',
     cancelled: '已取消',
     noOrders: '暂无订单',
-    selectHint: '请先从左侧选择一个订单进行查看和编辑。',
+    selectHint: '请先从列表中选择一个订单进行查看和编辑。',
     orderNo: '订单号',
     product: '商品',
     amount: '金额',
@@ -279,7 +287,8 @@ const TEXTS: Record<string, UiText> = {
     closeImage: '关闭',
     noImage: '暂无付款截图。',
     noHash: '暂无交易哈希',
-    pricesTitle: '价格配置',
+    pricesTitle: '价格设置',
+    pricesHint: '可在这里调整 Premium 价格、Stars 单价以及 Stars 最低购买数量。',
     price3m: 'TG Premium 3个月',
     price6m: 'TG Premium 6个月',
     price12m: 'TG Premium 12个月',
@@ -296,7 +305,7 @@ const TEXTS: Record<string, UiText> = {
     editOrder: '编辑订单',
     methodsTitle: '支付方式管理',
     methodsHint:
-      '这些支付方式会公开显示在支付页。你可以随时调整顺序、显示名、链名、币种和地址。',
+      '这些支付方式会公开显示在支付页。你可以随时调整顺序、显示名、链名、币种、地址以及启用状态。',
     addMethod: '新增支付方式',
     saveMethods: '保存支付方式',
     methodsSaving: '保存中...',
@@ -316,7 +325,7 @@ const TEXTS: Record<string, UiText> = {
   },
   'zh-tw': {
     title: '後台管理',
-    subtitle: '訂單管理、價格管理與支付方式管理',
+    subtitle: '在同一介面集中管理訂單、價格和支付方式。',
     checking: '正在檢查登入狀態...',
     tabs: { orders: '訂單管理', pricing: '價格與支付' },
     logout: '登出',
@@ -330,7 +339,7 @@ const TEXTS: Record<string, UiText> = {
     completed: '已完成',
     cancelled: '已取消',
     noOrders: '暫無訂單',
-    selectHint: '請先從左側選擇一筆訂單進行查看與編輯。',
+    selectHint: '請先從列表中選擇一筆訂單進行查看與編輯。',
     orderNo: '訂單號',
     product: '商品',
     amount: '金額',
@@ -358,6 +367,7 @@ const TEXTS: Record<string, UiText> = {
     noImage: '暫無付款截圖。',
     noHash: '暫無交易雜湊',
     pricesTitle: '價格設定',
+    pricesHint: '可在這裡調整 Premium 價格、Stars 單價以及 Stars 最低購買數量。',
     price3m: 'TG Premium 3個月',
     price6m: 'TG Premium 6個月',
     price12m: 'TG Premium 12個月',
@@ -374,7 +384,7 @@ const TEXTS: Record<string, UiText> = {
     editOrder: '編輯訂單',
     methodsTitle: '支付方式管理',
     methodsHint:
-      '這些支付方式會公開顯示在支付頁。你可以隨時調整順序、顯示名稱、鏈名、幣種和地址。',
+      '這些支付方式會公開顯示在支付頁。你可以隨時調整順序、顯示名稱、鏈名、幣種、地址以及啟用狀態。',
     addMethod: '新增支付方式',
     saveMethods: '保存支付方式',
     methodsSaving: '保存中...',
@@ -633,6 +643,7 @@ function AdminPageInner() {
       })
       const data = await readJsonSafe(res)
       if (!res.ok) throw new Error(data?.error || text.loadFailed)
+
       setPaymentMethods(Array.isArray(data?.items) ? data.items : [])
     } catch (err) {
       setPageError(err instanceof Error ? err.message : text.loadFailed)
@@ -870,8 +881,8 @@ function AdminPageInner() {
       const data = await readJsonSafe(res)
       if (!res.ok) throw new Error(data?.error || text.actionFailed)
 
+      setPaymentMethods(Array.isArray(data?.items) ? data.items : [])
       setMethodNotice({ type: 'success', text: text.methodsSaveSuccess })
-      await loadPaymentMethods()
     } catch (err) {
       setMethodNotice({
         type: 'error',
@@ -905,8 +916,8 @@ function AdminPageInner() {
       const data = await readJsonSafe(res)
       if (!res.ok) throw new Error(data?.error || text.actionFailed)
 
+      setPaymentMethods((prev) => prev.filter((row) => row.id !== item.id))
       setMethodNotice({ type: 'success', text: text.methodDeleteSuccess })
-      await loadPaymentMethods()
     } catch (err) {
       setMethodNotice({
         type: 'error',
@@ -925,7 +936,7 @@ function AdminPageInner() {
     <main className="admin-shell">
       <div className="admin-panel">
         <section className="hero-card">
-          <div>
+          <div className="hero-copy">
             <h1 className="hero-title">{text.title}</h1>
             <p className="hero-subtitle">{text.subtitle}</p>
           </div>
@@ -960,7 +971,7 @@ function AdminPageInner() {
         {pageError ? <div className="status-box error">{pageError}</div> : null}
 
         {tab === 'orders' ? (
-          <div className="grid-layout">
+          <div className="orders-layout">
             <section className="card search-card">
               <div className="search-row">
                 <input
@@ -984,12 +995,12 @@ function AdminPageInner() {
                   <span>{text.autoRefresh}</span>
                 </label>
 
-                <div className="tabs-row">
+                <div className="status-filter-grid">
                   {(['all', 'pending_payment', 'paid', 'completed', 'cancelled'] as const).map((value) => (
                     <button
                       key={value}
                       type="button"
-                      className={`tab-btn ${statusFilter === value ? 'active' : ''}`}
+                      className={`mini-tab ${statusFilter === value ? 'active' : ''}`}
                       onClick={() => setStatusFilter(value)}
                     >
                       {buildSearchText(text, value)}
@@ -1015,12 +1026,15 @@ function AdminPageInner() {
                       syncFormFromOrder(order)
                     }}
                   >
-                    <div className="order-item-title">{order.order_no}</div>
+                    <div className="order-item-top">
+                      <div className="order-item-title">{order.order_no}</div>
+                      <div className={`status ${getStatusClass(order.status)}`}>
+                        {getStatusLabel(text, order.status)}
+                      </div>
+                    </div>
+
                     <div className="order-item-sub">{order.email || '-'}</div>
                     <div className="order-item-sub">{getProductLabel(order, lang)}</div>
-                    <div className={`status ${getStatusClass(order.status)}`}>
-                      {getStatusLabel(text, order.status)}
-                    </div>
                   </button>
                 ))
               )}
@@ -1031,23 +1045,26 @@ function AdminPageInner() {
                 <div className="empty-text">{text.selectHint}</div>
               ) : (
                 <>
-                  <h2 className="section-title">{text.editOrder}</h2>
+                  <div className="section-head">
+                    <h2 className="section-title">{text.editOrder}</h2>
+                  </div>
 
                   <div className="meta-grid">
-                    <div>
-                      <span className="meta-label">{text.orderNo}:</span> {selectedOrder.order_no}
+                    <div className="meta-item">
+                      <span className="meta-label">{text.orderNo}</span>
+                      <span>{selectedOrder.order_no}</span>
                     </div>
-                    <div>
-                      <span className="meta-label">{text.product}:</span>{' '}
-                      {getProductLabel(selectedOrder, lang)}
+                    <div className="meta-item">
+                      <span className="meta-label">{text.product}</span>
+                      <span>{getProductLabel(selectedOrder, lang)}</span>
                     </div>
-                    <div>
-                      <span className="meta-label">{text.amount}:</span> $
-                      {selectedOrder.price_usd ?? selectedOrder.amount ?? 0}
+                    <div className="meta-item">
+                      <span className="meta-label">{text.amount}</span>
+                      <span>${selectedOrder.price_usd ?? selectedOrder.amount ?? 0}</span>
                     </div>
-                    <div>
-                      <span className="meta-label">{text.createdAt}:</span>{' '}
-                      {formatBostonTime(selectedOrder.created_at)}
+                    <div className="meta-item">
+                      <span className="meta-label">{text.createdAt}</span>
+                      <span>{formatBostonTime(selectedOrder.created_at)}</span>
                     </div>
                   </div>
 
@@ -1136,33 +1153,35 @@ function AdminPageInner() {
                       <div className={`inline-notice ${orderNotice.type}`}>{orderNotice.text}</div>
                     ) : null}
 
-                    <div className="preview-box">
-                      <span className="field-label">{text.txHash}</span>
-                      <div className="hash-box mono">
-                        {selectedOrder.tx_hash || form.tx_hash || text.noHash}
+                    <div className="preview-grid">
+                      <div className="preview-box">
+                        <span className="field-label">{text.txHash}</span>
+                        <div className="hash-box mono">
+                          {selectedOrder.tx_hash || form.tx_hash || text.noHash}
+                        </div>
                       </div>
-                    </div>
 
-                    <div className="preview-box">
-                      <span className="field-label">Proof Image</span>
-                      {selectedOrder.proof_image_base64 ? (
-                        <>
-                          <img
-                            src={selectedOrder.proof_image_base64}
-                            alt="payment proof preview"
-                            className="proof-image"
-                          />
-                          <button
-                            type="button"
-                            className="secondary-wide-btn"
-                            onClick={() => setPreviewImage(selectedOrder.proof_image_base64 || '')}
-                          >
-                            {text.viewLarge}
-                          </button>
-                        </>
-                      ) : (
-                        <div className="preview-note-box">{text.noImage}</div>
-                      )}
+                      <div className="preview-box">
+                        <span className="field-label">Proof Image</span>
+                        {selectedOrder.proof_image_base64 ? (
+                          <>
+                            <img
+                              src={selectedOrder.proof_image_base64}
+                              alt="payment proof preview"
+                              className="proof-image"
+                            />
+                            <button
+                              type="button"
+                              className="secondary-wide-btn"
+                              onClick={() => setPreviewImage(selectedOrder.proof_image_base64 || '')}
+                            >
+                              {text.viewLarge}
+                            </button>
+                          </>
+                        ) : (
+                          <div className="preview-note-box">{text.noImage}</div>
+                        )}
+                      </div>
                     </div>
 
                     <div className="action-grid">
@@ -1218,228 +1237,243 @@ function AdminPageInner() {
         ) : null}
 
         {tab === 'pricing' ? (
-          <section className="card single-card">
-            <h2 className="section-title">{text.pricesTitle}</h2>
-
-            <div className="settings-grid">
-              <label className="setting-field">
-                <span>{text.price3m}</span>
-                <input
-                  className="input"
-                  type="number"
-                  step="0.01"
-                  value={siteConfig.premium_3m_price}
-                  onChange={(e) =>
-                    setSiteConfig((prev) => ({
-                      ...prev,
-                      premium_3m_price: Number(e.target.value || 0),
-                    }))
-                  }
-                />
-              </label>
-
-              <label className="setting-field">
-                <span>{text.price6m}</span>
-                <input
-                  className="input"
-                  type="number"
-                  step="0.01"
-                  value={siteConfig.premium_6m_price}
-                  onChange={(e) =>
-                    setSiteConfig((prev) => ({
-                      ...prev,
-                      premium_6m_price: Number(e.target.value || 0),
-                    }))
-                  }
-                />
-              </label>
-
-              <label className="setting-field">
-                <span>{text.price12m}</span>
-                <input
-                  className="input"
-                  type="number"
-                  step="0.01"
-                  value={siteConfig.premium_12m_price}
-                  onChange={(e) =>
-                    setSiteConfig((prev) => ({
-                      ...prev,
-                      premium_12m_price: Number(e.target.value || 0),
-                    }))
-                  }
-                />
-              </label>
-
-              <label className="setting-field">
-                <span>{text.starsRate}</span>
-                <input
-                  className="input"
-                  type="number"
-                  step="0.0001"
-                  value={siteConfig.stars_rate}
-                  onChange={(e) =>
-                    setSiteConfig((prev) => ({
-                      ...prev,
-                      stars_rate: Number(e.target.value || 0),
-                    }))
-                  }
-                />
-              </label>
-
-              <label className="setting-field">
-                <span>{text.starsMinAmount}</span>
-                <input
-                  className="input"
-                  type="number"
-                  step="1"
-                  min="1"
-                  value={siteConfig.stars_min_amount}
-                  onChange={(e) =>
-                    setSiteConfig((prev) => ({
-                      ...prev,
-                      stars_min_amount: Number(e.target.value || 0),
-                    }))
-                  }
-                />
-              </label>
-            </div>
-
-            <button
-              type="button"
-              className="primary-btn"
-              onClick={saveSiteConfig}
-              disabled={configLoading}
-            >
-              {configLoading ? text.configSaving : text.saveConfig}
-            </button>
-
-            {configNotice ? (
-              <div className={`inline-notice ${configNotice.type}`}>{configNotice.text}</div>
-            ) : null}
-
-            <div className="payment-methods-head">
-              <div>
-                <h3 className="subsection-title">{text.methodsTitle}</h3>
-                <p className="subsection-hint">{text.methodsHint}</p>
+          <div className="pricing-layout">
+            <section className="card single-card">
+              <div className="section-head">
+                <div>
+                  <h2 className="section-title">{text.pricesTitle}</h2>
+                  <p className="section-subtitle">{text.pricesHint}</p>
+                </div>
               </div>
 
-              <div className="payment-method-actions">
-                <button type="button" className="small-btn" onClick={addPaymentMethod}>
-                  {text.addMethod}
-                </button>
+              <div className="settings-grid two-cols">
+                <label className="setting-field">
+                  <span>{text.price3m}</span>
+                  <input
+                    className="input"
+                    type="number"
+                    step="0.01"
+                    value={siteConfig.premium_3m_price}
+                    onChange={(e) =>
+                      setSiteConfig((prev) => ({
+                        ...prev,
+                        premium_3m_price: Number(e.target.value || 0),
+                      }))
+                    }
+                  />
+                </label>
+
+                <label className="setting-field">
+                  <span>{text.price6m}</span>
+                  <input
+                    className="input"
+                    type="number"
+                    step="0.01"
+                    value={siteConfig.premium_6m_price}
+                    onChange={(e) =>
+                      setSiteConfig((prev) => ({
+                        ...prev,
+                        premium_6m_price: Number(e.target.value || 0),
+                      }))
+                    }
+                  />
+                </label>
+
+                <label className="setting-field">
+                  <span>{text.price12m}</span>
+                  <input
+                    className="input"
+                    type="number"
+                    step="0.01"
+                    value={siteConfig.premium_12m_price}
+                    onChange={(e) =>
+                      setSiteConfig((prev) => ({
+                        ...prev,
+                        premium_12m_price: Number(e.target.value || 0),
+                      }))
+                    }
+                  />
+                </label>
+
+                <label className="setting-field">
+                  <span>{text.starsRate}</span>
+                  <input
+                    className="input"
+                    type="number"
+                    step="0.0001"
+                    value={siteConfig.stars_rate}
+                    onChange={(e) =>
+                      setSiteConfig((prev) => ({
+                        ...prev,
+                        stars_rate: Number(e.target.value || 0),
+                      }))
+                    }
+                  />
+                </label>
+
+                <label className="setting-field full-span">
+                  <span>{text.starsMinAmount}</span>
+                  <input
+                    className="input"
+                    type="number"
+                    step="1"
+                    min="1"
+                    value={siteConfig.stars_min_amount}
+                    onChange={(e) =>
+                      setSiteConfig((prev) => ({
+                        ...prev,
+                        stars_min_amount: Number(e.target.value || 0),
+                      }))
+                    }
+                  />
+                </label>
+              </div>
+
+              <div className="save-bar">
                 <button
                   type="button"
-                  className="primary-btn slim"
-                  onClick={saveAllPaymentMethods}
-                  disabled={methodsSaving}
+                  className="primary-btn save-bar-btn"
+                  onClick={saveSiteConfig}
+                  disabled={configLoading}
                 >
-                  {methodsSaving ? text.methodsSaving : text.saveMethods}
+                  {configLoading ? text.configSaving : text.saveConfig}
                 </button>
               </div>
-            </div>
 
-            {methodNotice ? (
-              <div className={`inline-notice ${methodNotice.type}`}>{methodNotice.text}</div>
-            ) : null}
+              {configNotice ? (
+                <div className={`inline-notice ${configNotice.type}`}>{configNotice.text}</div>
+              ) : null}
+            </section>
 
-            <div className="payment-methods-grid">
-              {methodsLoading ? (
-                <div className="empty-text">{text.refreshing}</div>
-              ) : paymentMethods.length === 0 ? (
-                <div className="empty-text">{text.noOrders}</div>
-              ) : (
-                paymentMethods.map((item, index) => (
-                  <div key={item.id ?? `new-${index}`} className="method-card">
-                    <div className="method-grid">
-                      <label className="setting-field">
-                        <span>{text.displayName}</span>
-                        <input
-                          className="input"
-                          value={item.display_name}
-                          onChange={(e) =>
-                            updatePaymentMethod(index, { display_name: e.target.value })
-                          }
-                          placeholder={text.methodNamePlaceholder}
-                        />
-                      </label>
+            <section className="card single-card">
+              <div className="section-head methods-head">
+                <div>
+                  <h2 className="section-title">{text.methodsTitle}</h2>
+                  <p className="section-subtitle">{text.methodsHint}</p>
+                </div>
 
-                      <label className="setting-field">
-                        <span>{text.chainName}</span>
-                        <input
-                          className="input"
-                          value={item.chain_name}
-                          onChange={(e) =>
-                            updatePaymentMethod(index, { chain_name: e.target.value })
-                          }
-                          placeholder={text.methodChainPlaceholder}
-                        />
-                      </label>
+                <div className="payment-method-actions">
+                  <button type="button" className="small-btn" onClick={addPaymentMethod}>
+                    {text.addMethod}
+                  </button>
+                  <button
+                    type="button"
+                    className="primary-btn slim"
+                    onClick={saveAllPaymentMethods}
+                    disabled={methodsSaving}
+                  >
+                    {methodsSaving ? text.methodsSaving : text.saveMethods}
+                  </button>
+                </div>
+              </div>
 
-                      <label className="setting-field">
-                        <span>{text.tokenName}</span>
-                        <input
-                          className="input"
-                          value={item.token_name}
-                          onChange={(e) =>
-                            updatePaymentMethod(index, { token_name: e.target.value })
-                          }
-                          placeholder={text.methodTokenPlaceholder}
-                        />
-                      </label>
+              {methodNotice ? (
+                <div className={`inline-notice ${methodNotice.type}`}>{methodNotice.text}</div>
+              ) : null}
 
-                      <label className="setting-field">
-                        <span>{text.sortOrder}</span>
-                        <input
-                          className="input"
-                          type="number"
-                          value={item.sort_order}
-                          onChange={(e) =>
-                            updatePaymentMethod(index, {
-                              sort_order: Number(e.target.value || 0),
-                            })
-                          }
-                        />
-                      </label>
+              <div className="payment-methods-grid">
+                {methodsLoading ? (
+                  <div className="empty-text">{text.refreshing}</div>
+                ) : paymentMethods.length === 0 ? (
+                  <div className="empty-text">{text.noOrders}</div>
+                ) : (
+                  paymentMethods.map((item, index) => (
+                    <div key={item.id ?? `new-${index}`} className="method-card">
+                      <div className="method-card-top">
+                        <div className="method-card-index">#{index + 1}</div>
+
+                        <div className="method-card-actions">
+                          <label className="checkbox-row">
+                            <input
+                              type="checkbox"
+                              checked={item.is_enabled}
+                              onChange={(e) =>
+                                updatePaymentMethod(index, { is_enabled: e.target.checked })
+                              }
+                            />
+                            <span>{text.enabled}</span>
+                          </label>
+
+                          <button
+                            type="button"
+                            className="method-delete-btn"
+                            onClick={() => deletePaymentMethod(item, index)}
+                            disabled={methodsSaving}
+                          >
+                            {text.deleteMethod}
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="method-grid">
+                        <label className="setting-field">
+                          <span>{text.displayName}</span>
+                          <input
+                            className="input"
+                            value={item.display_name}
+                            onChange={(e) =>
+                              updatePaymentMethod(index, { display_name: e.target.value })
+                            }
+                            placeholder={text.methodNamePlaceholder}
+                          />
+                        </label>
+
+                        <label className="setting-field">
+                          <span>{text.chainName}</span>
+                          <input
+                            className="input"
+                            value={item.chain_name}
+                            onChange={(e) =>
+                              updatePaymentMethod(index, { chain_name: e.target.value })
+                            }
+                            placeholder={text.methodChainPlaceholder}
+                          />
+                        </label>
+
+                        <label className="setting-field">
+                          <span>{text.tokenName}</span>
+                          <input
+                            className="input"
+                            value={item.token_name}
+                            onChange={(e) =>
+                              updatePaymentMethod(index, { token_name: e.target.value })
+                            }
+                            placeholder={text.methodTokenPlaceholder}
+                          />
+                        </label>
+
+                        <label className="setting-field">
+                          <span>{text.sortOrder}</span>
+                          <input
+                            className="input"
+                            type="number"
+                            value={item.sort_order}
+                            onChange={(e) =>
+                              updatePaymentMethod(index, {
+                                sort_order: Number(e.target.value || 0),
+                              })
+                            }
+                          />
+                        </label>
+
+                        <label className="setting-field method-address">
+                          <span>{text.address}</span>
+                          <textarea
+                            className="textarea mono"
+                            rows={4}
+                            value={item.address}
+                            onChange={(e) =>
+                              updatePaymentMethod(index, { address: e.target.value })
+                            }
+                          />
+                        </label>
+                      </div>
                     </div>
-
-                    <label className="setting-field">
-                      <span>{text.address}</span>
-                      <textarea
-                        className="textarea mono"
-                        value={item.address}
-                        onChange={(e) =>
-                          updatePaymentMethod(index, { address: e.target.value })
-                        }
-                        rows={3}
-                      />
-                    </label>
-
-                    <div className="method-bottom">
-                      <label className="checkbox-row">
-                        <input
-                          type="checkbox"
-                          checked={item.is_enabled}
-                          onChange={(e) =>
-                            updatePaymentMethod(index, { is_enabled: e.target.checked })
-                          }
-                        />
-                        <span>{text.enabled}</span>
-                      </label>
-
-                      <button
-                        type="button"
-                        className="method-delete-btn"
-                        onClick={() => deletePaymentMethod(item, index)}
-                        disabled={methodsSaving}
-                      >
-                        {text.deleteMethod}
-                      </button>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          </section>
+                  ))
+                )}
+              </div>
+            </section>
+          </div>
         ) : null}
       </div>
 
@@ -1485,10 +1519,9 @@ export default function AdminPage() {
 const globalThemeStyles = `
   :root {
     --bg-main: linear-gradient(180deg, #f7f8fb 0%, #eef2f8 100%);
-    --bg-card: rgba(255, 255, 255, 0.92);
+    --bg-card: rgba(255, 255, 255, 0.94);
     --bg-card-soft: rgba(255, 255, 255, 0.88);
     --bg-input: #ffffff;
-    --bg-muted: rgba(15, 23, 42, 0.035);
     --text-main: #111827;
     --text-strong: #0f172a;
     --text-soft: #64748b;
@@ -1500,10 +1533,9 @@ const globalThemeStyles = `
 
   html[data-theme='dark'] {
     --bg-main: linear-gradient(180deg, #07111f 0%, #0b1324 100%);
-    --bg-card: rgba(15, 23, 42, 0.86);
-    --bg-card-soft: rgba(15, 23, 42, 0.82);
-    --bg-input: rgba(15, 23, 42, 0.92);
-    --bg-muted: rgba(255, 255, 255, 0.04);
+    --bg-card: rgba(15, 23, 42, 0.9);
+    --bg-card-soft: rgba(15, 23, 42, 0.84);
+    --bg-input: rgba(15, 23, 42, 0.96);
     --text-main: #e5e7eb;
     --text-strong: #f8fafc;
     --text-soft: #94a3b8;
@@ -1531,11 +1563,11 @@ const styles = `
   .admin-shell {
     min-height: 100vh;
     background: var(--bg-main);
-    padding: 20px 12px 40px;
+    padding: 18px 12px 34px;
   }
 
   .admin-panel {
-    max-width: 1220px;
+    max-width: 1320px;
     margin: 0 auto;
     display: grid;
     gap: 16px;
@@ -1550,7 +1582,7 @@ const styles = `
   .hero-card,
   .tabs-row,
   .status-box {
-    border-radius: 24px;
+    border-radius: 26px;
     background: var(--bg-card);
     border: 1px solid var(--border-soft);
     box-shadow: var(--shadow-soft);
@@ -1564,12 +1596,15 @@ const styles = `
   }
 
   .hero-card {
-    padding: 18px;
-    display: flex;
-    justify-content: space-between;
-    gap: 14px;
+    padding: 20px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 420px);
+    gap: 16px;
     align-items: center;
-    flex-wrap: wrap;
+  }
+
+  .hero-copy {
+    min-width: 0;
   }
 
   .hero-title {
@@ -1581,23 +1616,20 @@ const styles = `
   }
 
   .hero-subtitle {
-    margin: 6px 0 0;
+    margin: 8px 0 0;
     color: var(--text-soft);
     font-size: 14px;
+    line-height: 1.7;
   }
 
   .hero-actions-wrap {
     width: 100%;
-    max-width: 620px;
-    display: block;
   }
 
   .hero-actions-row {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 12px;
-    width: 100%;
-    align-items: stretch;
   }
 
   .small-btn,
@@ -1615,14 +1647,14 @@ const styles = `
     box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
   }
 
-  .logout-btn {
-    width: 100%;
-  }
-
   .small-btn:hover,
   .secondary-wide-btn:hover,
   .logout-btn:hover {
-    background: rgba(255, 255, 255, 0.96);
+    background: rgba(255, 255, 255, 0.98);
+  }
+
+  .logout-btn {
+    width: 100%;
   }
 
   .tabs-row {
@@ -1638,7 +1670,7 @@ const styles = `
   .tab-btn {
     border: none;
     border-radius: 18px;
-    min-height: 52px;
+    min-height: 54px;
     font-size: 16px;
     font-weight: 900;
     color: var(--text-main);
@@ -1664,39 +1696,44 @@ const styles = `
     background: #fef2f2;
   }
 
-  .grid-layout {
+  .orders-layout {
     display: grid;
-    grid-template-columns: 320px minmax(0, 1fr) minmax(0, 1.2fr);
+    grid-template-columns: 320px 360px minmax(0, 1fr);
     gap: 16px;
     align-items: start;
   }
 
+  .pricing-layout {
+    display: grid;
+    gap: 16px;
+  }
+
   .card {
-    padding: 16px;
+    padding: 18px;
     min-width: 0;
     overflow: hidden;
   }
 
   .single-card {
-    max-width: 940px;
-    margin: 0 auto;
     width: 100%;
   }
 
   .search-card {
     display: grid;
-    gap: 12px;
+    gap: 14px;
+    position: sticky;
+    top: 18px;
   }
 
   .search-row {
     display: grid;
-    grid-template-columns: minmax(0,1fr) 132px;
+    grid-template-columns: minmax(0,1fr) 118px;
     gap: 10px;
   }
 
   .filter-row {
     display: grid;
-    gap: 10px;
+    gap: 12px;
   }
 
   .checkbox-row {
@@ -1706,6 +1743,28 @@ const styles = `
     color: var(--text-main);
     font-size: 14px;
     font-weight: 700;
+  }
+
+  .status-filter-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .mini-tab {
+    border: none;
+    min-height: 42px;
+    border-radius: 14px;
+    background: var(--bg-card-soft);
+    color: var(--text-main);
+    font-weight: 800;
+    font-size: 13px;
+    transition: all .16s ease;
+  }
+
+  .mini-tab.active {
+    background: var(--brand);
+    color: var(--brand-contrast);
   }
 
   .input,
@@ -1744,19 +1803,19 @@ const styles = `
   .order-list-card {
     display: grid;
     gap: 12px;
-    max-height: 80vh;
+    max-height: calc(100vh - 160px);
     overflow: auto;
   }
 
   .order-item {
     width: 100%;
     text-align: left;
-    border-radius: 20px;
+    border-radius: 22px;
     border: 1px solid var(--border-soft);
     background: var(--bg-card-soft);
     padding: 14px;
     display: grid;
-    gap: 6px;
+    gap: 8px;
     transition: all .16s ease;
     box-shadow: 0 10px 24px rgba(15, 23, 42, 0.04);
   }
@@ -1766,8 +1825,15 @@ const styles = `
     box-shadow: 0 16px 30px rgba(7, 27, 87, 0.12);
   }
 
+  .order-item-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
   .order-item-title {
-    font-size: 18px;
+    font-size: 17px;
     font-weight: 900;
     color: var(--text-strong);
     word-break: break-all;
@@ -1791,6 +1857,7 @@ const styles = `
     border: 1px solid var(--border-soft);
     background: var(--bg-card-soft);
     color: var(--text-main);
+    white-space: nowrap;
   }
 
   .status.pending {
@@ -1819,48 +1886,58 @@ const styles = `
 
   .editor-card {
     display: grid;
-    gap: 14px;
+    gap: 16px;
+  }
+
+  .section-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    flex-wrap: wrap;
   }
 
   .section-title {
     margin: 0;
-    font-size: 26px;
+    font-size: 28px;
     font-weight: 900;
     color: var(--text-strong);
   }
 
+  .section-subtitle {
+    margin: 8px 0 0;
+    color: var(--text-soft);
+    font-size: 14px;
+    line-height: 1.7;
+    max-width: 860px;
+  }
+
   .meta-grid {
     display: grid;
-    gap: 8px;
-    color: var(--text-main);
-    line-height: 1.7;
-    font-size: 16px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .meta-item {
+    border: 1px solid var(--border-soft);
+    background: var(--bg-card-soft);
+    border-radius: 18px;
+    padding: 14px;
+    display: grid;
+    gap: 6px;
+    line-height: 1.6;
   }
 
   .meta-label,
   .field-label {
     font-weight: 900;
     color: var(--text-strong);
-  }
-
-  .preview-box {
-    display: grid;
-    gap: 10px;
-  }
-
-  .proof-image {
-    width: 100%;
-    display: block;
-    max-height: 320px;
-    object-fit: cover;
-    border-radius: 22px;
-    border: 1px solid var(--border-soft);
-    background: var(--bg-card-soft);
+    font-size: 13px;
   }
 
   .form-grid {
     display: grid;
-    gap: 10px;
+    gap: 12px;
   }
 
   .readonly-status-row {
@@ -1870,16 +1947,10 @@ const styles = `
     flex-wrap: wrap;
   }
 
-  .hash-box,
-  .preview-note-box {
-    display: grid;
-    gap: 8px;
-  }
-
   .save-hint {
     color: var(--text-soft);
     font-size: 14px;
-    line-height: 1.6;
+    line-height: 1.7;
   }
 
   .primary-btn {
@@ -1901,6 +1972,18 @@ const styles = `
     border-radius: 999px;
     padding: 0 18px;
     font-size: 15px;
+  }
+
+  .save-bar {
+    margin-top: 16px;
+    display: flex;
+    justify-content: flex-start;
+  }
+
+  .save-bar-btn {
+    width: auto;
+    min-width: 220px;
+    padding: 0 22px;
   }
 
   .inline-notice {
@@ -1933,8 +2016,40 @@ const styles = `
     opacity: .72;
   }
 
+  .preview-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+
+  .preview-box {
+    display: grid;
+    gap: 10px;
+  }
+
+  .hash-box,
+  .preview-note-box {
+    min-height: 120px;
+    border-radius: 18px;
+    border: 1px solid var(--border-soft);
+    background: var(--bg-card-soft);
+    padding: 14px;
+    display: block;
+  }
+
+  .proof-image {
+    width: 100%;
+    display: block;
+    max-height: 320px;
+    object-fit: cover;
+    border-radius: 22px;
+    border: 1px solid var(--border-soft);
+    background: var(--bg-card-soft);
+  }
+
   .action-grid {
     display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 12px;
   }
 
@@ -1943,7 +2058,7 @@ const styles = `
     min-height: 56px;
     border-radius: 18px;
     border: 1px solid var(--border-soft);
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 900;
     transition:
       transform 0.16s ease,
@@ -2012,30 +2127,6 @@ const styles = `
     box-shadow: 0 12px 28px rgba(220, 38, 38, 0.22);
   }
 
-  .payment-methods-head {
-    margin-top: 28px;
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 14px;
-    flex-wrap: wrap;
-  }
-
-  .subsection-title {
-    margin: 0;
-    font-size: 22px;
-    font-weight: 900;
-    color: var(--text-strong);
-  }
-
-  .subsection-hint {
-    margin: 8px 0 0;
-    color: var(--text-soft);
-    font-size: 14px;
-    line-height: 1.7;
-    max-width: 760px;
-  }
-
   .payment-method-actions {
     display: flex;
     gap: 10px;
@@ -2051,10 +2142,37 @@ const styles = `
   .method-card {
     border: 1px solid var(--border-soft);
     background: var(--bg-card-soft);
-    border-radius: 22px;
+    border-radius: 24px;
     padding: 16px;
     display: grid;
+    gap: 14px;
+  }
+
+  .method-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .method-card-index {
+    min-height: 36px;
+    padding: 0 12px;
+    border-radius: 999px;
+    background: rgba(7, 27, 87, 0.08);
+    color: var(--brand);
+    display: inline-flex;
+    align-items: center;
+    font-weight: 900;
+    font-size: 13px;
+  }
+
+  .method-card-actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
   }
 
   .method-grid {
@@ -2063,12 +2181,8 @@ const styles = `
     gap: 12px;
   }
 
-  .method-bottom {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px;
-    flex-wrap: wrap;
+  .method-address {
+    grid-column: 1 / -1;
   }
 
   .method-delete-btn {
@@ -2084,6 +2198,14 @@ const styles = `
   .settings-grid {
     display: grid;
     gap: 14px;
+  }
+
+  .settings-grid.two-cols {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .full-span {
+    grid-column: 1 / -1;
   }
 
   .setting-field {
@@ -2150,17 +2272,35 @@ const styles = `
     background: rgba(15, 23, 42, 0.04);
   }
 
-  @media (max-width: 1080px) {
-    .grid-layout {
+  @media (max-width: 1180px) {
+    .orders-layout {
       grid-template-columns: 1fr;
+    }
+
+    .search-card {
+      position: static;
     }
 
     .order-list-card {
       max-height: none;
     }
+  }
+
+  @media (max-width: 900px) {
+    .hero-card {
+      grid-template-columns: 1fr;
+    }
+
+    .preview-grid {
+      grid-template-columns: 1fr;
+    }
 
     .method-grid {
       grid-template-columns: 1fr 1fr;
+    }
+
+    .settings-grid.two-cols {
+      grid-template-columns: 1fr;
     }
   }
 
@@ -2170,7 +2310,7 @@ const styles = `
     }
 
     .hero-card {
-      padding: 14px;
+      padding: 16px;
     }
 
     .hero-actions-row {
@@ -2185,12 +2325,18 @@ const styles = `
       grid-template-columns: 1fr;
     }
 
+    .status-filter-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .meta-grid,
+    .action-grid,
     .method-grid {
       grid-template-columns: 1fr;
     }
 
     .section-title {
-      font-size: 22px;
+      font-size: 24px;
     }
 
     .primary-btn,
@@ -2200,6 +2346,11 @@ const styles = `
     .secondary-wide-btn {
       min-height: 52px;
       font-size: 15px;
+    }
+
+    .save-bar-btn {
+      width: 100%;
+      min-width: 0;
     }
   }
 `
