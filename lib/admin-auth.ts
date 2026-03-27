@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers'
 import { createHash, timingSafeEqual } from 'crypto'
 
-const ADMIN_SESSION_COOKIE = 'agnopol_admin_session'
+export const ADMIN_SESSION_COOKIE = 'agnopol_admin_session'
 
 function getAdminPassword() {
   const value = process.env.ADMIN_PASSWORD
@@ -29,6 +29,11 @@ function safeEqualString(a: string, b: string) {
   return timingSafeEqual(aBuf, bBuf)
 }
 
+export function verifyAdminPassword(password: string) {
+  const expected = getAdminPassword()
+  return safeEqualString(password, expected)
+}
+
 export function isAdminAuthenticated() {
   const store = cookies()
   const cookieValue = store.get(ADMIN_SESSION_COOKIE)?.value || ''
@@ -54,6 +59,7 @@ export function createAdminSession() {
 
 export function clearAdminSession() {
   const store = cookies()
+
   store.set(ADMIN_SESSION_COOKIE, '', {
     httpOnly: true,
     sameSite: 'lax',
@@ -61,11 +67,6 @@ export function clearAdminSession() {
     path: '/',
     maxAge: 0,
   })
-}
-
-export function verifyAdminPassword(password: string) {
-  const expected = getAdminPassword()
-  return safeEqualString(password, expected)
 }
 
 export function requireAdminSession() {
