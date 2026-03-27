@@ -6,6 +6,16 @@ export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
+type PaymentMethodInput = {
+  id?: number
+  display_name?: string
+  chain_name?: string
+  token_name?: string
+  address?: string
+  sort_order?: number
+  is_enabled?: boolean
+}
+
 function getSupabase() {
   const supabaseUrl = process.env.SUPABASE_URL
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -23,154 +33,146 @@ function noStoreJson(data: any, init?: ResponseInit) {
   return response
 }
 
-const defaultMethods = [
-  {
-    display_name: 'TON / Toncoin',
-    chain_name: 'TON',
-    token_name: 'Toncoin',
-    address: 'UQC8kp8-ownfGWJdjf4XNteyMHPCkzGr5ZHX28wJjcPaX7dW',
-    sort_order: 1,
-    is_enabled: true,
-  },
-  {
-    display_name: 'TRC20 / USDT',
-    chain_name: 'TRC20',
-    token_name: 'USDT',
-    address: 'TD6sQK9NmqxKzP6WHvmUdkHQRZvwX6Cy1e',
-    sort_order: 2,
-    is_enabled: true,
-  },
-  {
-    display_name: 'Base / USDC',
-    chain_name: 'Base',
-    token_name: 'USDC',
-    address: '0x21E43Ddaa992A0B5cfcCeFE98838239b9E91B40E',
-    sort_order: 3,
-    is_enabled: true,
-  },
-]
+function normalizeItem(item: PaymentMethodInput, index: number) {
+  const displayName = String(item?.display_name || '').trim()
+  const chainName = String(item?.chain_name || '').trim()
+  const tokenName = String(item?.token_name || '').trim()
+  const address = String(item?.address || '').trim()
+  const sortOrder = Number.isFinite(Number(item?.sort_order))
+    ? Number(item?.sort_order)
+    : index + 1
 
-async function seedIfEmpty(supabase: ReturnType<typeof getSupabase>) {
-  const { count, error } = await supabase
-    .from('payment_methods')
-    .select('id', { count: 'exact', head: true })
-
-  if (error) throw new Error(error.message)
-
-  if ((count || 0) > 0) return
-
-  const { error: insertError } = await supabase
-    .from('payment_methods')
-    .insert(defaultMethods.map((item) => ({ ...item, updated_at: new Date().toISOString() })))
-
-  if (insertError) throw new Error(insertError.message)
+  return {
+    id: item?.id,
+    display_name: displayName,
+    chain_name: chainName,
+    token_name: tokenName,
+    address,
+    sort_order: sortOrder,
+    is_enabled: item?.is_enabled !== false,
+  }
 }
 
-async function listMethods(supabase: ReturnType<typeof getSupabase>) {
-  await seedIfEmpty(supabase)
-
-  const { data, error } = await supabase
-    .from('payment_methods')
-    .select('id, display_name, chain_name, token_name, address, sort_order, is_enabled, updated_at')
-    .order('sort_order', { ascending: true })
-    .order('id', { ascending: true })
-
-  if (error) throw new Error(error.message)
-  return data || []
+function validateItem(item: ReturnType<typeof normalizeItem>) {
+  if (!item.display_name) return 'display_name is required'
+  if (!item.chain_name) return 'chain_name is required'
+  if (!item.token_name) return 'token_name is required'
+  if (!item.address) return 'address is required'
+  if (!Number.isFinite(item.sort_order)) return 'sort_order is invalid'
+  return ''
 }
 
 export async function GET() {
   try {
     requireAdminSession()
     const supabase = getSupabase()
-    const items = await listMethods(supabase)
-    return noStoreJson({ success: true, items })
+
+    const { data, error } = await supabase
+      .from('payment_methods')
+      .select('*')
+      .order('sort_order', { ascending: true })
+      .order('id', { ascending: true })
+
+    if (error) {
+      throw new Error(error.message)
+    }
+
+    return noStoreJson({
+      success: true,
+      items: data || [],
+    })
   } catch (error) {
     return noStoreJson(
       { error: error instanceof Error ? error.message : 'Server error' },
-      { status: error instanceof Error && error.message === 'Unauthorized' ? 401 : 500 }
+      {
+        status: error instanceof Error && error.message === 'Unauthorized' ? 401 : 500,
+      }
     )
   }
 }
 
-export async function POST(req: Request) {
+export async function PUT(req: Request) {
   try {
     requireAdminSession()
     const supabase = getSupabase()
     const body = await req.json()
 
-    const payload = {
-      display_name: String(
-        body?.display_name ||
-          `${String(body?.chain_name || '').trim()} / ${String(body?.token_name || '').trim()}`
-      ).trim(),
-      chain_name: String(body?.chain_name || '').trim(),
-      token_name: String(body?.token_name || '').trim(),
-      address: String(body?.address || '').trim(),
-      sort_order: Number(body?.sort_order || 0),
-      is_enabled: Boolean(body?.is_enabled),
-      updated_at: new Date().toISOString(),
+    const items = Array.isArray(body?.items) ? body.items : null
+    if (!items) {
+      return noStoreJson({ error: 'items is required' }, { status: 400 })
     }
 
-    if (!payload.chain_name || !payload.token_name || !payload.address) {
-      return noStoreJson({ error: 'Missing required fields' }, { status: 400 })
-    }
-
-    const { data, error } = await supabase
-      .from('payment_methods')
-      .insert(payload)
-      .select('id, display_name, chain_name, token_name, address, sort_order, is_enabled, updated_at')
-      .single()
-
-    if (error) throw new Error(error.message)
-    return noStoreJson({ success: true, item: data })
-  } catch (error) {
-    return noStoreJson(
-      { error: error instanceof Error ? error.message : 'Server error' },
-      { status: error instanceof Error && error.message === 'Unauthorized' ? 401 : 500 }
+    const normalized = items.map((item: PaymentMethodInput, index: number) =>
+      normalizeItem(item, index)
     )
-  }
-}
 
-export async function PATCH(req: Request) {
-  try {
-    requireAdminSession()
-    const supabase = getSupabase()
-    const body = await req.json()
-    const id = Number(body?.id || 0)
-
-    if (!id) return noStoreJson({ error: 'Missing id' }, { status: 400 })
-
-    const patch = {
-      display_name: String(
-        body?.display_name ||
-          `${String(body?.chain_name || '').trim()} / ${String(body?.token_name || '').trim()}`
-      ).trim(),
-      chain_name: String(body?.chain_name || '').trim(),
-      token_name: String(body?.token_name || '').trim(),
-      address: String(body?.address || '').trim(),
-      sort_order: Number(body?.sort_order || 0),
-      is_enabled: Boolean(body?.is_enabled),
-      updated_at: new Date().toISOString(),
+    for (const item of normalized) {
+      const err = validateItem(item)
+      if (err) {
+        return noStoreJson({ error: err }, { status: 400 })
+      }
     }
 
-    if (!patch.chain_name || !patch.token_name || !patch.address) {
-      return noStoreJson({ error: 'Missing required fields' }, { status: 400 })
+    const existingItems = normalized.filter((item) => item.id)
+    const newItems = normalized.filter((item) => !item.id)
+
+    for (const item of existingItems) {
+      const { error } = await supabase
+        .from('payment_methods')
+        .update({
+          display_name: item.display_name,
+          chain_name: item.chain_name,
+          token_name: item.token_name,
+          address: item.address,
+          sort_order: item.sort_order,
+          is_enabled: item.is_enabled,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', item.id)
+
+      if (error) {
+        throw new Error(error.message)
+      }
+    }
+
+    if (newItems.length > 0) {
+      const { error } = await supabase.from('payment_methods').insert(
+        newItems.map((item) => ({
+          display_name: item.display_name,
+          chain_name: item.chain_name,
+          token_name: item.token_name,
+          address: item.address,
+          sort_order: item.sort_order,
+          is_enabled: item.is_enabled,
+          updated_at: new Date().toISOString(),
+        }))
+      )
+
+      if (error) {
+        throw new Error(error.message)
+      }
     }
 
     const { data, error } = await supabase
       .from('payment_methods')
-      .update(patch)
-      .eq('id', id)
-      .select('id, display_name, chain_name, token_name, address, sort_order, is_enabled, updated_at')
-      .single()
+      .select('*')
+      .order('sort_order', { ascending: true })
+      .order('id', { ascending: true })
 
-    if (error) throw new Error(error.message)
-    return noStoreJson({ success: true, item: data })
+    if (error) {
+      throw new Error(error.message)
+    }
+
+    return noStoreJson({
+      success: true,
+      items: data || [],
+    })
   } catch (error) {
     return noStoreJson(
       { error: error instanceof Error ? error.message : 'Server error' },
-      { status: error instanceof Error && error.message === 'Unauthorized' ? 401 : 500 }
+      {
+        status: error instanceof Error && error.message === 'Unauthorized' ? 401 : 500,
+      }
     )
   }
 }
@@ -180,18 +182,27 @@ export async function DELETE(req: Request) {
     requireAdminSession()
     const supabase = getSupabase()
     const body = await req.json()
-    const id = Number(body?.id || 0)
 
-    if (!id) return noStoreJson({ error: 'Missing id' }, { status: 400 })
+    const id = Number(body?.id)
+    if (!Number.isFinite(id) || id <= 0) {
+      return noStoreJson({ error: 'id is required' }, { status: 400 })
+    }
 
     const { error } = await supabase.from('payment_methods').delete().eq('id', id)
-    if (error) throw new Error(error.message)
 
-    return noStoreJson({ success: true, id })
+    if (error) {
+      throw new Error(error.message)
+    }
+
+    return noStoreJson({
+      success: true,
+    })
   } catch (error) {
     return noStoreJson(
       { error: error instanceof Error ? error.message : 'Server error' },
-      { status: error instanceof Error && error.message === 'Unauthorized' ? 401 : 500 }
+      {
+        status: error instanceof Error && error.message === 'Unauthorized' ? 401 : 500,
+      }
     )
   }
 }
