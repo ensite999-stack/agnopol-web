@@ -1,25 +1,30 @@
 import { NextResponse } from 'next/server'
-import { readAdminSessionFromCookies } from '../../../../lib/admin-auth'
+import { isAdminAuthenticated } from '../../../../lib/admin-auth'
 
 export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
+function noStoreJson(data: any, init?: ResponseInit) {
+  const response = NextResponse.json(data, init)
+  response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+  return response
+}
 
 export async function GET() {
   try {
-    const session = readAdminSessionFromCookies()
+    const authenticated = isAdminAuthenticated()
 
-    if (!session) {
-      return NextResponse.json({
+    return noStoreJson({
+      authenticated,
+    })
+  } catch (error) {
+    return noStoreJson(
+      {
         authenticated: false,
-      })
-    }
-
-    return NextResponse.json({
-      authenticated: true,
-      exp: session.exp,
-    })
-  } catch {
-    return NextResponse.json({
-      authenticated: false,
-    })
+        error: error instanceof Error ? error.message : 'Server error',
+      },
+      { status: 500 }
+    )
   }
 }
