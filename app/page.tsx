@@ -15,8 +15,6 @@ type PublicConfig = {
   premium_12m_price: number
   stars_rate: number
   stars_min_amount: number
-  trc20_address: string
-  base_address: string
   updated_at?: string
 }
 
@@ -26,8 +24,6 @@ const defaultConfig: PublicConfig = {
   premium_12m_price: 31.1,
   stars_rate: 0.02,
   stars_min_amount: 50,
-  trc20_address: 'TD6sQK9NmqxKzP6WHvmUdkHQRZvwX6Cy1e',
-  base_address: '0x21E43Ddaa992A0B5cfcCeFE98838239b9E91B40E',
 }
 
 const NAV_UI: Record<
@@ -241,8 +237,6 @@ function HomePageInner() {
             premium_12m_price: Number(data.item.premium_12m_price ?? defaultConfig.premium_12m_price),
             stars_rate: Number(data.item.stars_rate ?? defaultConfig.stars_rate),
             stars_min_amount: Number(data.item.stars_min_amount ?? defaultConfig.stars_min_amount),
-            trc20_address: String(data.item.trc20_address ?? defaultConfig.trc20_address),
-            base_address: String(data.item.base_address ?? defaultConfig.base_address),
             updated_at: data.item.updated_at,
           })
         }
@@ -270,6 +264,13 @@ function HomePageInner() {
     if (!Number.isFinite(value) || value < 1) return 50
     return Math.floor(value)
   }, [config.stars_min_amount])
+
+  useEffect(() => {
+    setStars((prev) => {
+      if (!Number.isFinite(prev) || prev < starsMinAmount) return starsMinAmount
+      return prev
+    })
+  }, [starsMinAmount])
 
   const safeStars = useMemo(() => {
     if (!Number.isFinite(stars)) return starsMinAmount
