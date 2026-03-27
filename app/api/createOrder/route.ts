@@ -46,6 +46,26 @@ function isValidTelegramUsername(value: string) {
   return /^@[A-Za-z][A-Za-z0-9_]{4,31}$/.test(value)
 }
 
+async function getSiteSettings(supabase: ReturnType<typeof createClient>) {
+  const { data, error } = await supabase
+    .from('site_settings')
+    .select('stars_min_amount')
+    .order('id', { ascending: true })
+    .limit(1)
+    .maybeSingle()
+
+  if (error) {
+    throw new Error(error.message)
+  }
+
+  const starsMinAmount = Number(data?.stars_min_amount ?? 50)
+
+  return {
+    stars_min_amount:
+      Number.isFinite(starsMinAmount) && starsMinAmount >= 1 ? Math.floor(starsMinAmount) : 50,
+  }
+}
+
 export async function POST(req: Request) {
   try {
     const supabase = getSupabase()
@@ -99,9 +119,17 @@ export async function POST(req: Request) {
       return noStoreJson({ error: 'Invalid premium duration' }, { status: 400 })
     }
 
+    const siteSettings = await getSiteSettings(supabase)
+
     if (productType === 'tg_stars') {
-      if (!Number.isInteger(starsAmount) || Number(starsAmount) < 50) {
-        return noStoreJson({ error: 'Invalid stars amount' }, { status: 400 })
+      if (
+        !Number.isInteger(starsAmount) ||
+        Number(starsAmount) < Number(siteSettings.stars_min_amount)
+      ) {
+        return noStoreJson(
+          { error: `Invalid stars amount. Minimum is ${siteSettings.stars_min_amount}.` },
+          { status: 400 }
+        )
       }
     }
 
